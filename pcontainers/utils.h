@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 #include <boost/function.hpp>
+#include <string.h>
+#include <Python.h>
 #include "lmdb.h"
 
 namespace utils {
@@ -43,7 +45,7 @@ inline string make_string(const MDB_val& m) {
 }
 
 template <typename T>
-string any_tostring(T x, int n=0) {
+inline string any_tostring(T x, int n=0) {
     ostringstream ss;
     if (n > 0) {
         ss << setfill('0') << setw(n);
@@ -52,5 +54,22 @@ string any_tostring(T x, int n=0) {
     return ss.str();
 }
 
-
+inline string error2string(int errnum) {
+    if (errnum == 0) {
+        return "";
+    }
+	if (errnum >= MDB_KEYEXIST && errnum <= MDB_LAST_ERRCODE) {
+		return string(mdb_strerror(errnum));
+	}
+	char buf[1024] = "";
+	strerror_r(errnum, buf, 1023);
+	return string(buf);
 }
+
+inline void PyErr_SetCppString(PyObject *type, const string& message) {
+    PyErr_SetString(type, message.c_str());
+}
+
+
+} // END NS utils
+

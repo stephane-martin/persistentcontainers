@@ -10,7 +10,9 @@
 #include <utility>
 #include <algorithm>
 #include <cerrno>
+#include <boost/exception/all.hpp>
 #include "lmdb.h"
+#include "utils.h"
 
 namespace lmdb {
 
@@ -20,258 +22,173 @@ using std::vector;
 using std::map;
 using std::cout;
 using std::endl;
-using std::exception;
-using std::runtime_error;
+using boost::errinfo_nested_exception;
+using boost::errinfo_errno;
+using boost::copy_exception;
+using namespace utils;
 
+struct exception_base: virtual std::exception, virtual boost::exception {
+    typedef boost::error_info<struct what_info, string> what;
+    typedef boost::error_info<struct code_info, int> code;
 
-
-class system_error: public runtime_error {
-public:
-    system_error(const string& w=""): runtime_error(w) { }
-};
-
-class io_error: public system_error {
-public:
-    io_error(const string& w=""): system_error(w) { }
-};
-
-class lmdb_error: public runtime_error {
-public:
-    string reason;
-    virtual int code() const { return 0; }
-
-    lmdb_error(const char* w): runtime_error(string(w)) {
-        reason = string(w);
-    }
-
-    lmdb_error(const string& w=""): runtime_error(w) {
-        reason = w;
-    }
-
-    ~lmdb_error() throw (){}
-
-    virtual const char* what() const throw () {
-        if (!reason.empty()) {
-            return reason.c_str();
+    const string w() const {
+        string s;
+        const string* s_ptr = boost::get_error_info<exception_base::what>(*this);
+        if (s_ptr) {
+            s += *s_ptr + " ";
         }
-        if (code() != 0) {
-            return (const char*) mdb_strerror(code());
+        const int* c_ptr = boost::get_error_info<boost::errinfo_errno>(*this);
+        if (c_ptr) {
+            s += "(errno code: " + any_tostring(*c_ptr) + " '" + error2string(*c_ptr) + "'" + ")";
         }
-        return "";
+        const int* code_ptr = boost::get_error_info<exception_base::code>(*this);
+        if (code_ptr) {
+            s += "(lmdb code: " + any_tostring(*code_ptr) + " '" + error2string(*code_ptr) + "'" + ")";
+        }
+        return s;
     }
-
-    static inline exception factory(int code);
 };
 
-class access_error: public lmdb_error {
-public:
-    int code() const { return EACCES; }
-    access_error(const string& w=""): lmdb_error(w) {}
+struct runtime_error: virtual exception_base { };
+struct system_error: virtual runtime_error { };
+struct io_error: virtual system_error { };
+struct access_error: virtual io_error { };
+
+struct lmdb_nested_error;
+
+struct lmdb_error: virtual exception_base {
+    static inline lmdb_nested_error factory(int code);
 };
 
-class mdb_keyexist: public lmdb_error {
-public:
-    int code() const { return MDB_KEYEXIST; }
-    mdb_keyexist(const string& w=""): lmdb_error(w) { }
-};
+struct mdb_keyexist: virtual lmdb_error { mdb_keyexist() { *this << lmdb_error::code(MDB_KEYEXIST); } };
+struct mdb_notfound: virtual lmdb_error { mdb_notfound() { *this << lmdb_error::code(MDB_NOTFOUND); } };
+struct mdb_page_notfound: virtual lmdb_error { mdb_page_notfound() { *this << lmdb_error::code(MDB_PAGE_NOTFOUND); } };
+struct mdb_currupted: virtual lmdb_error { mdb_currupted() { *this << lmdb_error::code(MDB_CORRUPTED); } };
+struct mdb_panic: virtual lmdb_error { mdb_panic() { *this << lmdb_error::code(MDB_PANIC); } };
+struct mdb_version_mismatch: virtual lmdb_error { mdb_version_mismatch() { *this << lmdb_error::code(MDB_VERSION_MISMATCH); } };
+struct mdb_invalid: virtual lmdb_error { mdb_invalid() { *this << lmdb_error::code(MDB_INVALID); } };
+struct mdb_map_full: virtual lmdb_error { mdb_map_full() { *this << lmdb_error::code(MDB_MAP_FULL); } };
+struct mdb_dbs_full: virtual lmdb_error { mdb_dbs_full() { *this << lmdb_error::code(MDB_DBS_FULL); } };
+struct mdb_readers_full: virtual lmdb_error { mdb_readers_full() { *this << lmdb_error::code(MDB_READERS_FULL); } };
+struct mdb_tls_full: virtual lmdb_error { mdb_tls_full() { *this << lmdb_error::code(MDB_TLS_FULL); } };
+struct mdb_txn_full: virtual lmdb_error { mdb_txn_full() { *this << lmdb_error::code(MDB_TXN_FULL); } };
+struct mdb_cursor_full: virtual lmdb_error { mdb_cursor_full() { *this << lmdb_error::code(MDB_CURSOR_FULL); } };
+struct mdb_page_full: virtual lmdb_error { mdb_page_full() { *this << lmdb_error::code(MDB_PAGE_FULL); } };
+struct mdb_map_resized: virtual lmdb_error { mdb_map_resized() { *this << lmdb_error::code(MDB_MAP_RESIZED); } };
+struct mdb_incompatible: virtual lmdb_error { mdb_incompatible() { *this << lmdb_error::code(MDB_INCOMPATIBLE); } };
+struct mdb_bad_rslot: virtual lmdb_error { mdb_bad_rslot() { *this << lmdb_error::code(MDB_BAD_RSLOT); } };
+struct mdb_bad_txn: virtual lmdb_error { mdb_bad_txn() { *this << lmdb_error::code(MDB_BAD_TXN); } };
+struct mdb_bad_valsize: virtual lmdb_error { mdb_bad_valsize() { *this << lmdb_error::code(MDB_BAD_VALSIZE); } };
+struct mdb_bad_dbi: virtual lmdb_error { mdb_bad_dbi() { *this << lmdb_error::code(MDB_BAD_DBI); } };
 
-class mdb_notfound: public lmdb_error {
-public:
-    int code() const { return MDB_NOTFOUND; }
-    mdb_notfound(const string& w=""): lmdb_error(w) { }
-};
+struct empty_key: virtual mdb_bad_valsize { empty_key() { *this << lmdb_error::code(MDB_BAD_VALSIZE); } };
+struct empty_database: virtual mdb_notfound { empty_database() { *this << lmdb_error::code(MDB_NOTFOUND); } };
 
-class key_not_found: public mdb_notfound {
-public:
-    int code() const { return MDB_NOTFOUND; }
-    key_not_found(const string& w=""): mdb_notfound(w) { }
-};
+struct not_initialized: virtual lmdb_error { };
 
-class mdb_page_notfound: public lmdb_error {
-public:
-    int code() const { return MDB_PAGE_NOTFOUND; }
-    mdb_page_notfound(const string& w=""): lmdb_error(w) { }
-};
+struct lmdb_nested_error: virtual lmdb_error { };
 
-class mdb_currupted: public lmdb_error {
-public:
-    int code() const { return MDB_CORRUPTED; }
-    mdb_currupted(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_panic: public lmdb_error {
-public:
-    int code() const { return MDB_PANIC; }
-    mdb_panic(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_version_mismatch: public lmdb_error {
-public:
-    int code() const { return MDB_VERSION_MISMATCH; }
-    mdb_version_mismatch(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_invalid: public lmdb_error {
-public:
-    int code() const { return MDB_INVALID; }
-    mdb_invalid(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_map_full: public lmdb_error {
-public:
-    int code() const { return MDB_MAP_FULL; }
-    mdb_map_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_dbs_full: public lmdb_error {
-public:
-    int code() const { return MDB_DBS_FULL; }
-    mdb_dbs_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_readers_full: public lmdb_error {
-public:
-    int code() const { return MDB_READERS_FULL; }
-    mdb_readers_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_tls_full: public lmdb_error {
-public:
-    int code() const { return MDB_TLS_FULL; }
-    mdb_tls_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_txn_full: public lmdb_error {
-public:
-    int code() const { return MDB_TXN_FULL; }
-    mdb_txn_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_cursor_full: public lmdb_error {
-public:
-    int code() const { return MDB_CURSOR_FULL; }
-    mdb_cursor_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_page_full: public lmdb_error {
-public:
-    int code() const { return MDB_PAGE_FULL; }
-    mdb_page_full(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_map_resized: public lmdb_error {
-public:
-    int code() const { return MDB_MAP_RESIZED; }
-    mdb_map_resized(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_incompatible: public lmdb_error {
-public:
-    int code() const { return MDB_INCOMPATIBLE; }
-    mdb_incompatible(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_bad_rslot: public lmdb_error {
-public:
-    int code() const { return MDB_BAD_RSLOT; }
-    mdb_bad_rslot(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_bad_txn: public lmdb_error {
-public:
-    int code() const { return MDB_BAD_TXN; }
-    mdb_bad_txn(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_bad_valsize: public lmdb_error {
-public:
-    int code() const { return MDB_BAD_VALSIZE; }
-    mdb_bad_valsize(const string& w=""): lmdb_error(w) { }
-};
-
-class mdb_bad_dbi: public lmdb_error {
-public:
-    int code() const { return MDB_BAD_DBI; }
-    mdb_bad_dbi(const string& w=""): lmdb_error(w) { }
-};
-
-class empty_key: public lmdb_error {
-public:
-    empty_key(): lmdb_error("the key should not be empty") { }
-};
-
-class empty_database: public lmdb_error {
-public:
-    empty_database(): lmdb_error("the database is empty") { }
-};
-
-class not_initialized: public lmdb_error {
-public:
-    not_initialized(): lmdb_error("PersistentDict is not initialized") { }
-};
-
-exception lmdb_error::factory(int code) {
+lmdb_nested_error lmdb_error::factory(int code) {
+    lmdb_nested_error exc;
+    io_error io_ex;
+    access_error access_ex;
     switch (code) {
         case MDB_KEYEXIST:
-            throw mdb_keyexist();
+            exc << errinfo_nested_exception(copy_exception(mdb_keyexist()));
+            break;
         case MDB_NOTFOUND:
-            throw mdb_notfound();
+            exc << errinfo_nested_exception(copy_exception(mdb_notfound()));
+            break;
         case MDB_PAGE_NOTFOUND:
-            throw mdb_page_notfound();
+            exc << errinfo_nested_exception(copy_exception(mdb_page_notfound()));
+            break;
         case MDB_CORRUPTED:
-            throw mdb_currupted();
+            exc << errinfo_nested_exception(copy_exception(mdb_currupted()));
+            break;
         case MDB_PANIC:
-            throw mdb_panic();
+            exc << errinfo_nested_exception(copy_exception(mdb_panic()));
+            break;
         case MDB_VERSION_MISMATCH:
-            throw mdb_version_mismatch();
+            exc << errinfo_nested_exception(copy_exception(mdb_version_mismatch()));
+            break;
         case MDB_INVALID:
-            throw mdb_invalid();
+            exc << errinfo_nested_exception(copy_exception(mdb_invalid()));
+            break;
         case MDB_MAP_FULL:
-            throw mdb_map_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_map_full()));
+            break;
         case MDB_DBS_FULL:
-            throw mdb_dbs_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_dbs_full()));
+            break;
         case MDB_READERS_FULL:
-            throw mdb_readers_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_readers_full()));
+            break;
         case MDB_TLS_FULL:
-            throw mdb_tls_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_tls_full()));
+            break;
         case MDB_TXN_FULL:
-            throw mdb_txn_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_txn_full()));
+            break;
         case MDB_CURSOR_FULL:
-            throw mdb_cursor_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_cursor_full()));
+            break;
         case MDB_PAGE_FULL:
-            throw mdb_page_full();
+            exc << errinfo_nested_exception(copy_exception(mdb_page_full()));
+            break;
         case MDB_MAP_RESIZED:
-            throw mdb_map_resized();
+            exc << errinfo_nested_exception(copy_exception(mdb_map_resized()));
+            break;
         case MDB_INCOMPATIBLE:
-            throw mdb_incompatible();
+            exc << errinfo_nested_exception(copy_exception(mdb_incompatible()));
+            break;
         case MDB_BAD_RSLOT:
-            throw mdb_bad_rslot();
+            exc << errinfo_nested_exception(copy_exception(mdb_bad_rslot()));
+            break;
         case MDB_BAD_TXN:
-            throw mdb_bad_txn();
+            exc << errinfo_nested_exception(copy_exception(mdb_bad_txn()));
+            break;
         case MDB_BAD_VALSIZE:
-            throw mdb_bad_valsize();
+            exc << errinfo_nested_exception(copy_exception(mdb_bad_valsize()));
+            break;
         case MDB_BAD_DBI:
-            throw mdb_bad_dbi();
+            exc << errinfo_nested_exception(copy_exception(mdb_bad_dbi()));
+            break;
         case ENOMEM:
-            throw std::bad_alloc();
+            exc << errinfo_nested_exception(copy_exception(std::bad_alloc()));
+            break;
         case EINVAL:
-            throw std::invalid_argument("invalid argument");
+            exc << errinfo_nested_exception(copy_exception(std::invalid_argument("invalid LMDB argument")));
+            break;
         case EIO:
-            throw io_error();
+            io_ex << lmdb_error::what("a low-level I/O error occurred in LMDB");
+            exc << errinfo_nested_exception(copy_exception(io_ex));
+            break;
         case ENOSPC:
-            throw io_error("no more disk space");
+            io_ex << lmdb_error::what("no more disk space");
+            exc << errinfo_nested_exception(copy_exception(io_ex));
+            break;
         case ENOENT:
-            throw io_error("the directory specified by the path parameter doesn't exist");
+            io_ex << lmdb_error::what("the directory specified by the path parameter does not exist");
+            exc << errinfo_nested_exception(copy_exception(io_ex));
+            break;
         case EAGAIN:
-            throw io_error("the environment was locked by another process");
+            io_ex << lmdb_error::what("the environment was locked by another process");
+            exc << errinfo_nested_exception(copy_exception(io_ex));
+            break;
         case EACCES:
-            throw access_error();
+            access_ex << lmdb_error::what("access denied");
+            exc << errinfo_nested_exception(copy_exception(access_ex));
+            break;
+        case EBUSY:
+            io_ex << lmdb_error::what("EBUSY");
+            exc << errinfo_nested_exception(copy_exception(io_ex));
+            break;
         default:
-            throw lmdb_error();
-    }
-    return std::runtime_error("should not happen");
+            ;
+    }   // end switch
+    return exc;
 
-}
+}   // END lmdb_error::factory
 
 
-}
+}   // END NS lmdb

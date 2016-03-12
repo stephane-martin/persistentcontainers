@@ -19,7 +19,7 @@ from queue import Empty
 
 from mbufferio import MBufferIO
 
-from ._py_exceptions import KeyNotFound, EmptyDatabase
+from ._py_exceptions import EmptyDatabase, NotFound
 
 
 cdef class PersistentStringDict(object):
@@ -211,7 +211,7 @@ cdef class PersistentStringDict(object):
         val.mv_data = <void*> (<char*> item)
         cdef cppConstIterator it = move(cppConstIterator(self.ptr, val))      # keep a ref to the iterator so that the txn stays active
         if it.has_reached_end():
-            raise KeyNotFound()
+            raise NotFound()
         return self._getvalue(it)
 
     cpdef get(self, item, default=''):
@@ -273,7 +273,7 @@ cdef class PersistentStringDict(object):
         try:
             with nogil:
                 val = self.ptr.pop(k)
-        except KeyNotFound:
+        except NotFound:
             if default is None:
                 raise
             return default
@@ -467,7 +467,7 @@ cdef class PersistentDict(PersistentStringDict):
 
         cdef cppConstIterator it = move(cppConstIterator(self.ptr, k))  # keep a ref to the iterator so that the txn stays active
         if it.has_reached_end():
-            raise KeyNotFound()
+            raise NotFound()
         return pickle.load(self._getvalue_buf(it))
 
     cpdef get(self, key, default=None):
@@ -519,7 +519,7 @@ cdef class PersistentDict(PersistentStringDict):
         try:
             with nogil:
                 v = self.ptr.pop(k)
-        except KeyNotFound:
+        except NotFound:
             if default is None:
                 raise
             return default
@@ -1021,4 +1021,3 @@ def adapt_binary_predicate(binary_pred):
     def predicate(x, y):
         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))
     return predicate
-

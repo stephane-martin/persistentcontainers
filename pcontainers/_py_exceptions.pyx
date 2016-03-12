@@ -21,9 +21,6 @@ class KeyExist(LmdbError, KeyError):
 class NotFound(LmdbError):
     pass
 
-class KeyNotFound(NotFound, KeyError):
-    pass
-
 class EmptyKey(LmdbError, ValueError):
     pass
 
@@ -89,7 +86,6 @@ cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized
 cdef public PyObject* py_access_error = <PyObject*>AccessError
 cdef public PyObject* py_key_exist = <PyObject*>KeyExist
 cdef public PyObject* py_not_found = <PyObject*>NotFound
-cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound
 cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
 cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase
 cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound

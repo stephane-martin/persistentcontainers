@@ -1570,8 +1570,6 @@ static PyObject **__pyx_vp_11pcontainers_14_py_exceptions_py_key_exist = 0;
 #define __pyx_v_11pcontainers_14_py_exceptions_py_key_exist (*__pyx_vp_11pcontainers_14_py_exceptions_py_key_exist)
 static PyObject **__pyx_vp_11pcontainers_14_py_exceptions_py_not_found = 0;
 #define __pyx_v_11pcontainers_14_py_exceptions_py_not_found (*__pyx_vp_11pcontainers_14_py_exceptions_py_not_found)
-static PyObject **__pyx_vp_11pcontainers_14_py_exceptions_py_key_not_found = 0;
-#define __pyx_v_11pcontainers_14_py_exceptions_py_key_not_found (*__pyx_vp_11pcontainers_14_py_exceptions_py_key_not_found)
 static PyObject **__pyx_vp_11pcontainers_14_py_exceptions_py_empty_key = 0;
 #define __pyx_v_11pcontainers_14_py_exceptions_py_empty_key (*__pyx_vp_11pcontainers_14_py_exceptions_py_empty_key)
 static PyObject **__pyx_vp_11pcontainers_14_py_exceptions_py_empty_database = 0;
@@ -1734,6 +1732,7 @@ static char __pyx_k_popitem[] = "popitem";
 static char __pyx_k_reverse[] = "reverse";
 static char __pyx_k_timeout[] = "timeout";
 static char __pyx_k_unicode[] = "__unicode__";
+static char __pyx_k_NotFound[] = "NotFound";
 static char __pyx_k_fromkeys[] = "fromkeys";
 static char __pyx_k_iterkeys[] = "iterkeys";
 static char __pyx_k_map_size[] = "map_size";
@@ -1763,7 +1762,6 @@ static char __pyx_k_put_nowait[] = "put_nowait";
 static char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static char __pyx_k_unary_pred[] = "unary_pred";
 static char __pyx_k_ImportError[] = "ImportError";
-static char __pyx_k_KeyNotFound[] = "KeyNotFound";
 static char __pyx_k_binary_pred[] = "binary_pred";
 static char __pyx_k_max_readers[] = "max_readers";
 static char __pyx_k_no_mem_init[] = "no_mem_init";
@@ -1809,8 +1807,8 @@ static PyObject *__pyx_kp_u_;
 static PyObject *__pyx_n_s_Empty;
 static PyObject *__pyx_n_s_EmptyDatabase;
 static PyObject *__pyx_n_s_ImportError;
-static PyObject *__pyx_n_s_KeyNotFound;
 static PyObject *__pyx_n_s_MBufferIO;
+static PyObject *__pyx_n_s_NotFound;
 static PyObject *__pyx_n_s_NotImplementedError;
 static PyObject *__pyx_kp_u_PersistentDict_dbname_dirname;
 static PyObject *__pyx_n_s_PersistentDict_items;
@@ -5059,7 +5057,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_10__getit
  *         val.mv_data = <void*> (<char*> item)
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, val))      # keep a ref to the iterator so that the txn stays active             # <<<<<<<<<<<<<<
  *         if it.has_reached_end():
- *             raise KeyNotFound()
+ *             raise NotFound()
  */
   try {
     __pyx_t_4 = quiet::PersistentDict::const_iterator(__pyx_v_self->ptr, __pyx_v_val);
@@ -5073,7 +5071,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_10__getit
  *         val.mv_data = <void*> (<char*> item)
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, val))      # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():             # <<<<<<<<<<<<<<
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return self._getvalue(it)
  */
   try {
@@ -5088,11 +5086,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_10__getit
     /* "pcontainers/_pdict.pyx":214
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, val))      # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():
- *             raise KeyNotFound()             # <<<<<<<<<<<<<<
+ *             raise NotFound()             # <<<<<<<<<<<<<<
  *         return self._getvalue(it)
  * 
  */
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_8 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -5120,14 +5118,14 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_10__getit
  *         val.mv_data = <void*> (<char*> item)
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, val))      # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():             # <<<<<<<<<<<<<<
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return self._getvalue(it)
  */
   }
 
   /* "pcontainers/_pdict.pyx":215
  *         if it.has_reached_end():
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return self._getvalue(it)             # <<<<<<<<<<<<<<
  * 
  *     cpdef get(self, item, default=''):
@@ -6736,7 +6734,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
  *         try:
  *             with nogil:             # <<<<<<<<<<<<<<
  *                 val = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  */
       {
           #ifdef WITH_THREAD
@@ -6749,7 +6747,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
  *         try:
  *             with nogil:
  *                 val = self.ptr.pop(k)             # <<<<<<<<<<<<<<
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:
  */
             try {
@@ -6772,7 +6770,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
  *         try:
  *             with nogil:             # <<<<<<<<<<<<<<
  *                 val = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  */
           /*finally:*/ {
             /*normal exit:*/{
@@ -6813,11 +6811,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
     /* "pcontainers/_pdict.pyx":276
  *             with nogil:
  *                 val = self.ptr.pop(k)
- *         except KeyNotFound:             # <<<<<<<<<<<<<<
+ *         except NotFound:             # <<<<<<<<<<<<<<
  *             if default is None:
  *                 raise
  */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_12 = PyErr_ExceptionMatches(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6830,7 +6828,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
 
       /* "pcontainers/_pdict.pyx":277
  *                 val = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:             # <<<<<<<<<<<<<<
  *                 raise
  *             return default
@@ -6840,7 +6838,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
       if (__pyx_t_14) {
 
         /* "pcontainers/_pdict.pyx":278
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:
  *                 raise             # <<<<<<<<<<<<<<
  *             return default
@@ -6855,7 +6853,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_pop(struct
 
         /* "pcontainers/_pdict.pyx":277
  *                 val = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:             # <<<<<<<<<<<<<<
  *                 raise
  *             return default
@@ -12313,7 +12311,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_10__getitem__(s
  * 
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, k))  # keep a ref to the iterator so that the txn stays active             # <<<<<<<<<<<<<<
  *         if it.has_reached_end():
- *             raise KeyNotFound()
+ *             raise NotFound()
  */
   try {
     __pyx_t_7 = quiet::PersistentDict::const_iterator(__pyx_v_self->__pyx_base.ptr, __pyx_v_k);
@@ -12327,7 +12325,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_10__getitem__(s
  * 
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, k))  # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():             # <<<<<<<<<<<<<<
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return pickle.load(self._getvalue_buf(it))
  */
   try {
@@ -12342,11 +12340,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_10__getitem__(s
     /* "pcontainers/_pdict.pyx":470
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, k))  # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():
- *             raise KeyNotFound()             # <<<<<<<<<<<<<<
+ *             raise NotFound()             # <<<<<<<<<<<<<<
  *         return pickle.load(self._getvalue_buf(it))
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 470; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 470; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_1 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -12374,14 +12372,14 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_10__getitem__(s
  * 
  *         cdef cppConstIterator it = move(cppConstIterator(self.ptr, k))  # keep a ref to the iterator so that the txn stays active
  *         if it.has_reached_end():             # <<<<<<<<<<<<<<
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return pickle.load(self._getvalue_buf(it))
  */
   }
 
   /* "pcontainers/_pdict.pyx":471
  *         if it.has_reached_end():
- *             raise KeyNotFound()
+ *             raise NotFound()
  *         return pickle.load(self._getvalue_buf(it))             # <<<<<<<<<<<<<<
  * 
  *     cpdef get(self, key, default=None):
@@ -14246,7 +14244,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
  *         try:
  *             with nogil:             # <<<<<<<<<<<<<<
  *                 v = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  */
       {
           #ifdef WITH_THREAD
@@ -14259,7 +14257,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
  *         try:
  *             with nogil:
  *                 v = self.ptr.pop(k)             # <<<<<<<<<<<<<<
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:
  */
             try {
@@ -14282,7 +14280,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
  *         try:
  *             with nogil:             # <<<<<<<<<<<<<<
  *                 v = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  */
           /*finally:*/ {
             /*normal exit:*/{
@@ -14323,11 +14321,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
     /* "pcontainers/_pdict.pyx":522
  *             with nogil:
  *                 v = self.ptr.pop(k)
- *         except KeyNotFound:             # <<<<<<<<<<<<<<
+ *         except NotFound:             # <<<<<<<<<<<<<<
  *             if default is None:
  *                 raise
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_11 = PyErr_ExceptionMatches(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -14340,7 +14338,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
 
       /* "pcontainers/_pdict.pyx":523
  *                 v = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:             # <<<<<<<<<<<<<<
  *                 raise
  *             return default
@@ -14350,7 +14348,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
       if (__pyx_t_13) {
 
         /* "pcontainers/_pdict.pyx":524
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:
  *                 raise             # <<<<<<<<<<<<<<
  *             return default
@@ -14365,7 +14363,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_pop(struct __pyx
 
         /* "pcontainers/_pdict.pyx":523
  *                 v = self.ptr.pop(k)
- *         except KeyNotFound:
+ *         except NotFound:
  *             if default is None:             # <<<<<<<<<<<<<<
  *                 raise
  *             return default
@@ -29406,7 +29404,6 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_22adapt_binary_predicate_predica
  *     def predicate(x, y):
  *         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))             # <<<<<<<<<<<<<<
  *     return predicate
- * 
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_cur_scope->__pyx_v_binary_pred)) { __Pyx_RaiseClosureNameError("binary_pred"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1022; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
@@ -29574,7 +29571,6 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_6adapt_binary_predicate(CYTHON_U
  *     def predicate(x, y):
  *         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))
  *     return predicate             # <<<<<<<<<<<<<<
- * 
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_predicate);
@@ -33676,8 +33672,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Empty, __pyx_k_Empty, sizeof(__pyx_k_Empty), 0, 0, 1, 1},
   {&__pyx_n_s_EmptyDatabase, __pyx_k_EmptyDatabase, sizeof(__pyx_k_EmptyDatabase), 0, 0, 1, 1},
   {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
-  {&__pyx_n_s_KeyNotFound, __pyx_k_KeyNotFound, sizeof(__pyx_k_KeyNotFound), 0, 0, 1, 1},
   {&__pyx_n_s_MBufferIO, __pyx_k_MBufferIO, sizeof(__pyx_k_MBufferIO), 0, 0, 1, 1},
+  {&__pyx_n_s_NotFound, __pyx_k_NotFound, sizeof(__pyx_k_NotFound), 0, 0, 1, 1},
   {&__pyx_n_s_NotImplementedError, __pyx_k_NotImplementedError, sizeof(__pyx_k_NotImplementedError), 0, 0, 1, 1},
   {&__pyx_kp_u_PersistentDict_dbname_dirname, __pyx_k_PersistentDict_dbname_dirname, sizeof(__pyx_k_PersistentDict_dbname_dirname), 0, 1, 0, 0},
   {&__pyx_n_s_PersistentDict_items, __pyx_k_PersistentDict_items, sizeof(__pyx_k_PersistentDict_items), 0, 0, 1, 1},
@@ -34268,7 +34264,6 @@ PyMODINIT_FUNC PyInit__pdict(void)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_access_error", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_access_error, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_key_exist", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_key_exist, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_not_found", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_key_not_found", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_key_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_empty_key", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_empty_key, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_empty_database", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_empty_database, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "py_page_not_found", (void **)&__pyx_vp_11pcontainers_14_py_exceptions_py_page_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -34442,7 +34437,7 @@ PyMODINIT_FUNC PyInit__pdict(void)
  * 
  * from mbufferio import MBufferIO             # <<<<<<<<<<<<<<
  * 
- * from ._py_exceptions import KeyNotFound, EmptyDatabase
+ * from ._py_exceptions import EmptyDatabase, NotFound
  */
   __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
@@ -34461,28 +34456,28 @@ PyMODINIT_FUNC PyInit__pdict(void)
   /* "pcontainers/_pdict.pyx":22
  * from mbufferio import MBufferIO
  * 
- * from ._py_exceptions import KeyNotFound, EmptyDatabase             # <<<<<<<<<<<<<<
+ * from ._py_exceptions import EmptyDatabase, NotFound             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __pyx_t_9 = PyList_New(2); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
-  __Pyx_INCREF(__pyx_n_s_KeyNotFound);
-  __Pyx_GIVEREF(__pyx_n_s_KeyNotFound);
-  PyList_SET_ITEM(__pyx_t_9, 0, __pyx_n_s_KeyNotFound);
   __Pyx_INCREF(__pyx_n_s_EmptyDatabase);
   __Pyx_GIVEREF(__pyx_n_s_EmptyDatabase);
-  PyList_SET_ITEM(__pyx_t_9, 1, __pyx_n_s_EmptyDatabase);
+  PyList_SET_ITEM(__pyx_t_9, 0, __pyx_n_s_EmptyDatabase);
+  __Pyx_INCREF(__pyx_n_s_NotFound);
+  __Pyx_GIVEREF(__pyx_n_s_NotFound);
+  PyList_SET_ITEM(__pyx_t_9, 1, __pyx_n_s_NotFound);
   __pyx_t_3 = __Pyx_Import(__pyx_n_s_py_exceptions, __pyx_t_9, 1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_KeyNotFound, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_t_9 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_EmptyDatabase); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_EmptyDatabase, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_NotFound); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_9);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_NotFound, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 

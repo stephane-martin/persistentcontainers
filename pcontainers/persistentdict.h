@@ -11,13 +11,13 @@
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/move/move.hpp>
 #include <boost/bind.hpp>
 #include <boost/utility.hpp>
 #include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/conditional.hpp>
+#include <boost/throw_exception.hpp>
 
 #include "guid.h"
 #include "lmdb.h"
@@ -37,7 +37,6 @@ using std::map;
 using std::cout;
 using std::endl;
 using std::exception;
-using std::runtime_error;
 using boost::enable_if;
 using boost::enable_if_c;
 using boost::disable_if;
@@ -113,10 +112,10 @@ public:
     }
 
     int get_maxkeysize() const {
-        if (!*this) {
-            throw not_initialized();
+        if (*this) {
+            return env->get_maxkeysize();
         }
-        return env->get_maxkeysize();
+        return 0;
     }
 
     inline void close() {
@@ -183,20 +182,20 @@ public:
 
     inline void erase(const string& key) {
         if (!*this) {
-            throw not_initialized();
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         iterator it = iterator(this, key, false);
         if (it.has_reached_end()) {
-            throw key_not_found(key);
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         it.del();
     }
 
     inline vector<string> erase(const string& first, const string& last) {
-        if (!*this) {
-            throw not_initialized();
-        }
         vector<string> removed_keys;
+        if (!*this) {
+            return removed_keys;
+        }
         string k;
         iterator it = iterator::range(this, first, false);
         for(; !it.has_reached_end(); ++it) {
@@ -213,7 +212,7 @@ public:
     template <typename InputIterator>
     inline void insert(InputIterator first, InputIterator last) {
         if (!*this) {
-            throw not_initialized();
+            BOOST_THROW_EXCEPTION(not_initialized());
         }
         insert_iterator output(this);
         for(InputIterator it=first; it != last; ++it) {
@@ -232,7 +231,7 @@ public:
 
     inline void insert(MDB_val k, MDB_val v) {
         if (!*this) {
-            throw not_initialized();
+            BOOST_THROW_EXCEPTION(not_initialized());
         }
         insert_iterator output(this);
         output = make_pair(k, v);
@@ -245,7 +244,7 @@ public:
 
     void transform_values(binary_functor binary_funct) {                // value = f(key, value)
         if (!*this) {
-            throw not_initialized();
+            return;
         }
         iterator it(this, 0, false);
         for(; !it.has_reached_end(); ++it) {
@@ -265,7 +264,7 @@ public:
 
     void remove_if(binary_predicate binary_pred) {                      // remove_if(predicate(key, value))
         if (!*this) {
-            throw not_initialized();
+            return;
         }
         iterator it(this, 0, false);                                    // writeable iterator
 
@@ -290,42 +289,38 @@ public:
     }
 
     inline bool empty() const {
-        if (!*this) {
-            throw not_initialized();
+        if (*this) {
+            return cbegin().has_reached_end();
         }
-        return cbegin().has_reached_end();
+        return true;
     }
 
     inline size_t count(const string& key) const {
-        if (!*this) {
-            throw not_initialized();
-        }
-        if (contains(key)) {
+        if (bool(*this) && contains(key)) {
             return 1;
         }
         return 0;
     }
 
     inline void clear() {
-        if (!*this) {
-            throw not_initialized();
+        if (*this) {
+            env->drop(dbi);
         }
-        env->drop(dbi);
     }
 
     inline size_t size() const {
         if (!*this) {
-            throw not_initialized();
+            return 0;
         }
         return env->size(dbi);
     }
 
     inline string operator[] (const string& key) const {
-        if (!*this) {
-            throw not_initialized();
-        }
         if (key.empty()) {
-            throw empty_key();
+            BOOST_THROW_EXCEPTION(empty_key());
+        }
+        if (!*this) {
+            return "";
         }
         const_iterator it(this, key);
         if (it.has_reached_end()) {
@@ -335,57 +330,48 @@ public:
     }
 
     inline string at(const string& key) const {
-        if (!*this) {
-            throw not_initialized();
-        }
         return at(make_mdb_val(key));
     }
 
     inline string at(MDB_val k) const {
-        if (!*this) {
-            throw not_initialized();
-        }
         if (k.mv_size == 0 || k.mv_data == NULL) {
-            throw empty_key();
+            BOOST_THROW_EXCEPTION(empty_key());
+        }
+        if (!*this) {
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         const_iterator it(this, k);
         if (it.has_reached_end()) {
-            throw key_not_found(make_string(k));
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         return it.get_value();
     }
 
     inline string pop(MDB_val k) {
-        if (!*this) {
-            throw not_initialized();
-        }
         if (k.mv_size == 0 || k.mv_data == NULL) {
-            throw empty_key();
+            BOOST_THROW_EXCEPTION(empty_key());
+        }
+        if (!*this) {
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         iterator it(this, k, false);
         if (it.has_reached_end()) {
-            throw key_not_found(make_string(k));
+            BOOST_THROW_EXCEPTION(mdb_notfound());
         }
         return it.pop();
     }
 
     inline string pop(const string& key) {
-        if (!*this) {
-            throw not_initialized();
-        }
-        if (key.empty()) {
-            throw empty_key();
-        }
         return pop(make_mdb_val(key));
     }
 
     inline pair<string, string> popitem() {
         if (!*this) {
-            throw not_initialized();
+            BOOST_THROW_EXCEPTION(empty_database());
         }
         iterator it = iterator(this, 0, false);
         if (it.has_reached_end()) {
-            throw empty_database();
+            BOOST_THROW_EXCEPTION(empty_database());
         }
         pair<string, string> p = *it;
         it.del();
@@ -393,10 +379,7 @@ public:
     }
 
     inline bool contains(const string& key) const {
-        if (!*this) {
-            return false;
-        }
-        if (key.empty()) {
+        if (!bool(*this) || key.empty() ) {
             return false;
         }
         return !const_iterator(this, key).has_reached_end();
@@ -598,7 +581,7 @@ public:
 
         inline size_t size() const {
             if (!txn) {
-                throw lmdb_error("no transaction");
+                return 0;
             }
             return txn->size(the_dict->dbi);
         }
@@ -641,7 +624,7 @@ public:
 
         inline bool operator<(const tmpl_iterator& other) const {
             if (initialized != other.initialized) {
-                throw lmdb_error("Can't compare iterators that have different initialized status");
+                BOOST_THROW_EXCEPTION(lmdb_error() << lmdb_error::what("Can't compare iterators that have different initialized status"));
             }
             if (!initialized) {
                 // both iterators are not initialized, thus they are equal
@@ -651,10 +634,10 @@ public:
                 return false;
             }
             if (the_dict == NULL || other.the_dict == NULL) {
-                throw lmdb_error("Can't compare iterators that are not relative to the same dict");
+                BOOST_THROW_EXCEPTION(lmdb_error() << lmdb_error::what("Can't compare iterators that are not relative to the same dict"));
             }
             if ((*the_dict) != *(other.the_dict)) {
-                throw lmdb_error("Can't compare iterators that are not relative to the same dict");
+                BOOST_THROW_EXCEPTION(lmdb_error() << lmdb_error::what("Can't compare iterators that are not relative to the same dict"));
             }
             if (reached_end && other.reached_end) {
                 return false;
@@ -718,15 +701,15 @@ public:
         }
 
         inline pair<const string, string> operator*() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();  // todo: better exception
-            }
             return get_item();
         }
 
         inline string get_key() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val k = make_mdb_val();
             cursor->get_current_key(k);
@@ -734,8 +717,11 @@ public:
         }
 
         inline MDB_val get_key_buffer() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val k = make_mdb_val();
             cursor->get_current_key(k);
@@ -743,8 +729,11 @@ public:
         }
 
         inline string get_value() const {
-            if (reached_end || reached_beginning || !initialized | !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val v = make_mdb_val();
             cursor->get_current_value(v);
@@ -752,8 +741,11 @@ public:
         }
 
         inline MDB_val get_value_buffer() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val v = make_mdb_val();
             cursor->get_current_value(v);
@@ -761,8 +753,11 @@ public:
         }
 
         inline pair<const string, string> get_item() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val k = make_mdb_val();
             MDB_val v = make_mdb_val();
@@ -771,8 +766,11 @@ public:
         }
 
         inline pair<MDB_val, MDB_val> get_item_buffer() const {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val k = make_mdb_val();
             MDB_val v = make_mdb_val();
@@ -975,8 +973,11 @@ public:
         }
 
         inline string pop() {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             MDB_val v = make_mdb_val();
             cursor->get_current_value(v);
@@ -986,28 +987,37 @@ public:
         }
 
         inline void set_value(const string& value) {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             cursor->set_current_value(make_mdb_val(value));
         }
 
         inline void set_value(MDB_val v) {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (v.mv_data == NULL) {
+                BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             cursor->set_current_value(v);
         }
 
         inline void set_key_value(MDB_val key, MDB_val value) {
             if (!initialized) {
-                throw runtime_error("iterator is not initialized");
+                BOOST_THROW_EXCEPTION(not_initialized());
             }
-            if (key.mv_size == 0 || key.mv_data == NULL || !cursor) {
-                throw empty_key();
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                BOOST_THROW_EXCEPTION(empty_key());
             }
             if (value.mv_data == NULL) {
-                throw mdb_invalid();
+                BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
             }
             cursor->set_key_value(key, value);
             reached_beginning = false;
@@ -1020,13 +1030,13 @@ public:
 
         inline void append_key_value(MDB_val key, MDB_val value) {
             if (!initialized) {
-                throw runtime_error("iterator is not initialized");
+                BOOST_THROW_EXCEPTION(not_initialized());
             }
-            if (key.mv_size == 0 || key.mv_data == NULL || !cursor) {
-                throw empty_key();
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                BOOST_THROW_EXCEPTION(empty_key());
             }
             if (value.mv_data == NULL) {
-                throw mdb_invalid();
+                BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
             }
             cursor->append_key_value(key, value);
             reached_beginning = false;
@@ -1038,8 +1048,11 @@ public:
         }
 
         inline void del() {
-            if (reached_end || reached_beginning || !initialized || !cursor) {
-                throw empty_key();
+            if (!initialized) {
+                BOOST_THROW_EXCEPTION(not_initialized());
+            }
+            if (reached_end || reached_beginning) {
+                BOOST_THROW_EXCEPTION(mdb_notfound());
             }
             cursor->del();
         }
@@ -1048,7 +1061,7 @@ public:
 
     inline vector<string> get_all_keys() const {
         if (!*this) {
-            throw not_initialized();
+            return vector<string>();
         }
         int pos = 0;
         const_iterator it = cbegin();
@@ -1062,7 +1075,7 @@ public:
 
     inline vector<string> get_all_values() const {
         if (!*this) {
-            throw not_initialized();
+            return vector<string>();
         }
         int pos = 0;
         const_iterator it = cbegin();
@@ -1076,7 +1089,7 @@ public:
 
     inline vector<pair<string, string> > get_all_items_if(binary_predicate binary_pred) const {
         if (!*this) {
-            throw not_initialized();
+            return vector<pair<string, string> >();
         }
         const_iterator it = cbegin();
         vector< pair<string, string> > v;

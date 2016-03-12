@@ -13,6 +13,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <boost/throw_exception.hpp>
+
 #include "persistentdict.h"
 
 namespace quiet {
@@ -186,7 +188,7 @@ public:
                     insert_key = make_string(k);
                     long long int_k = strtoull((char*) insert_key.c_str(), NULL, 10);
                     if (int_k == 0) {
-                        throw lmdb_error("A key in the database in not an integer key");
+                        BOOST_THROW_EXCEPTION( lmdb_error() << lmdb_error::what("A key in the database in not an integer key") );
                     }
                     insert_key = any_tostring(int_k + pos, NDIGITS);
                 }
@@ -375,7 +377,7 @@ public:
             if (current_value) {
                 return *current_value;
             }
-            throw empty_database();
+            BOOST_THROW_EXCEPTION( empty_database() );
         }
 
         inline iiterator& operator++() {

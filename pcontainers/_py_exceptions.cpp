@@ -633,7 +633,6 @@ __PYX_EXTERN_C DL_EXPORT(PyObject) *py_not_initialized;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_access_error;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_key_exist;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_not_found;
-__PYX_EXTERN_C DL_EXPORT(PyObject) *py_key_not_found;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_empty_key;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_empty_database;
 __PYX_EXTERN_C DL_EXPORT(PyObject) *py_page_not_found;
@@ -697,7 +696,6 @@ static char __pyx_k_py_bad_dbi[] = "py_bad_dbi";
 static char __pyx_k_py_bad_txn[] = "py_bad_txn";
 static char __pyx_k_py_invalid[] = "py_invalid";
 static char __pyx_k_AccessError[] = "AccessError";
-static char __pyx_k_KeyNotFound[] = "KeyNotFound";
 static char __pyx_k_ReadersFull[] = "ReadersFull";
 static char __pyx_k_py_dbs_full[] = "py_dbs_full";
 static char __pyx_k_py_map_full[] = "py_map_full";
@@ -722,7 +720,6 @@ static char __pyx_k_py_access_error[] = "py_access_error";
 static char __pyx_k_py_bad_val_size[] = "py_bad_val_size";
 static char __pyx_k_py_incompatible[] = "py_incompatible";
 static char __pyx_k_py_readers_full[] = "py_readers_full";
-static char __pyx_k_py_key_not_found[] = "py_key_not_found";
 static char __pyx_k_py_empty_database[] = "py_empty_database";
 static char __pyx_k_py_page_not_found[] = "py_page_not_found";
 static char __pyx_k_py_not_initialized[] = "py_not_initialized";
@@ -745,7 +742,6 @@ static PyObject *__pyx_n_s_Incompatible;
 static PyObject *__pyx_n_s_Invalid;
 static PyObject *__pyx_n_s_KeyError;
 static PyObject *__pyx_n_s_KeyExist;
-static PyObject *__pyx_n_s_KeyNotFound;
 static PyObject *__pyx_n_s_LmdbError;
 static PyObject *__pyx_n_s_MapFull;
 static PyObject *__pyx_n_s_MapResized;
@@ -779,7 +775,6 @@ static PyObject *__pyx_n_s_py_empty_key;
 static PyObject *__pyx_n_s_py_incompatible;
 static PyObject *__pyx_n_s_py_invalid;
 static PyObject *__pyx_n_s_py_key_exist;
-static PyObject *__pyx_n_s_py_key_not_found;
 static PyObject *__pyx_n_s_py_lmdb_error;
 static PyObject *__pyx_n_s_py_map_full;
 static PyObject *__pyx_n_s_py_map_resized;
@@ -800,7 +795,6 @@ PyObject *py_not_initialized;
 PyObject *py_access_error;
 PyObject *py_key_exist;
 PyObject *py_not_found;
-PyObject *py_key_not_found;
 PyObject *py_empty_key;
 PyObject *py_empty_database;
 PyObject *py_page_not_found;
@@ -822,7 +816,7 @@ PyObject *py_bad_txn;
 PyObject *py_bad_val_size;
 PyObject *py_bad_dbi;
 
-/* "pcontainers/_py_exceptions.pyx":114
+/* "pcontainers/_py_exceptions.pyx":110
  * cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi
  * 
  * cdef void custom_handler():             # <<<<<<<<<<<<<<
@@ -833,14 +827,14 @@ void __pyx_f_11pcontainers_14_py_exceptions_custom_handler(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("custom_handler", 0);
 
-  /* "pcontainers/_py_exceptions.pyx":115
+  /* "pcontainers/_py_exceptions.pyx":111
  * 
  * cdef void custom_handler():
  *     custom_exception_handler()             # <<<<<<<<<<<<<<
  */
   quiet::custom_exception_handler();
 
-  /* "pcontainers/_py_exceptions.pyx":114
+  /* "pcontainers/_py_exceptions.pyx":110
  * cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi
  * 
  * cdef void custom_handler():             # <<<<<<<<<<<<<<
@@ -890,7 +884,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Invalid, __pyx_k_Invalid, sizeof(__pyx_k_Invalid), 0, 0, 1, 1},
   {&__pyx_n_s_KeyError, __pyx_k_KeyError, sizeof(__pyx_k_KeyError), 0, 0, 1, 1},
   {&__pyx_n_s_KeyExist, __pyx_k_KeyExist, sizeof(__pyx_k_KeyExist), 0, 0, 1, 1},
-  {&__pyx_n_s_KeyNotFound, __pyx_k_KeyNotFound, sizeof(__pyx_k_KeyNotFound), 0, 0, 1, 1},
   {&__pyx_n_s_LmdbError, __pyx_k_LmdbError, sizeof(__pyx_k_LmdbError), 0, 0, 1, 1},
   {&__pyx_n_s_MapFull, __pyx_k_MapFull, sizeof(__pyx_k_MapFull), 0, 0, 1, 1},
   {&__pyx_n_s_MapResized, __pyx_k_MapResized, sizeof(__pyx_k_MapResized), 0, 0, 1, 1},
@@ -924,7 +917,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_py_incompatible, __pyx_k_py_incompatible, sizeof(__pyx_k_py_incompatible), 0, 0, 1, 1},
   {&__pyx_n_s_py_invalid, __pyx_k_py_invalid, sizeof(__pyx_k_py_invalid), 0, 0, 1, 1},
   {&__pyx_n_s_py_key_exist, __pyx_k_py_key_exist, sizeof(__pyx_k_py_key_exist), 0, 0, 1, 1},
-  {&__pyx_n_s_py_key_not_found, __pyx_k_py_key_not_found, sizeof(__pyx_k_py_key_not_found), 0, 0, 1, 1},
   {&__pyx_n_s_py_lmdb_error, __pyx_k_py_lmdb_error, sizeof(__pyx_k_py_lmdb_error), 0, 0, 1, 1},
   {&__pyx_n_s_py_map_full, __pyx_k_py_map_full, sizeof(__pyx_k_py_map_full), 0, 0, 1, 1},
   {&__pyx_n_s_py_map_resized, __pyx_k_py_map_resized, sizeof(__pyx_k_py_map_resized), 0, 0, 1, 1},
@@ -946,7 +938,7 @@ static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_IOError = __Pyx_GetBuiltinName(__pyx_n_s_IOError); if (!__pyx_builtin_IOError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_KeyError = __Pyx_GetBuiltinName(__pyx_n_s_KeyError); if (!__pyx_builtin_KeyError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -1058,7 +1050,6 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_access_error, (void *)&py_access_error, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_key_exist, (void *)&py_key_exist, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_not_found, (void *)&py_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__Pyx_ExportVoidPtr(__pyx_n_s_py_key_not_found, (void *)&py_key_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_empty_key, (void *)&py_empty_key, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_empty_database, (void *)&py_empty_database, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportVoidPtr(__pyx_n_s_py_page_not_found, (void *)&py_page_not_found, "PyObject *") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1234,27 +1225,27 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":24
  *     pass
  * 
- * class KeyNotFound(NotFound, KeyError):             # <<<<<<<<<<<<<<
+ * class EmptyKey(LmdbError, ValueError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
-  __Pyx_INCREF(__pyx_builtin_KeyError);
-  __Pyx_GIVEREF(__pyx_builtin_KeyError);
-  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_builtin_KeyError);
+  __Pyx_INCREF(__pyx_builtin_ValueError);
+  __Pyx_GIVEREF(__pyx_builtin_ValueError);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_builtin_ValueError);
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_KeyNotFound, __pyx_n_s_KeyNotFound, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_EmptyKey, __pyx_n_s_EmptyKey, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_KeyNotFound, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_EmptyKey, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_KeyNotFound, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EmptyKey, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1263,27 +1254,24 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":27
  *     pass
  * 
- * class EmptyKey(LmdbError, ValueError):             # <<<<<<<<<<<<<<
+ * class EmptyDatabase(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-  __Pyx_INCREF(__pyx_builtin_ValueError);
-  __Pyx_GIVEREF(__pyx_builtin_ValueError);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_builtin_ValueError);
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_EmptyKey, __pyx_n_s_EmptyKey, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_EmptyDatabase, __pyx_n_s_EmptyDatabase, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EmptyKey, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EmptyDatabase, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EmptyKey, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EmptyDatabase, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1292,11 +1280,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":30
  *     pass
  * 
- * class EmptyDatabase(LmdbError):             # <<<<<<<<<<<<<<
+ * class PageNotFound(NotFound):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -1305,11 +1293,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_EmptyDatabase, __pyx_n_s_EmptyDatabase, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_PageNotFound, __pyx_n_s_PageNotFound, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_EmptyDatabase, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_PageNotFound, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EmptyDatabase, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_PageNotFound, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1318,11 +1306,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":33
  *     pass
  * 
- * class PageNotFound(NotFound):             # <<<<<<<<<<<<<<
+ * class Corrupted(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -1331,11 +1319,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_PageNotFound, __pyx_n_s_PageNotFound, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Corrupted, __pyx_n_s_Corrupted, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_PageNotFound, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Corrupted, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_PageNotFound, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Corrupted, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1344,7 +1332,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":36
  *     pass
  * 
- * class Corrupted(LmdbError):             # <<<<<<<<<<<<<<
+ * class Panic(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1357,11 +1345,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_Corrupted, __pyx_n_s_Corrupted, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_Panic, __pyx_n_s_Panic, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_Corrupted, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_Panic, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Corrupted, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Panic, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1370,7 +1358,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":39
  *     pass
  * 
- * class Panic(LmdbError):             # <<<<<<<<<<<<<<
+ * class VersionMismatch(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1383,11 +1371,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Panic, __pyx_n_s_Panic, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_VersionMismatch, __pyx_n_s_VersionMismatch, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Panic, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_VersionMismatch, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Panic, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_VersionMismatch, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1396,24 +1384,27 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":42
  *     pass
  * 
- * class VersionMismatch(LmdbError):             # <<<<<<<<<<<<<<
+ * class Invalid(LmdbError, ValueError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
   __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+  __Pyx_INCREF(__pyx_builtin_ValueError);
+  __Pyx_GIVEREF(__pyx_builtin_ValueError);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_builtin_ValueError);
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_VersionMismatch, __pyx_n_s_VersionMismatch, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_Invalid, __pyx_n_s_Invalid, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_VersionMismatch, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_Invalid, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_VersionMismatch, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Invalid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 42; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1422,27 +1413,24 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":45
  *     pass
  * 
- * class Invalid(LmdbError, ValueError):             # <<<<<<<<<<<<<<
+ * class MapFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-  __Pyx_INCREF(__pyx_builtin_ValueError);
-  __Pyx_GIVEREF(__pyx_builtin_ValueError);
-  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_builtin_ValueError);
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Invalid, __pyx_n_s_Invalid, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_MapFull, __pyx_n_s_MapFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Invalid, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_MapFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Invalid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_MapFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1451,7 +1439,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":48
  *     pass
  * 
- * class MapFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class DbsFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1464,11 +1452,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_MapFull, __pyx_n_s_MapFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_DbsFull, __pyx_n_s_DbsFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_MapFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_DbsFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_MapFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DbsFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1477,7 +1465,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":51
  *     pass
  * 
- * class DbsFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class ReadersFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1490,11 +1478,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_DbsFull, __pyx_n_s_DbsFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_ReadersFull, __pyx_n_s_ReadersFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_DbsFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_ReadersFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DbsFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ReadersFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1503,7 +1491,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":54
  *     pass
  * 
- * class ReadersFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class TlsFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1516,11 +1504,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_ReadersFull, __pyx_n_s_ReadersFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_TlsFull, __pyx_n_s_TlsFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_ReadersFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_TlsFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ReadersFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_TlsFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1529,7 +1517,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":57
  *     pass
  * 
- * class TlsFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class TxnFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1542,11 +1530,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_TlsFull, __pyx_n_s_TlsFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_TxnFull, __pyx_n_s_TxnFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_TlsFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_TxnFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_TlsFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_TxnFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1555,7 +1543,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":60
  *     pass
  * 
- * class TxnFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class CursorFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1568,11 +1556,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_TxnFull, __pyx_n_s_TxnFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_CursorFull, __pyx_n_s_CursorFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_TxnFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_CursorFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_TxnFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_CursorFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1581,7 +1569,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":63
  *     pass
  * 
- * class CursorFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class PageFull(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1594,11 +1582,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_CursorFull, __pyx_n_s_CursorFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_PageFull, __pyx_n_s_PageFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_CursorFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_PageFull, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_CursorFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_PageFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1607,7 +1595,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":66
  *     pass
  * 
- * class PageFull(LmdbError):             # <<<<<<<<<<<<<<
+ * class MapResized(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1620,11 +1608,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_PageFull, __pyx_n_s_PageFull, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_MapResized, __pyx_n_s_MapResized, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_PageFull, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_MapResized, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_PageFull, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_MapResized, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1633,7 +1621,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":69
  *     pass
  * 
- * class MapResized(LmdbError):             # <<<<<<<<<<<<<<
+ * class Incompatible(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1646,11 +1634,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_MapResized, __pyx_n_s_MapResized, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Incompatible, __pyx_n_s_Incompatible, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_MapResized, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Incompatible, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_MapResized, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Incompatible, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1659,7 +1647,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":72
  *     pass
  * 
- * class Incompatible(LmdbError):             # <<<<<<<<<<<<<<
+ * class BadRslot(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1672,11 +1660,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_Incompatible, __pyx_n_s_Incompatible, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_BadRslot, __pyx_n_s_BadRslot, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_Incompatible, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_BadRslot, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Incompatible, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadRslot, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1685,7 +1673,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":75
  *     pass
  * 
- * class BadRslot(LmdbError):             # <<<<<<<<<<<<<<
+ * class BadTxn(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1698,11 +1686,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_BadRslot, __pyx_n_s_BadRslot, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_BadTxn, __pyx_n_s_BadTxn, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_BadRslot, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_BadTxn, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadRslot, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadTxn, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1711,7 +1699,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":78
  *     pass
  * 
- * class BadTxn(LmdbError):             # <<<<<<<<<<<<<<
+ * class BadValSize(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1724,11 +1712,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_BadTxn, __pyx_n_s_BadTxn, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_BadValSize, __pyx_n_s_BadValSize, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_BadTxn, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_BadValSize, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadTxn, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadValSize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1737,7 +1725,7 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":81
  *     pass
  * 
- * class BadValSize(LmdbError):             # <<<<<<<<<<<<<<
+ * class BadDbi(LmdbError):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
@@ -1750,11 +1738,11 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_BadValSize, __pyx_n_s_BadValSize, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_BadDbi, __pyx_n_s_BadDbi, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_BadValSize, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_BadDbi, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadValSize, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadDbi, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1763,350 +1751,312 @@ PyMODINIT_FUNC PyInit__py_exceptions(void)
   /* "pcontainers/_py_exceptions.pyx":84
  *     pass
  * 
- * class BadDbi(LmdbError):             # <<<<<<<<<<<<<<
- *     pass
- * 
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_BadDbi, __pyx_n_s_BadDbi, (PyObject *) NULL, __pyx_n_s_pcontainers__py_exceptions, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_BadDbi, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BadDbi, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "pcontainers/_py_exceptions.pyx":87
- *     pass
- * 
  * cdef public PyObject* py_lmdb_error = <PyObject*>LmdbError             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized
  * cdef public PyObject* py_access_error = <PyObject*>AccessError
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_lmdb_error = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_LmdbError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_lmdb_error = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":88
+  /* "pcontainers/_py_exceptions.pyx":85
  * 
  * cdef public PyObject* py_lmdb_error = <PyObject*>LmdbError
  * cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_access_error = <PyObject*>AccessError
  * cdef public PyObject* py_key_exist = <PyObject*>KeyExist
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotInitialized); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_not_initialized = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotInitialized); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_not_initialized = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":89
+  /* "pcontainers/_py_exceptions.pyx":86
  * cdef public PyObject* py_lmdb_error = <PyObject*>LmdbError
  * cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized
  * cdef public PyObject* py_access_error = <PyObject*>AccessError             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_key_exist = <PyObject*>KeyExist
  * cdef public PyObject* py_not_found = <PyObject*>NotFound
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_AccessError); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_access_error = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_AccessError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_access_error = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":90
+  /* "pcontainers/_py_exceptions.pyx":87
  * cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized
  * cdef public PyObject* py_access_error = <PyObject*>AccessError
  * cdef public PyObject* py_key_exist = <PyObject*>KeyExist             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_not_found = <PyObject*>NotFound
- * cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound
+ * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyExist); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_key_exist = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyExist); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_key_exist = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":91
+  /* "pcontainers/_py_exceptions.pyx":88
  * cdef public PyObject* py_access_error = <PyObject*>AccessError
  * cdef public PyObject* py_key_exist = <PyObject*>KeyExist
  * cdef public PyObject* py_not_found = <PyObject*>NotFound             # <<<<<<<<<<<<<<
- * cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound
- * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
- */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_not_found = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "pcontainers/_py_exceptions.pyx":92
- * cdef public PyObject* py_key_exist = <PyObject*>KeyExist
- * cdef public PyObject* py_not_found = <PyObject*>NotFound
- * cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
  * cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_KeyNotFound); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_key_not_found = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_not_found = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":93
+  /* "pcontainers/_py_exceptions.pyx":89
+ * cdef public PyObject* py_key_exist = <PyObject*>KeyExist
  * cdef public PyObject* py_not_found = <PyObject*>NotFound
- * cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound
  * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase
  * cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_EmptyKey); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_empty_key = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_EmptyKey); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_empty_key = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":94
- * cdef public PyObject* py_key_not_found = <PyObject*>KeyNotFound
+  /* "pcontainers/_py_exceptions.pyx":90
+ * cdef public PyObject* py_not_found = <PyObject*>NotFound
  * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
  * cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound
  * cdef public PyObject* py_corrupted = <PyObject*>Corrupted
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_EmptyDatabase); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_empty_database = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_EmptyDatabase); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_empty_database = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":95
+  /* "pcontainers/_py_exceptions.pyx":91
  * cdef public PyObject* py_empty_key = <PyObject*>EmptyKey
  * cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase
  * cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_corrupted = <PyObject*>Corrupted
  * cdef public PyObject* py_panic = <PyObject*>Panic
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_PageNotFound); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_page_not_found = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_PageNotFound); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_page_not_found = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":96
+  /* "pcontainers/_py_exceptions.pyx":92
  * cdef public PyObject* py_empty_database = <PyObject*>EmptyDatabase
  * cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound
  * cdef public PyObject* py_corrupted = <PyObject*>Corrupted             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_panic = <PyObject*>Panic
  * cdef public PyObject* py_version_mismatch = <PyObject*>VersionMismatch
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Corrupted); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_corrupted = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Corrupted); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_corrupted = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":97
+  /* "pcontainers/_py_exceptions.pyx":93
  * cdef public PyObject* py_page_not_found = <PyObject*>PageNotFound
  * cdef public PyObject* py_corrupted = <PyObject*>Corrupted
  * cdef public PyObject* py_panic = <PyObject*>Panic             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_version_mismatch = <PyObject*>VersionMismatch
  * cdef public PyObject* py_invalid = <PyObject*>Invalid
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Panic); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_panic = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Panic); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_panic = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":98
+  /* "pcontainers/_py_exceptions.pyx":94
  * cdef public PyObject* py_corrupted = <PyObject*>Corrupted
  * cdef public PyObject* py_panic = <PyObject*>Panic
  * cdef public PyObject* py_version_mismatch = <PyObject*>VersionMismatch             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_invalid = <PyObject*>Invalid
  * cdef public PyObject* py_map_full = <PyObject*>MapFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_VersionMismatch); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_version_mismatch = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_VersionMismatch); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_version_mismatch = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":99
+  /* "pcontainers/_py_exceptions.pyx":95
  * cdef public PyObject* py_panic = <PyObject*>Panic
  * cdef public PyObject* py_version_mismatch = <PyObject*>VersionMismatch
  * cdef public PyObject* py_invalid = <PyObject*>Invalid             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_map_full = <PyObject*>MapFull
  * cdef public PyObject* py_dbs_full = <PyObject*>DbsFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Invalid); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_invalid = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Invalid); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_invalid = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":100
+  /* "pcontainers/_py_exceptions.pyx":96
  * cdef public PyObject* py_version_mismatch = <PyObject*>VersionMismatch
  * cdef public PyObject* py_invalid = <PyObject*>Invalid
  * cdef public PyObject* py_map_full = <PyObject*>MapFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_dbs_full = <PyObject*>DbsFull
  * cdef public PyObject* py_readers_full = <PyObject*>ReadersFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_MapFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_map_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_MapFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_map_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":101
+  /* "pcontainers/_py_exceptions.pyx":97
  * cdef public PyObject* py_invalid = <PyObject*>Invalid
  * cdef public PyObject* py_map_full = <PyObject*>MapFull
  * cdef public PyObject* py_dbs_full = <PyObject*>DbsFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_readers_full = <PyObject*>ReadersFull
  * cdef public PyObject* py_tls_full = <PyObject*>TlsFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_DbsFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_dbs_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_DbsFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_dbs_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":102
+  /* "pcontainers/_py_exceptions.pyx":98
  * cdef public PyObject* py_map_full = <PyObject*>MapFull
  * cdef public PyObject* py_dbs_full = <PyObject*>DbsFull
  * cdef public PyObject* py_readers_full = <PyObject*>ReadersFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_tls_full = <PyObject*>TlsFull
  * cdef public PyObject* py_txn_full = <PyObject*>TxnFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_ReadersFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_readers_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_ReadersFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_readers_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":103
+  /* "pcontainers/_py_exceptions.pyx":99
  * cdef public PyObject* py_dbs_full = <PyObject*>DbsFull
  * cdef public PyObject* py_readers_full = <PyObject*>ReadersFull
  * cdef public PyObject* py_tls_full = <PyObject*>TlsFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_txn_full = <PyObject*>TxnFull
  * cdef public PyObject* py_cursor_full = <PyObject*>CursorFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_TlsFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_tls_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_TlsFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_tls_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":104
+  /* "pcontainers/_py_exceptions.pyx":100
  * cdef public PyObject* py_readers_full = <PyObject*>ReadersFull
  * cdef public PyObject* py_tls_full = <PyObject*>TlsFull
  * cdef public PyObject* py_txn_full = <PyObject*>TxnFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_cursor_full = <PyObject*>CursorFull
  * cdef public PyObject* py_page_full = <PyObject*>PageFull
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_TxnFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_txn_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_TxnFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_txn_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":105
+  /* "pcontainers/_py_exceptions.pyx":101
  * cdef public PyObject* py_tls_full = <PyObject*>TlsFull
  * cdef public PyObject* py_txn_full = <PyObject*>TxnFull
  * cdef public PyObject* py_cursor_full = <PyObject*>CursorFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_page_full = <PyObject*>PageFull
  * cdef public PyObject* py_map_resized = <PyObject*>MapResized
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_CursorFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_cursor_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_CursorFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_cursor_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":106
+  /* "pcontainers/_py_exceptions.pyx":102
  * cdef public PyObject* py_txn_full = <PyObject*>TxnFull
  * cdef public PyObject* py_cursor_full = <PyObject*>CursorFull
  * cdef public PyObject* py_page_full = <PyObject*>PageFull             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_map_resized = <PyObject*>MapResized
  * cdef public PyObject* py_incompatible = <PyObject*>Incompatible
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_PageFull); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_page_full = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_PageFull); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_page_full = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":107
+  /* "pcontainers/_py_exceptions.pyx":103
  * cdef public PyObject* py_cursor_full = <PyObject*>CursorFull
  * cdef public PyObject* py_page_full = <PyObject*>PageFull
  * cdef public PyObject* py_map_resized = <PyObject*>MapResized             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_incompatible = <PyObject*>Incompatible
  * cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_MapResized); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_map_resized = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_MapResized); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_map_resized = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":108
+  /* "pcontainers/_py_exceptions.pyx":104
  * cdef public PyObject* py_page_full = <PyObject*>PageFull
  * cdef public PyObject* py_map_resized = <PyObject*>MapResized
  * cdef public PyObject* py_incompatible = <PyObject*>Incompatible             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot
  * cdef public PyObject* py_bad_txn = <PyObject*>BadTxn
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_Incompatible); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_incompatible = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Incompatible); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_incompatible = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":109
+  /* "pcontainers/_py_exceptions.pyx":105
  * cdef public PyObject* py_map_resized = <PyObject*>MapResized
  * cdef public PyObject* py_incompatible = <PyObject*>Incompatible
  * cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_bad_txn = <PyObject*>BadTxn
  * cdef public PyObject* py_bad_val_size = <PyObject*>BadValSize
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadRslot); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_bad_rslot = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadRslot); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_bad_rslot = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":110
+  /* "pcontainers/_py_exceptions.pyx":106
  * cdef public PyObject* py_incompatible = <PyObject*>Incompatible
  * cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot
  * cdef public PyObject* py_bad_txn = <PyObject*>BadTxn             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_bad_val_size = <PyObject*>BadValSize
  * cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadTxn); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_bad_txn = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadTxn); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_bad_txn = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":111
+  /* "pcontainers/_py_exceptions.pyx":107
  * cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot
  * cdef public PyObject* py_bad_txn = <PyObject*>BadTxn
  * cdef public PyObject* py_bad_val_size = <PyObject*>BadValSize             # <<<<<<<<<<<<<<
  * cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadValSize); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_bad_val_size = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadValSize); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_bad_val_size = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/_py_exceptions.pyx":112
+  /* "pcontainers/_py_exceptions.pyx":108
  * cdef public PyObject* py_bad_txn = <PyObject*>BadTxn
  * cdef public PyObject* py_bad_val_size = <PyObject*>BadValSize
  * cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi             # <<<<<<<<<<<<<<
  * 
  * cdef void custom_handler():
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadDbi); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  py_bad_dbi = ((PyObject *)__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_BadDbi); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  py_bad_dbi = ((PyObject *)__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "pcontainers/_py_exceptions.pyx":1
  * # -*- coding: utf-8 -*-             # <<<<<<<<<<<<<<
  * 
  * # noinspection PyUnresolvedReferences
  */
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /*--- Wrapped vars code ---*/
 

@@ -8,7 +8,6 @@ cdef public PyObject* py_not_initialized
 cdef public PyObject* py_access_error
 cdef public PyObject* py_key_exist
 cdef public PyObject* py_not_found
-cdef public PyObject* py_key_not_found
 cdef public PyObject* py_empty_key
 cdef public PyObject* py_empty_database
 cdef public PyObject* py_page_not_found

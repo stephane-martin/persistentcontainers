@@ -25,7 +25,6 @@ __PYX_EXTERN_C DL_IMPORT(PyObject) *py_not_initialized;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_access_error;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_key_exist;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_not_found;
-__PYX_EXTERN_C DL_IMPORT(PyObject) *py_key_not_found;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_empty_key;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_empty_database;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_page_not_found;

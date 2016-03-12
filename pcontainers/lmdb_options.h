@@ -20,7 +20,6 @@ using std::map;
 using std::cout;
 using std::endl;
 using std::exception;
-using std::runtime_error;
 
 class lmdb_options {
 public:
