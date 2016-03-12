@@ -15,7 +15,6 @@ ON_READTHEDOCS = os.environ.get('READTHEDOCS', None) == 'True'
 PLATFORM = platform.system().lower().strip()
 IS_MACOSX = "darwin" in PLATFORM
 IS_LINUX = "linux" in PLATFORM
-GUID_DEFINE = join(ROOT, "pcontainers", "created_by_setup.py.h")
 
 
 def check_libuuid():
@@ -108,19 +107,8 @@ def runsetup():
         os.environ["MACOSX_DEPLOYMENT_TARGET"] = python_config_vars["MACOSX_DEPLOYMENT_TARGET"]
         os.environ["SDKROOT"] = python_config_vars["UNIVERSALSDK"]
 
-        if not exists(GUID_DEFINE):
-            with open(GUID_DEFINE, mode="wt", encoding="UTF-8") as f:
-                f.write(u"#define GUID_CFUUID\n")
-
     elif IS_LINUX:
-        if not check_libuuid():
-            info("Please install libuuid with development headers")
-            sys.exit(1)
-
-        if not exists(GUID_DEFINE):
-            with open(GUID_DEFINE, mode="wt", encoding="UTF-8") as f:
-                f.write(u"#define GUID_LIBUUID\n")
-
+        pass
     else:
         info("Works on MacOSX or Linux")
         sys.exit(1)
