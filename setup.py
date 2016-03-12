@@ -37,6 +37,7 @@ extensions = [
             'pcontainers/_py_exceptions.cpp',
             'pcontainers/custom_exc.cpp'
         ],
+        include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++"
     ),
     Extension(

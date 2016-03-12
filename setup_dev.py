@@ -9,6 +9,7 @@ extensions[:] = [
             'pcontainers/_py_exceptions.pyx',
             'pcontainers/custom_exc.cpp'
         ],
+        include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++"
     ),
     Extension(
