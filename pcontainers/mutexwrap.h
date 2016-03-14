@@ -20,11 +20,11 @@ inline string tostring(int x) {
     return ss.str();
 }
 
-class ErrorCheckLock {
+class MutexWrap {
 protected:
     // Prevent copying or assignment
-    ErrorCheckLock(const ErrorCheckLock& arg);
-    ErrorCheckLock& operator=(const ErrorCheckLock& rhs);
+    MutexWrap(const MutexWrap& arg);
+    MutexWrap& operator=(const MutexWrap& rhs);
 
     pthread_mutex_t mutex;
 
@@ -46,14 +46,14 @@ protected:
     }
 
 public:
-    ErrorCheckLock() {
+    MutexWrap() {
         pthread_mutexattr_t mattr;
         pthread_mutexattr_init(&mattr);
         pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ERRORCHECK);
         pthread_mutex_init(&mutex, &mattr);
     }
 
-    ~ErrorCheckLock() {
+    ~MutexWrap() {
         destroy();
     }
 
@@ -83,5 +83,16 @@ public:
     }
 };
 
-}
 
+class MutexWrapLock {
+protected:
+    MutexWrap& mutex;
+    MutexWrapLock(const MutexWrapLock& other);
+    MutexWrapLock& operator=(const MutexWrap& other);
+
+public:
+    MutexWrapLock(MutexWrap& m): mutex(m) { mutex.lock(); }
+    ~MutexWrapLock() { mutex.unlock(); }
+};
+
+}   // END NS quiet

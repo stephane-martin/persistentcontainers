@@ -28,9 +28,6 @@
 #include "utils.h"
 #include "logging.h"
 
-
-
-
 namespace quiet {
 
 using std::string;
@@ -268,7 +265,9 @@ public:
     }
 
     void remove_if(binary_predicate binary_pred) {                      // remove_if(predicate(key, value))
+        _LOG_DEBUG << "remove_if(binary_predicate)";
         if (!*this) {
+            _LOG_INFO << "remove_if cancelled cause the dict is not initialized";
             return;
         }
         iterator it(this, 0, false);                                    // writeable iterator

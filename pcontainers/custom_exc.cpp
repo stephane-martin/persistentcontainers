@@ -147,6 +147,9 @@ void custom_exception_handler() {
     } catch (const std::underflow_error& exn) {
         PyErr_SetString(PyExc_ArithmeticError, exn.what());
 
+    } catch (const exception_base& exn) {
+        PyErr_SetCppString(PyExc_RuntimeError, exn.w());
+
     } catch (const std::exception& exn) {
         PyErr_SetString(PyExc_RuntimeError, exn.what());
 

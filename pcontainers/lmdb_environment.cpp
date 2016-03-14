@@ -21,29 +21,25 @@ using std::map;
 using std::cout;
 using std::endl;
 
-using quiet::ErrorCheckLock;
-
+using quiet::MutexWrap;
+using quiet::MutexWrapLock;
 
 map<string, boost::shared_ptr<environment> > environment::opened_environments = map<string, boost::shared_ptr<environment> >();
-ErrorCheckLock* environment::lock_envs = new ErrorCheckLock();
-ErrorCheckLock* environment::lock_dbis = new ErrorCheckLock();
+
+MutexWrap environment::lock_envs;
+MutexWrap environment::lock_dbis;
 
 environment::shared_ptr env_factory(const string& directory_name, const lmdb_options& opts) {
     environment::shared_ptr env;
-    environment::lock_envs->lock();
-    try {
+    MutexWrapLock lock(environment::lock_envs);
+    {
         env = environment::opened_environments[directory_name];
         if (!env) {
             env = environment::shared_ptr(new environment(directory_name, opts));
             environment::opened_environments[directory_name] = env;
         }
-    } catch (...) {
-        environment::lock_envs->unlock();
-        throw;
+        return env;
     }
-    environment::lock_envs->unlock();
-    return env;
 }
-
 
 }   // end NS lmdb

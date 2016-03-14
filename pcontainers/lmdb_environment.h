@@ -30,7 +30,8 @@ using std::cout;
 using std::endl;
 using std::exception;
 using std::ostringstream;
-using quiet::ErrorCheckLock;
+using quiet::MutexWrap;
+using quiet::MutexWrapLock;
 using namespace utils;
 
 
@@ -41,8 +42,8 @@ private:
 
 protected:
     static map<string, boost::shared_ptr<environment> > opened_environments;
-    static ErrorCheckLock* lock_envs;
-    static ErrorCheckLock* lock_dbis;
+    static MutexWrap lock_envs;
+    static MutexWrap lock_dbis;
     map<string, MDB_dbi> opened_dbis;
 
 public:
@@ -56,8 +57,8 @@ public:
     MDB_dbi get_dbi(const string& dbname) {
         int res;
         MDB_dbi dbi;
-        lock_dbis->lock();
-        try {
+        MutexWrapLock lock(lock_dbis);
+        {
             if (opened_dbis.count(dbname)) {
                 dbi = opened_dbis[dbname];
             } else {
@@ -74,12 +75,8 @@ public:
                 txn.reset();    // commit transaction
                 opened_dbis[dbname] = dbi;
             }
-        } catch (...) {
-            lock_dbis->unlock();
-            throw;
+            return dbi;
         }
-        lock_dbis->unlock();
-        return dbi;
     }
 
     MDB_env* ptr;

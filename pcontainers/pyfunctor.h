@@ -7,6 +7,8 @@
 #include <Python.h>
 #include "lmdb_exceptions.h"
 #include "utils.h"
+#include "pyutils.h"
+#include "logging.h"
 
 namespace quiet {
 
@@ -16,8 +18,11 @@ using namespace utils;
 
 
 class PyPredicate {
+protected:
+    PyNewRef callback;
+
 public:
-    PyPredicate(): callback(NULL) { }
+    PyPredicate(): callback(PyNewRef()) { }
 
     static inline unary_predicate make_unary_predicate(PyObject* obj) {
         return PyPredicate(obj);
@@ -27,119 +32,128 @@ public:
         return PyPredicate(obj);
     }
 
-
     PyPredicate(PyObject* obj) {
         if (obj == NULL) {
-            callback = NULL;
+            callback = PyNewRef();
+            _LOG_DEBUG << "new trivial PyPredicate object";
             return;
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        if (!PyCallable_Check(obj)) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: obj is not a python callable") );
+        GilWrapper gil;
+        {
+            if (!PyCallable_Check(obj)) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: obj is not a python callable") );
+            }
+            Py_INCREF(obj);
+            callback = PyNewRef(obj);
         }
-        callback = obj;
-        Py_INCREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
+        if (!callback) {
+            _LOG_WARNING << "'callback' has not been correctly initialized";
+        }
     }
 
     ~PyPredicate() {
-        if (callback != NULL) {
-            PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-            Py_DECREF(callback);
-            PyGILState_Release(__pyx_gilstate_save);
-            callback = NULL;
+        if (callback) {
+            GilWrapper gil;
+            {
+                callback.reset();
+            }
         }
     }
 
     PyPredicate(const PyPredicate& other) {
-        if (other.callback == NULL) {
-            callback = NULL;
+        if (!other.callback) {
+            callback = PyNewRef();
             return;
         }
-        callback = other.callback;
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        Py_INCREF(callback);
-        PyGILState_Release(__pyx_gilstate_save);
+
+        GilWrapper gil;
+        {
+            callback = PyNewRef(other.callback.get());
+            if (callback) {
+                Py_INCREF(callback.get());
+            }
+        }
     }
 
     PyPredicate& operator=(PyPredicate other) {
-        std::swap(callback, other.callback);
-        return *this;
+        GilWrapper gil;
+        {
+            callback = PyNewRef(other.callback.get());
+            if (callback) {
+                Py_INCREF(callback.get());
+            }
+            return *this;
+        }
     }
 
     bool operator()(const string& key) {
-        if (callback == NULL) {
+        if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("This predicate is not initialized") );
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        // convert the two strings into python 'bytes' objects (they are new references)
-        PyObject* py_key = PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size());
-        if (py_key == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed") );
-        }
+        GilWrapper gil;
+        {
+            // convert the two strings into python 'bytes' objects (they are new references)
+            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            if (!py_key) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed") );
+            }
 
-        PyObject* obj = PyObject_CallFunctionObjArgs(callback, py_key, NULL);
-        Py_DECREF(py_key);
+            if (!callback) {
+                _LOG_WARNING << "callback is empty, prepare for segfault";
+            }
+            PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), NULL));
 
-        if (obj == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Calling python callback failed") );
-        }
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Calling python callback failed") );
+            }
 
-        // we got a Python object as a result; now let's convert it into a C++ bool
-        int res = PyObject_IsTrue(obj);
-        Py_DECREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
-        if (res == -1) {
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Converting to bool failed") );
+            // we got a Python object as a result; now let's convert it into a C++ bool
+            int res = PyObject_IsTrue(obj.get());
+            if (res == -1) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Converting to bool failed") );
+            }
+            return (bool) res;
         }
-        return (bool) res;
     }
 
     bool operator()(const string& key, const string& value) {       // for binary predicates
-        if (callback == NULL) {
+        if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("This predicate is not initialized") );
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        // convert the two strings into python 'bytes' objects (they are new references)
-        PyObject* py_key = PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size());
-        if (py_key == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
-        }
-        PyObject* py_value = PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size());
-        if (py_value == NULL) {
-            Py_DECREF(py_key);
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
-        }
+        GilWrapper gil;
+        {
+            // convert the two strings into python 'bytes' objects (they are new references)
+            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            if (!py_key) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
+            }
+            PyNewRef py_value(PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size()));
+            if (!py_value) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
+            }
+            if (!callback) {
+                _LOG_WARNING << "callback is empty, prepare for segfault";
+            }
+            //PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), py_value.get(), NULL);
+            PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), py_value.get(), NULL));
 
-        PyObject* obj = PyObject_CallFunctionObjArgs(callback, py_key, py_value, NULL);
-        Py_DECREF(py_key);
-        Py_DECREF(py_value);
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Calling python callback failed") );
+            }
 
-        if (obj == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Calling python callback failed") );
+            // we got a Python object as a result; now let's convert it into a C++ bool
+            int res = PyObject_IsTrue(obj.get());
+            if (res == -1) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Converting to bool failed") );
+            }
+            return (bool) res;
         }
-
-        // we got a Python object as a result; now let's convert it into a C++ bool
-        int res = PyObject_IsTrue(obj);
-        Py_DECREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
-        if (res == -1) {
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: Converting to bool failed") );
-        }
-        return (bool) res;
     }
-
-private:
-    PyObject* callback;
 };
 
 class PyFunctor {
+private:
+    PyNewRef callback;
 public:
 
     static inline unary_functor make_unary_functor(PyObject* obj) {
@@ -150,227 +164,211 @@ public:
         return PyFunctor(obj);
     }
 
-
-    PyFunctor(): callback(NULL) { }
+    PyFunctor(): callback(PyNewRef()) { }
 
     PyFunctor(PyObject* obj) {
-        if (obj == NULL) {
-            callback = NULL;
+        if (!obj) {
+            callback = PyNewRef();
             return;
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        if (!PyCallable_Check(obj)) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: obj is not a python callable") );
+        GilWrapper gil;
+        {
+            if (!PyCallable_Check(obj)) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: obj is not a python callable") );
+            }
+            callback = PyNewRef(obj);
+            Py_INCREF(obj);
         }
-        callback = obj;
-        Py_INCREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
     }
 
     ~PyFunctor() {
-        if (callback != NULL) {
-            PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-            Py_DECREF(callback);
-            PyGILState_Release(__pyx_gilstate_save);
-            callback = NULL;
+        if (callback) {
+            GilWrapper gil;
+            {
+                callback.reset();
+            }
         }
     }
 
     PyFunctor(const PyFunctor& other) {
-        if (other.callback == NULL) {
-            callback = NULL;
+        if (!other.callback) {
+            callback = PyNewRef();
             return;
         }
-        callback = other.callback;
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        Py_INCREF(callback);
-        PyGILState_Release(__pyx_gilstate_save);
+        GilWrapper gil;
+        {
+            callback = PyNewRef(other.callback.get());
+            if (callback) {
+                Py_INCREF(callback.get());
+            }
+        }
     }
 
     PyFunctor& operator=(PyFunctor other) {
-        std::swap(callback, other.callback);
-        return *this;
+        GilWrapper gil;
+        {
+            callback = PyNewRef(other.callback.get());
+            if (callback) {
+                Py_INCREF(callback.get());
+            }
+            return *this;
+        }
     }
 
     string operator()(const string& key) {
-        if (callback == NULL) {
+        if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        // convert the two strings into python 'bytes' objects (they are new references)
-        PyObject* py_key = PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size());
-        if (py_key == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
-        }
-
-        PyObject* obj = PyObject_CallFunctionObjArgs(callback, py_key, NULL);
-        Py_DECREF(py_key);
-
-        if (obj == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: Calling python callback failed") );
-        }
-
-        // we got a Python object as a result; now let's convert it into a C++ string
-
-        if (PyUnicode_Check(obj)) {
-            // ooops, the callback returned a unicode object... lets encode it in utf8 first
-            PyObject* u_res = PyUnicode_AsUTF8String(obj);
-            Py_DECREF(obj);
-            if (u_res == NULL) {
-                // should not happen
-                PyGILState_Release(__pyx_gilstate_save);
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to UTF-8 failed :(") );
+        GilWrapper gil;
+        {
+            // convert the two strings into python 'bytes' objects (they are new references)
+            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            if (!py_key) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-            obj = u_res;
-        }
-        if (!PyBytes_Check(obj)) {
-            // res in not a bytes object... let's try to call bytes(obj)
-            PyObject* u_res = PyObject_Bytes(obj);
-            Py_DECREF(obj);
-            if (u_res == NULL) {
-                PyGILState_Release(__pyx_gilstate_save);
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
+
+            PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), NULL));
+
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: Calling python callback failed") );
             }
-            obj = u_res;
+
+            // we got a Python object as a result; now let's convert it into a C++ string
+
+            if (PyUnicode_Check(obj.get())) {
+                // ooops, the callback returned a unicode object... lets encode it in utf8 first
+                obj = PyNewRef(PyUnicode_AsUTF8String(obj.get()));
+                if (!obj) {
+                    // should not happen
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to UTF-8 failed :(") );
+                }
+            }
+            if (!PyBytes_Check(obj.get())) {
+                // res in not a bytes object... let's try to call bytes(obj)
+                obj = PyNewRef(PyObject_Bytes(obj.get()));
+                if (!obj) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
+                }
+            }
+            char* buffer = NULL;
+            Py_ssize_t l = 0;
+            if (PyBytes_AsStringAndSize(obj.get(), &buffer, &l) == -1) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
+            }
+            string s(buffer, l);
+            return s;
         }
-        char* buffer = NULL;
-        Py_ssize_t l = 0;
-        if (PyBytes_AsStringAndSize(obj, &buffer, &l) == -1) {
-            Py_DECREF(obj);
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
-        }
-        string s(buffer, l);
-        Py_DECREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
-        return s;
     }
 
     string operator()(const string& key, const string& value) {
-        if (callback == NULL) {
+        if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        // convert the two strings into python 'bytes' objects (they are new references)
-        PyObject* py_key = PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size());
-        if (py_key == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
-        }
-        PyObject* py_value = PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size());
-        if (py_value == NULL) {
-            Py_DECREF(py_key);
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
-        }
-
-        PyObject* obj = PyObject_CallFunctionObjArgs(callback, py_key, py_value, NULL);
-        Py_DECREF(py_key);
-        Py_DECREF(py_value);
-
-        if (obj == NULL) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: Calling python callback failed") );
-        }
-
-        // we got a Python object as a result; now let's convert it into a C++ string
-
-        if (PyUnicode_Check(obj)) {
-            // ooops, the callback returned a unicode object... lets encode it in utf8 first
-            PyObject* u_res = PyUnicode_AsUTF8String(obj);
-            Py_DECREF(obj);
-            if (u_res == NULL) {
-                // should not happen
-                PyGILState_Release(__pyx_gilstate_save);
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to UTF-8 failed :(") );
+        GilWrapper gil;
+        {
+            // convert the two strings into python 'bytes' objects (they are new references)
+            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            if (!py_key) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-            obj = u_res;
-        }
-        if (!PyBytes_Check(obj)) {
-            // res in not a bytes object... let's try to call bytes(obj)
-            PyObject* u_res = PyObject_Bytes(obj);
-            Py_DECREF(obj);
-            if (u_res == NULL) {
-                PyGILState_Release(__pyx_gilstate_save);
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
+            PyNewRef py_value(PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size()));
+            if (!py_value) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-            obj = u_res;
+
+            PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), py_value.get(), NULL));
+
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: Calling python callback failed") );
+            }
+
+            // we got a Python object as a result; now let's convert it into a C++ string
+
+            if (PyUnicode_Check(obj.get())) {
+                // ooops, the callback returned a unicode object... lets encode it in utf8 first
+                obj = PyNewRef(PyUnicode_AsUTF8String(obj.get()));
+                if (!obj) {
+                    // should not happen
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to UTF-8 failed :(") );
+                }
+            }
+            if (!PyBytes_Check(obj.get())) {
+                // res in not a bytes object... let's try to call bytes(obj)
+                obj = PyNewRef(PyObject_Bytes(obj.get()));
+                if (!obj) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
+                }
+            }
+            char* buffer = NULL;
+            Py_ssize_t l = 0;
+            if (PyBytes_AsStringAndSize(obj.get(), &buffer, &l) == -1) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
+            }
+            string s(buffer, l);
+            return s;
         }
-        char* buffer = NULL;
-        Py_ssize_t l = 0;
-        if (PyBytes_AsStringAndSize(obj, &buffer, &l) == -1) {
-            Py_DECREF(obj);
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
-        }
-        string s(buffer, l);
-        Py_DECREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
-        return s;
     }
 
-private:
-    PyObject* callback;
 };
 
 class PyStringInputIterator {
 public:
-    PyStringInputIterator(): iterator(NULL), empty(true), current_value("") { }
+    PyStringInputIterator(): iterator(PyNewRef()), empty(true), current_value("") { }
 
-    PyStringInputIterator(PyObject* obj): iterator(NULL), empty(true), current_value("") {
-        if (obj == NULL) {
+    PyStringInputIterator(PyObject* obj): empty(true), current_value("") {
+        if (!obj) {
+            iterator = PyNewRef();
             return;
         }
-
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        int res = PyIter_Check(obj);
-        if (!res) {
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
+        GilWrapper gil;
+        {
+            int res = PyIter_Check(obj);
+            if (!res) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
+            }
+            iterator = PyNewRef(obj);
+            Py_INCREF(obj);
+            empty = false;
+            _next_value();
         }
-        iterator = obj;
-        Py_INCREF(obj);
-        PyGILState_Release(__pyx_gilstate_save);
-        empty = false;
-        _next_value();
     }
 
     ~PyStringInputIterator() {
-        if (iterator != NULL) {
-            PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-            Py_DECREF(iterator);
-            PyGILState_Release(__pyx_gilstate_save);
-            iterator = NULL;
+        if (iterator) {
+            GilWrapper gil;
+            {
+                iterator.reset();
+            }
         }
     }
 
     PyStringInputIterator(const PyStringInputIterator& other) {
-        if (other.iterator == NULL) {
-            iterator = NULL;
-            empty = true;
-            current_value = "";
-            return;
+        GilWrapper gil;
+        {
+            iterator = PyNewRef(other.iterator.get());
+            if (iterator) {
+                Py_INCREF(iterator.get());
+            }
+            empty = other.empty;
+            current_value = other.current_value;
         }
-        iterator = other.iterator;
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        Py_INCREF(iterator);
-        PyGILState_Release(__pyx_gilstate_save);
-        empty = other.empty;
-        current_value = other.current_value;
     }
 
     PyStringInputIterator& operator=(PyStringInputIterator other) {
-        std::swap(iterator, other.iterator);
-        std::swap(empty, other.empty);
-        std::swap(current_value, other.current_value);
-        return *this;
+        GilWrapper gil;
+        {
+            iterator = PyNewRef(other.iterator.get());
+            if (iterator) {
+                Py_INCREF(iterator.get());
+            }
+            empty = other.empty;
+            current_value = other.current_value;
+            return *this;
+        }
     }
 
     friend bool operator==(const PyStringInputIterator& one, const PyStringInputIterator& other) {
-        if (one.iterator == NULL && other.iterator == NULL) {
+        if (!(one.iterator) && !(other.iterator)) {
             return true;
         }
         if (one.empty && other.empty) {
@@ -403,71 +401,62 @@ protected:
         if (empty) {
             return;
         }
-        PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
-        PyObject* next_obj = Py_TYPE(iterator)->tp_iternext(iterator);      // new ref
-        if (next_obj == NULL) {
-            PyObject* exc_type = PyErr_Occurred();
-            if (exc_type != NULL) {
-                if (exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)) {
-                    PyErr_Clear();
-                } else {
-                    // a python exception occurred, but it's not a StopIteration. let it flow to python code.
+        GilWrapper gil;
+        {
+            PyNewRef next_obj(Py_TYPE(iterator.get())->tp_iternext(iterator.get()));      // new ref
+            if (!next_obj) {
+                PyObject* exc_type = PyErr_Occurred();
+                if (exc_type != NULL) {
+                    if (exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)) {
+                        PyErr_Clear();
+                    } else {
+                        // a python exception occurred, but it's not a StopIteration. let it flow to python code.
+                        empty = true;
+                        current_value = "";
+                        BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
+                    }
+                }
+                empty = true;
+                current_value = "";
+                return;
+            }
+
+            if (PyUnicode_Check(next_obj.get())) {
+                // ooops, the callback returned a unicode object... lets encode it in utf8 first
+                next_obj = PyNewRef(PyUnicode_AsUTF8String(next_obj.get()));
+                if (!next_obj) {
+                    // should not happen
                     empty = true;
                     current_value = "";
-                    PyGILState_Release(__pyx_gilstate_save);
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyIterator: converting result to UTF-8 failed :(") );
+                }
+            }
+
+            if (!PyBytes_Check(next_obj.get())) {
+                next_obj = PyNewRef(PyObject_Bytes(next_obj.get()));
+                if (!next_obj) {
+                    // conversion to bytes failed
+                    empty = true;
+                    current_value = "";
                     BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
                 }
             }
-            empty = true;
-            current_value = "";
-            PyGILState_Release(__pyx_gilstate_save);
-            return;
-        }
 
-        if (PyUnicode_Check(next_obj)) {
-            // ooops, the callback returned a unicode object... lets encode it in utf8 first
-            PyObject* next_obj_str = PyUnicode_AsUTF8String(next_obj);
-            Py_DECREF(next_obj);
-            if (next_obj_str == NULL) {
-                // should not happen
+            char* buffer = NULL;
+            Py_ssize_t length = 0;
+            int res = PyBytes_AsStringAndSize(next_obj.get(), &buffer, &length);
+            if (res == -1) {
+                // should not happen...
                 empty = true;
                 current_value = "";
-                PyGILState_Release(__pyx_gilstate_save);
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyIterator: converting result to UTF-8 failed :(") );
-            }
-            next_obj = next_obj_str;
-        }
-
-        if (!PyBytes_Check(next_obj)) {
-            PyObject* next_obj_str = PyObject_Bytes(next_obj);
-            Py_DECREF(next_obj);
-            if (next_obj_str == NULL) {
-                // conversion to bytes failed
-                empty = true;
-                current_value = "";
-                PyGILState_Release(__pyx_gilstate_save);
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
+            } else {
+                current_value = string(buffer, length);
             }
-            next_obj = next_obj_str;
         }
-
-        char* buffer = NULL;
-        Py_ssize_t length = 0;
-        int res = PyBytes_AsStringAndSize(next_obj, &buffer, &length);
-        if (res == -1) {
-            // should not happen...
-            empty = true;
-            current_value = "";
-            PyGILState_Release(__pyx_gilstate_save);
-            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
-        } else {
-            current_value = string(buffer, length);
-        }
-        Py_DECREF(next_obj);
-        PyGILState_Release(__pyx_gilstate_save);
     }
 
-    PyObject* iterator;
+    PyNewRef iterator;
     bool empty;
     string current_value;
 };
