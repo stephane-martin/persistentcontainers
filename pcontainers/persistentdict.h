@@ -26,6 +26,10 @@
 #include "lmdb_options.h"
 #include "lmdb_environment.h"
 #include "utils.h"
+#include "logging.h"
+
+
+
 
 namespace quiet {
 
@@ -80,6 +84,7 @@ public:
 
     PersistentDict() {
         init();
+        _LOG_DEBUG << "New trivial PersistentDict object";
     }
 
     operator bool() const {

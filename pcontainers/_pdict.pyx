@@ -1021,3 +1021,10 @@ def adapt_binary_predicate(binary_pred):
     def predicate(x, y):
         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))
     return predicate
+
+
+cpdef add_console_logging():
+    add_console()
+
+cpdef add_python_logging(name):
+    set_logger(<bytes> name)

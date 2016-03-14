@@ -56,6 +56,11 @@ cdef extern from "pyfunctor.h" namespace "quiet" nogil:
         PyStringInputIterator()
         PyStringInputIterator(PyObject* obj)
 
+cdef extern from "logging.h" namespace "utils" nogil:
+    void add_console "utils::Logger::add_console"()
+
+cdef extern from "pylogging.h" namespace "utils":
+    void set_logger "utils::PyLogger::set_logger" (const string& name)
 
 cdef extern from "lmdb_options.h" namespace "lmdb" nogil:
     # noinspection PyPep8Naming
@@ -241,6 +246,9 @@ cdef extern from "persistentqueue.h" namespace "quiet" nogil:
         void remove_if(unary_predicate unary_pred) except +custom_handler
         void transform_values(unary_functor unary_funct) except +custom_handler
 
+
+cpdef add_console_logging()
+cpdef add_python_logging(name)
 
 cdef class PersistentStringDict(object):
     cdef cppPersistentDict* ptr

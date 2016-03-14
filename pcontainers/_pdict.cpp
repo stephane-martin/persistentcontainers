@@ -257,6 +257,8 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "custom_exc.h"
 #include "lmdb.h"
 #include "pyfunctor.h"
+#include "logging.h"
+#include "pylogging.h"
 #include "lmdb_options.h"
 #include "persistentdict.h"
 #include "persistentqueue.h"
@@ -515,7 +517,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_14PersistentDict_pop;
 struct __pyx_opt_args_11pcontainers_6_pdict_14PersistentDict_copy_to;
 struct __pyx_opt_args_11pcontainers_6_pdict_15PersistentQueue_move_to;
 
-/* "pcontainers/_pdict.pxd":251
+/* "pcontainers/_pdict.pxd":259
  *     cpdef noiteritems(self)
  *     cpdef erase(self, first, last)
  *     cpdef get(self, key, default=?)             # <<<<<<<<<<<<<<
@@ -527,7 +529,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_get {
   PyObject *__pyx_default;
 };
 
-/* "pcontainers/_pdict.pxd":252
+/* "pcontainers/_pdict.pxd":260
  *     cpdef erase(self, first, last)
  *     cpdef get(self, key, default=?)
  *     cpdef pop(self, key, default=?)             # <<<<<<<<<<<<<<
@@ -539,7 +541,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_pop {
   PyObject *__pyx_default;
 };
 
-/* "pcontainers/_pdict.pxd":258
+/* "pcontainers/_pdict.pxd":266
  *     cpdef transform_values(self, binary_funct)
  *     cpdef remove_if(self, binary_pred)
  *     cpdef iterkeys(self, reverse=?)             # <<<<<<<<<<<<<<
@@ -551,7 +553,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_iterkeys {
   PyObject *reverse;
 };
 
-/* "pcontainers/_pdict.pxd":259
+/* "pcontainers/_pdict.pxd":267
  *     cpdef remove_if(self, binary_pred)
  *     cpdef iterkeys(self, reverse=?)
  *     cpdef itervalues(self, reverse=?)             # <<<<<<<<<<<<<<
@@ -563,7 +565,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_itervalues {
   PyObject *reverse;
 };
 
-/* "pcontainers/_pdict.pxd":260
+/* "pcontainers/_pdict.pxd":268
  *     cpdef iterkeys(self, reverse=?)
  *     cpdef itervalues(self, reverse=?)
  *     cpdef iteritems(self, reverse=?)             # <<<<<<<<<<<<<<
@@ -575,7 +577,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_iteritems {
   PyObject *reverse;
 };
 
-/* "pcontainers/_pdict.pxd":261
+/* "pcontainers/_pdict.pxd":269
  *     cpdef itervalues(self, reverse=?)
  *     cpdef iteritems(self, reverse=?)
  *     cpdef copy_to(self, dirname, dbname=?, opts=?, chunk_size=?)             # <<<<<<<<<<<<<<
@@ -589,7 +591,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_20PersistentStringDict_copy_to {
   PyObject *chunk_size;
 };
 
-/* "pcontainers/_pdict.pxd":288
+/* "pcontainers/_pdict.pxd":296
  *     cpdef qsize(self)
  *     cpdef full(self)
  *     cpdef put(self, item, block=?, timeout=?)             # <<<<<<<<<<<<<<
@@ -602,7 +604,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_21PersistentStringQueue_put {
   PyObject *timeout;
 };
 
-/* "pcontainers/_pdict.pxd":289
+/* "pcontainers/_pdict.pxd":297
  *     cpdef full(self)
  *     cpdef put(self, item, block=?, timeout=?)
  *     cpdef get(self, block=?, timeout=?)             # <<<<<<<<<<<<<<
@@ -615,7 +617,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_21PersistentStringQueue_get {
   PyObject *timeout;
 };
 
-/* "pcontainers/_pdict.pxd":295
+/* "pcontainers/_pdict.pxd":303
  *     cpdef transform_values(self, unary_funct)
  *     cpdef remove_if(self, unary_pred)
  *     cpdef move_to(self, dirname, dbname=?, opts=?, chunk_size=?)             # <<<<<<<<<<<<<<
@@ -681,8 +683,8 @@ struct __pyx_opt_args_11pcontainers_6_pdict_15PersistentQueue_move_to {
   PyObject *chunk_size;
 };
 
-/* "pcontainers/_pdict.pxd":245
- * 
+/* "pcontainers/_pdict.pxd":253
+ * cpdef add_python_logging(name)
  * 
  * cdef class PersistentStringDict(object):             # <<<<<<<<<<<<<<
  *     cdef cppPersistentDict* ptr
@@ -695,7 +697,7 @@ struct __pyx_obj_11pcontainers_6_pdict_PersistentStringDict {
 };
 
 
-/* "pcontainers/_pdict.pxd":271
+/* "pcontainers/_pdict.pxd":279
  * 
  * 
  * cdef class PersistentDict(PersistentStringDict):             # <<<<<<<<<<<<<<
@@ -707,7 +709,7 @@ struct __pyx_obj_11pcontainers_6_pdict_PersistentDict {
 };
 
 
-/* "pcontainers/_pdict.pxd":275
+/* "pcontainers/_pdict.pxd":283
  * 
  * 
  * cdef class PersistentStringQueue(object):             # <<<<<<<<<<<<<<
@@ -721,7 +723,7 @@ struct __pyx_obj_11pcontainers_6_pdict_PersistentStringQueue {
 };
 
 
-/* "pcontainers/_pdict.pxd":299
+/* "pcontainers/_pdict.pxd":307
  * 
  * 
  * cdef class PersistentQueue(PersistentStringQueue):             # <<<<<<<<<<<<<<
@@ -733,7 +735,7 @@ struct __pyx_obj_11pcontainers_6_pdict_PersistentQueue {
 };
 
 
-/* "pcontainers/_pdict.pxd":303
+/* "pcontainers/_pdict.pxd":311
  * 
  * 
  * cdef class LmdbOptions(object):             # <<<<<<<<<<<<<<
@@ -1458,6 +1460,8 @@ static int __pyx_Generator_init(void);
 
 static int __Pyx_check_binary_version(void);
 
+static int __Pyx_ExportFunction(const char *name, void (*f)(void), const char *sig);
+
 #if !defined(__Pyx_PyIdentifier_FromString)
 #if PY_MAJOR_VERSION < 3
   #define __Pyx_PyIdentifier_FromString(s) PyString_FromString(s)
@@ -1646,6 +1650,8 @@ static PyTypeObject *__pyx_ptype_11pcontainers_6_pdict___pyx_scope_struct_14_ada
 static PyTypeObject *__pyx_ptype_11pcontainers_6_pdict___pyx_scope_struct_15_adapt_binary_functor = 0;
 static PyTypeObject *__pyx_ptype_11pcontainers_6_pdict___pyx_scope_struct_16_adapt_unary_predicate = 0;
 static PyTypeObject *__pyx_ptype_11pcontainers_6_pdict___pyx_scope_struct_17_adapt_binary_predicate = 0;
+static PyObject *__pyx_f_11pcontainers_6_pdict_add_console_logging(int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_11pcontainers_6_pdict_add_python_logging(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject *); /*proto*/
 static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
@@ -2074,6 +2080,8 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21adapt_unary_predicate_predicat
 static PyObject *__pyx_pf_11pcontainers_6_pdict_4adapt_unary_predicate(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_unary_pred); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_22adapt_binary_predicate_predicate(PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_6adapt_binary_predicate(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_binary_pred); /* proto */
+static PyObject *__pyx_pf_11pcontainers_6_pdict_8add_console_logging(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_11pcontainers_6_pdict_10add_python_logging(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_name); /* proto */
 static PyObject *__pyx_tp_new_11pcontainers_6_pdict_PersistentStringDict(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_11pcontainers_6_pdict_PersistentDict(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_11pcontainers_6_pdict_PersistentStringQueue(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -29404,6 +29412,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_22adapt_binary_predicate_predica
  *     def predicate(x, y):
  *         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))             # <<<<<<<<<<<<<<
  *     return predicate
+ * 
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_cur_scope->__pyx_v_binary_pred)) { __Pyx_RaiseClosureNameError("binary_pred"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1022; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
@@ -29571,6 +29580,8 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_6adapt_binary_predicate(CYTHON_U
  *     def predicate(x, y):
  *         return bool(binary_pred(pickle.loads(x), pickle.loads(y)))
  *     return predicate             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_predicate);
@@ -29598,7 +29609,167 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_6adapt_binary_predicate(CYTHON_U
   return __pyx_r;
 }
 
-/* "pcontainers/_pdict.pxd":307
+/* "pcontainers/_pdict.pyx":1026
+ * 
+ * 
+ * cpdef add_console_logging():             # <<<<<<<<<<<<<<
+ *     add_console()
+ * 
+ */
+
+static PyObject *__pyx_pw_11pcontainers_6_pdict_9add_console_logging(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_f_11pcontainers_6_pdict_add_console_logging(CYTHON_UNUSED int __pyx_skip_dispatch) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("add_console_logging", 0);
+
+  /* "pcontainers/_pdict.pyx":1027
+ * 
+ * cpdef add_console_logging():
+ *     add_console()             # <<<<<<<<<<<<<<
+ * 
+ * cpdef add_python_logging(name):
+ */
+  utils::Logger::add_console();
+
+  /* "pcontainers/_pdict.pyx":1026
+ * 
+ * 
+ * cpdef add_console_logging():             # <<<<<<<<<<<<<<
+ *     add_console()
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_11pcontainers_6_pdict_9add_console_logging(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_11pcontainers_6_pdict_9add_console_logging(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("add_console_logging (wrapper)", 0);
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_8add_console_logging(__pyx_self);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_11pcontainers_6_pdict_8add_console_logging(CYTHON_UNUSED PyObject *__pyx_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("add_console_logging", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_add_console_logging(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1026; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pcontainers._pdict.add_console_logging", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pcontainers/_pdict.pyx":1029
+ *     add_console()
+ * 
+ * cpdef add_python_logging(name):             # <<<<<<<<<<<<<<
+ *     set_logger(<bytes> name)
+ */
+
+static PyObject *__pyx_pw_11pcontainers_6_pdict_11add_python_logging(PyObject *__pyx_self, PyObject *__pyx_v_name); /*proto*/
+static PyObject *__pyx_f_11pcontainers_6_pdict_add_python_logging(PyObject *__pyx_v_name, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  std::string __pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("add_python_logging", 0);
+
+  /* "pcontainers/_pdict.pyx":1030
+ * 
+ * cpdef add_python_logging(name):
+ *     set_logger(<bytes> name)             # <<<<<<<<<<<<<<
+ */
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_name); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1030; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  utils::PyLogger::set_logger(__pyx_t_1);
+
+  /* "pcontainers/_pdict.pyx":1029
+ *     add_console()
+ * 
+ * cpdef add_python_logging(name):             # <<<<<<<<<<<<<<
+ *     set_logger(<bytes> name)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pcontainers._pdict.add_python_logging", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_11pcontainers_6_pdict_11add_python_logging(PyObject *__pyx_self, PyObject *__pyx_v_name); /*proto*/
+static PyObject *__pyx_pw_11pcontainers_6_pdict_11add_python_logging(PyObject *__pyx_self, PyObject *__pyx_v_name) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("add_python_logging (wrapper)", 0);
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_10add_python_logging(__pyx_self, ((PyObject *)__pyx_v_name));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_11pcontainers_6_pdict_10add_python_logging(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_name) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("add_python_logging", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_add_python_logging(__pyx_v_name, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1029; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pcontainers._pdict.add_python_logging", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pcontainers/_pdict.pxd":315
  * 
  * 
  * cdef inline unicode make_unicode(s):             # <<<<<<<<<<<<<<
@@ -29620,7 +29791,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   __Pyx_RefNannySetupContext("make_unicode", 0);
   __Pyx_INCREF(__pyx_v_s);
 
-  /* "pcontainers/_pdict.pxd":308
+  /* "pcontainers/_pdict.pxd":316
  * 
  * cdef inline unicode make_unicode(s):
  *     if s is None:             # <<<<<<<<<<<<<<
@@ -29631,7 +29802,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":309
+    /* "pcontainers/_pdict.pxd":317
  * cdef inline unicode make_unicode(s):
  *     if s is None:
  *         return u''             # <<<<<<<<<<<<<<
@@ -29643,7 +29814,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
     __pyx_r = __pyx_kp_u_;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":308
+    /* "pcontainers/_pdict.pxd":316
  * 
  * cdef inline unicode make_unicode(s):
  *     if s is None:             # <<<<<<<<<<<<<<
@@ -29652,7 +29823,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":310
+  /* "pcontainers/_pdict.pxd":318
  *     if s is None:
  *         return u''
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -29662,7 +29833,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   __pyx_t_2 = (PyUnicode_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":311
+    /* "pcontainers/_pdict.pxd":319
  *         return u''
  *     if PyUnicode_Check(s):
  *         return s             # <<<<<<<<<<<<<<
@@ -29670,12 +29841,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  *         return s.decode('utf-8')
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(PyUnicode_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyUnicode_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 319; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_INCREF(__pyx_v_s);
     __pyx_r = ((PyObject*)__pyx_v_s);
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":310
+    /* "pcontainers/_pdict.pxd":318
  *     if s is None:
  *         return u''
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -29684,7 +29855,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":312
+  /* "pcontainers/_pdict.pxd":320
  *     if PyUnicode_Check(s):
  *         return s
  *     if PyBytes_Check(s):             # <<<<<<<<<<<<<<
@@ -29694,7 +29865,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   __pyx_t_2 = (PyBytes_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":313
+    /* "pcontainers/_pdict.pxd":321
  *         return s
  *     if PyBytes_Check(s):
  *         return s.decode('utf-8')             # <<<<<<<<<<<<<<
@@ -29702,17 +29873,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  *         return s.__unicode__()
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_r = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":312
+    /* "pcontainers/_pdict.pxd":320
  *     if PyUnicode_Check(s):
  *         return s
  *     if PyBytes_Check(s):             # <<<<<<<<<<<<<<
@@ -29721,18 +29892,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":314
+  /* "pcontainers/_pdict.pxd":322
  *     if PyBytes_Check(s):
  *         return s.decode('utf-8')
  *     if hasattr(s, '__unicode__'):             # <<<<<<<<<<<<<<
  *         return s.__unicode__()
  *     if hasattr(s, '__bytes__'):
  */
-  __pyx_t_2 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 322; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "pcontainers/_pdict.pxd":315
+    /* "pcontainers/_pdict.pxd":323
  *         return s.decode('utf-8')
  *     if hasattr(s, '__unicode__'):
  *         return s.__unicode__()             # <<<<<<<<<<<<<<
@@ -29740,7 +29911,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  *         return s.__bytes__().decode('utf-8')
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_3))) {
@@ -29753,19 +29924,19 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_r = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":314
+    /* "pcontainers/_pdict.pxd":322
  *     if PyBytes_Check(s):
  *         return s.decode('utf-8')
  *     if hasattr(s, '__unicode__'):             # <<<<<<<<<<<<<<
@@ -29774,18 +29945,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":316
+  /* "pcontainers/_pdict.pxd":324
  *     if hasattr(s, '__unicode__'):
  *         return s.__unicode__()
  *     if hasattr(s, '__bytes__'):             # <<<<<<<<<<<<<<
  *         return s.__bytes__().decode('utf-8')
  *     s = str(s)
  */
-  __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 316; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":317
+    /* "pcontainers/_pdict.pxd":325
  *         return s.__unicode__()
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__().decode('utf-8')             # <<<<<<<<<<<<<<
@@ -29793,7 +29964,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  *     if PyUnicode_Check(s):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_3))) {
@@ -29806,25 +29977,25 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_r = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":316
+    /* "pcontainers/_pdict.pxd":324
  *     if hasattr(s, '__unicode__'):
  *         return s.__unicode__()
  *     if hasattr(s, '__bytes__'):             # <<<<<<<<<<<<<<
@@ -29833,25 +30004,25 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":318
+  /* "pcontainers/_pdict.pxd":326
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__().decode('utf-8')
  *     s = str(s)             # <<<<<<<<<<<<<<
  *     if PyUnicode_Check(s):
  *         return s
  */
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 318; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_v_s);
   __Pyx_GIVEREF(__pyx_v_s);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_s);
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 318; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF_SET(__pyx_v_s, __pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "pcontainers/_pdict.pxd":319
+  /* "pcontainers/_pdict.pxd":327
  *         return s.__bytes__().decode('utf-8')
  *     s = str(s)
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -29861,7 +30032,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   __pyx_t_2 = (PyUnicode_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":320
+    /* "pcontainers/_pdict.pxd":328
  *     s = str(s)
  *     if PyUnicode_Check(s):
  *         return s             # <<<<<<<<<<<<<<
@@ -29869,12 +30040,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(PyUnicode_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyUnicode_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_INCREF(__pyx_v_s);
     __pyx_r = ((PyObject*)__pyx_v_s);
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":319
+    /* "pcontainers/_pdict.pxd":327
  *         return s.__bytes__().decode('utf-8')
  *     s = str(s)
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -29883,7 +30054,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  */
   }
 
-  /* "pcontainers/_pdict.pxd":321
+  /* "pcontainers/_pdict.pxd":329
  *     if PyUnicode_Check(s):
  *         return s
  *     return s.decode('utf-8')             # <<<<<<<<<<<<<<
@@ -29891,17 +30062,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_decode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(PyUnicode_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_4)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "pcontainers/_pdict.pxd":307
+  /* "pcontainers/_pdict.pxd":315
  * 
  * 
  * cdef inline unicode make_unicode(s):             # <<<<<<<<<<<<<<
@@ -29923,7 +30094,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_unicode(PyObje
   return __pyx_r;
 }
 
-/* "pcontainers/_pdict.pxd":324
+/* "pcontainers/_pdict.pxd":332
  * 
  * 
  * cdef inline bytes make_utf8(s):             # <<<<<<<<<<<<<<
@@ -29945,7 +30116,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
   __Pyx_RefNannySetupContext("make_utf8", 0);
   __Pyx_INCREF(__pyx_v_s);
 
-  /* "pcontainers/_pdict.pxd":325
+  /* "pcontainers/_pdict.pxd":333
  * 
  * cdef inline bytes make_utf8(s):
  *     if s is None:             # <<<<<<<<<<<<<<
@@ -29956,7 +30127,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":326
+    /* "pcontainers/_pdict.pxd":334
  * cdef inline bytes make_utf8(s):
  *     if s is None:
  *         return b''             # <<<<<<<<<<<<<<
@@ -29968,7 +30139,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
     __pyx_r = __pyx_kp_b_;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":325
+    /* "pcontainers/_pdict.pxd":333
  * 
  * cdef inline bytes make_utf8(s):
  *     if s is None:             # <<<<<<<<<<<<<<
@@ -29977,7 +30148,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":327
+  /* "pcontainers/_pdict.pxd":335
  *     if s is None:
  *         return b''
  *     if PyBytes_Check(s):             # <<<<<<<<<<<<<<
@@ -29987,7 +30158,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
   __pyx_t_2 = (PyBytes_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":328
+    /* "pcontainers/_pdict.pxd":336
  *         return b''
  *     if PyBytes_Check(s):
  *         return s             # <<<<<<<<<<<<<<
@@ -29995,12 +30166,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  *         return PyUnicode_AsUTF8String(s)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(PyBytes_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyBytes_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_INCREF(__pyx_v_s);
     __pyx_r = ((PyObject*)__pyx_v_s);
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":327
+    /* "pcontainers/_pdict.pxd":335
  *     if s is None:
  *         return b''
  *     if PyBytes_Check(s):             # <<<<<<<<<<<<<<
@@ -30009,7 +30180,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":329
+  /* "pcontainers/_pdict.pxd":337
  *     if PyBytes_Check(s):
  *         return s
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -30019,7 +30190,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
   __pyx_t_2 = (PyUnicode_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":330
+    /* "pcontainers/_pdict.pxd":338
  *         return s
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)             # <<<<<<<<<<<<<<
@@ -30027,13 +30198,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  *         return s.__bytes__()
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = PyUnicode_AsUTF8String(__pyx_v_s); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 330; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyUnicode_AsUTF8String(__pyx_v_s); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":329
+    /* "pcontainers/_pdict.pxd":337
  *     if PyBytes_Check(s):
  *         return s
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -30042,18 +30213,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":331
+  /* "pcontainers/_pdict.pxd":339
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)
  *     if hasattr(s, '__bytes__'):             # <<<<<<<<<<<<<<
  *         return s.__bytes__()
  *     if hasattr(s, '__unicode__'):
  */
-  __pyx_t_2 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 331; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 339; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "pcontainers/_pdict.pxd":332
+    /* "pcontainers/_pdict.pxd":340
  *         return PyUnicode_AsUTF8String(s)
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__()             # <<<<<<<<<<<<<<
@@ -30061,7 +30232,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  *         return PyUnicode_AsUTF8String(s.__unicode__())
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_bytes); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 340; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_4))) {
@@ -30074,19 +30245,19 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 340; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 340; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 340; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_r = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":331
+    /* "pcontainers/_pdict.pxd":339
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)
  *     if hasattr(s, '__bytes__'):             # <<<<<<<<<<<<<<
@@ -30095,18 +30266,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":333
+  /* "pcontainers/_pdict.pxd":341
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__()
  *     if hasattr(s, '__unicode__'):             # <<<<<<<<<<<<<<
  *         return PyUnicode_AsUTF8String(s.__unicode__())
  *     s = str(s)
  */
-  __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":334
+    /* "pcontainers/_pdict.pxd":342
  *         return s.__bytes__()
  *     if hasattr(s, '__unicode__'):
  *         return PyUnicode_AsUTF8String(s.__unicode__())             # <<<<<<<<<<<<<<
@@ -30114,7 +30285,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  *     if PyUnicode_Check(s):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_s, __pyx_n_s_unicode); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_4))) {
@@ -30127,21 +30298,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyUnicode_AsUTF8String(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyUnicode_AsUTF8String(__pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":333
+    /* "pcontainers/_pdict.pxd":341
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__()
  *     if hasattr(s, '__unicode__'):             # <<<<<<<<<<<<<<
@@ -30150,25 +30321,25 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":335
+  /* "pcontainers/_pdict.pxd":343
  *     if hasattr(s, '__unicode__'):
  *         return PyUnicode_AsUTF8String(s.__unicode__())
  *     s = str(s)             # <<<<<<<<<<<<<<
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)
  */
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_v_s);
   __Pyx_GIVEREF(__pyx_v_s);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_s);
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF_SET(__pyx_v_s, __pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "pcontainers/_pdict.pxd":336
+  /* "pcontainers/_pdict.pxd":344
  *         return PyUnicode_AsUTF8String(s.__unicode__())
  *     s = str(s)
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -30178,20 +30349,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
   __pyx_t_2 = (PyUnicode_Check(__pyx_v_s) != 0);
   if (__pyx_t_2) {
 
-    /* "pcontainers/_pdict.pxd":337
+    /* "pcontainers/_pdict.pxd":345
  *     s = str(s)
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)             # <<<<<<<<<<<<<<
  *     return s
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = PyUnicode_AsUTF8String(__pyx_v_s); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyUnicode_AsUTF8String(__pyx_v_s); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "pcontainers/_pdict.pxd":336
+    /* "pcontainers/_pdict.pxd":344
  *         return PyUnicode_AsUTF8String(s.__unicode__())
  *     s = str(s)
  *     if PyUnicode_Check(s):             # <<<<<<<<<<<<<<
@@ -30200,18 +30371,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11pcontainers_6_pdict_make_utf8(PyObject 
  */
   }
 
-  /* "pcontainers/_pdict.pxd":338
+  /* "pcontainers/_pdict.pxd":346
  *     if PyUnicode_Check(s):
  *         return PyUnicode_AsUTF8String(s)
  *     return s             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  if (!(likely(PyBytes_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(PyBytes_CheckExact(__pyx_v_s))||((__pyx_v_s) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_s)->tp_name), 0))) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_INCREF(__pyx_v_s);
   __pyx_r = ((PyObject*)__pyx_v_s);
   goto __pyx_L0;
 
-  /* "pcontainers/_pdict.pxd":324
+  /* "pcontainers/_pdict.pxd":332
  * 
  * 
  * cdef inline bytes make_utf8(s):             # <<<<<<<<<<<<<<
@@ -33644,6 +33815,8 @@ static PyTypeObject __pyx_type_11pcontainers_6_pdict___pyx_scope_struct_17_adapt
 };
 
 static PyMethodDef __pyx_methods[] = {
+  {"add_console_logging", (PyCFunction)__pyx_pw_11pcontainers_6_pdict_9add_console_logging, METH_NOARGS, 0},
+  {"add_python_logging", (PyCFunction)__pyx_pw_11pcontainers_6_pdict_11add_python_logging, METH_O, 0},
   {0, 0, 0, 0}
 };
 
@@ -33912,36 +34085,36 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__12);
   __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_stef_Documents_Seafile_de, __pyx_n_s_predicate, 1021, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1021; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "pcontainers/_pdict.pxd":313
+  /* "pcontainers/_pdict.pxd":321
  *         return s
  *     if PyBytes_Check(s):
  *         return s.decode('utf-8')             # <<<<<<<<<<<<<<
  *     if hasattr(s, '__unicode__'):
  *         return s.__unicode__()
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
 
-  /* "pcontainers/_pdict.pxd":317
+  /* "pcontainers/_pdict.pxd":325
  *         return s.__unicode__()
  *     if hasattr(s, '__bytes__'):
  *         return s.__bytes__().decode('utf-8')             # <<<<<<<<<<<<<<
  *     s = str(s)
  *     if PyUnicode_Check(s):
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "pcontainers/_pdict.pxd":321
+  /* "pcontainers/_pdict.pxd":329
  *     if PyUnicode_Check(s):
  *         return s
  *     return s.decode('utf-8')             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
 
@@ -34107,6 +34280,8 @@ PyMODINIT_FUNC PyInit__pdict(void)
   /*--- Global init code ---*/
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
+  if (__Pyx_ExportFunction("add_console_logging", (void (*)(void))__pyx_f_11pcontainers_6_pdict_add_console_logging, "PyObject *(int __pyx_skip_dispatch)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_ExportFunction("add_python_logging", (void (*)(void))__pyx_f_11pcontainers_6_pdict_add_python_logging, "PyObject *(PyObject *, int __pyx_skip_dispatch)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   /*--- Type init code ---*/
   __pyx_vtabptr_11pcontainers_6_pdict_PersistentStringDict = &__pyx_vtable_11pcontainers_6_pdict_PersistentStringDict;
   __pyx_vtable_11pcontainers_6_pdict_PersistentStringDict.noiterkeys = (PyObject *(*)(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringDict *, int __pyx_skip_dispatch))__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_noiterkeys;
@@ -37928,6 +38103,42 @@ static int __Pyx_check_binary_version(void) {
         return PyErr_WarnEx(NULL, message, 1);
     }
     return 0;
+}
+
+static int __Pyx_ExportFunction(const char *name, void (*f)(void), const char *sig) {
+    PyObject *d = 0;
+    PyObject *cobj = 0;
+    union {
+        void (*fp)(void);
+        void *p;
+    } tmp;
+    d = PyObject_GetAttrString(__pyx_m, (char *)"__pyx_capi__");
+    if (!d) {
+        PyErr_Clear();
+        d = PyDict_New();
+        if (!d)
+            goto bad;
+        Py_INCREF(d);
+        if (PyModule_AddObject(__pyx_m, (char *)"__pyx_capi__", d) < 0)
+            goto bad;
+    }
+    tmp.fp = f;
+#if PY_VERSION_HEX >= 0x02070000
+    cobj = PyCapsule_New(tmp.p, sig, 0);
+#else
+    cobj = PyCObject_FromVoidPtrAndDesc(tmp.p, (void *)sig, 0);
+#endif
+    if (!cobj)
+        goto bad;
+    if (PyDict_SetItemString(d, name, cobj) < 0)
+        goto bad;
+    Py_DECREF(cobj);
+    Py_DECREF(d);
+    return 0;
+bad:
+    Py_XDECREF(cobj);
+    Py_XDECREF(d);
+    return -1;
 }
 
 #ifndef __PYX_HAVE_RT_ImportModule

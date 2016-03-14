@@ -46,7 +46,9 @@ extensions = [
             'pcontainers/mdb.c',
             'pcontainers/midl.c',
             'pcontainers/persistentdict.cpp',
-            'pcontainers/lmdb_environment.cpp'
+            'pcontainers/lmdb_environment.cpp',
+            'pcontainers/logging.cpp',
+            'pcontainers/pylogging.cpp'
         ],
         include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++"

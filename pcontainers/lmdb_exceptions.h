@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <cerrno>
 #include <boost/exception/all.hpp>
+#include <string.h>
 #include "lmdb.h"
-#include "utils.h"
 
 namespace lmdb {
 
@@ -22,10 +22,28 @@ using std::vector;
 using std::map;
 using std::cout;
 using std::endl;
+using std::ostringstream;
 using boost::errinfo_nested_exception;
 using boost::errinfo_errno;
 using boost::copy_exception;
-using namespace utils;
+
+inline string tostring(int x) {
+    ostringstream ss;
+    ss << x;
+    return ss.str();
+}
+
+inline string tostring_error(int errnum) {
+    if (errnum == 0) {
+        return "";
+    }
+	if (errnum >= MDB_KEYEXIST && errnum <= MDB_LAST_ERRCODE) {
+		return string(mdb_strerror(errnum));
+	}
+	char buf[1024] = "";
+	strerror_r(errnum, buf, 1023);
+	return string(buf);
+}
 
 struct exception_base: virtual std::exception, virtual boost::exception {
     typedef boost::error_info<struct what_info, string> what;
@@ -39,11 +57,11 @@ struct exception_base: virtual std::exception, virtual boost::exception {
         }
         const int* c_ptr = boost::get_error_info<boost::errinfo_errno>(*this);
         if (c_ptr) {
-            s += "(errno code: " + any_tostring(*c_ptr) + " '" + error2string(*c_ptr) + "'" + ")";
+            s += "(errno code: " + tostring(*c_ptr) + " '" + tostring_error(*c_ptr) + "'" + ")";
         }
         const int* code_ptr = boost::get_error_info<exception_base::code>(*this);
         if (code_ptr) {
-            s += "(lmdb code: " + any_tostring(*code_ptr) + " '" + error2string(*code_ptr) + "'" + ")";
+            s += "(lmdb code: " + tostring(*code_ptr) + " '" + tostring_error(*code_ptr) + "'" + ")";
         }
         return s;
     }

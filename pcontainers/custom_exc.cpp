@@ -3,10 +3,9 @@
 #include <stdexcept>
 #include <ios>
 #include <boost/exception/exception.hpp>
-#include <Python.h>
+#include "custom_exc.h"
 #include "_py_exceptions.h"
 #include "lmdb_exceptions.h"
-#include "custom_exc.h"
 #include "utils.h"
 
 namespace quiet {

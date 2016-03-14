@@ -7,21 +7,15 @@
 #include <pthread.h>
 #include <boost/throw_exception.hpp>
 #include "lmdb_exceptions.h"
-#include "utils.h"
 
 namespace quiet {
 
 using std::string;
 using std::ostringstream;
 using namespace lmdb;
-using namespace utils;
 
-template <typename T>
-string any_tostring(T x, int n=0) {
+inline string tostring(int x) {
     ostringstream ss;
-    if (n > 0) {
-        ss << std::setfill ('0') << std::setw(n);
-    }
     ss << x;
     return ss.str();
 }
@@ -66,14 +60,14 @@ public:
     void lock() {
         int res = pthread_mutex_lock(&mutex);
         if (res != 0) {
-            BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_lock returned with " + any_tostring(res)));
+            BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_lock returned with: " + tostring(res)));
         }
     }
 
     void unlock() {
         int res = pthread_mutex_unlock(&mutex);
         if (res != 0) {
-            BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_unlock returned with " + any_tostring(res)));
+            BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_unlock returned with: " + tostring(res)));
         }
     }
 
@@ -85,7 +79,7 @@ public:
         if (res == EBUSY) {
             return false;
         }
-        BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_trylock returned with " + any_tostring(res)));
+        BOOST_THROW_EXCEPTION(runtime_error() << lmdb_error::what("pthread_mutex_trylock returned with: " + tostring(res)));
     }
 };
 
