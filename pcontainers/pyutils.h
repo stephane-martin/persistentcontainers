@@ -42,6 +42,20 @@ public:
         return *this;
     }
 
+    PyNewRef& operator++() {
+        if (obj) {
+            Py_INCREF(obj);
+        }
+        return *this;
+    }
+
+    PyNewRef& operator++(int) {
+        if (obj) {
+            Py_INCREF(obj);
+        }
+        return *this;
+    }
+
     void reset() {
         if (obj) {
             Py_DECREF(obj);

@@ -43,8 +43,8 @@ public:
             if (!PyCallable_Check(obj)) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: obj is not a python callable") );
             }
-            Py_INCREF(obj);
             callback = PyNewRef(obj);
+            callback++;
         }
         if (!callback) {
             _LOG_WARNING << "'callback' has not been correctly initialized";
@@ -61,17 +61,10 @@ public:
     }
 
     PyPredicate(const PyPredicate& other) {
-        if (!other.callback) {
-            callback = PyNewRef();
-            return;
-        }
-
         GilWrapper gil;
         {
             callback = PyNewRef(other.callback.get());
-            if (callback) {
-                Py_INCREF(callback.get());
-            }
+            callback++;
         }
     }
 
@@ -79,11 +72,9 @@ public:
         GilWrapper gil;
         {
             callback = PyNewRef(other.callback.get());
-            if (callback) {
-                Py_INCREF(callback.get());
-            }
-            return *this;
+            callback++;
         }
+        return *this;
     }
 
     bool operator()(const string& key) {
@@ -177,7 +168,7 @@ public:
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: obj is not a python callable") );
             }
             callback = PyNewRef(obj);
-            Py_INCREF(obj);
+            callback++;
         }
     }
 
@@ -191,16 +182,10 @@ public:
     }
 
     PyFunctor(const PyFunctor& other) {
-        if (!other.callback) {
-            callback = PyNewRef();
-            return;
-        }
         GilWrapper gil;
         {
             callback = PyNewRef(other.callback.get());
-            if (callback) {
-                Py_INCREF(callback.get());
-            }
+            callback++;
         }
     }
 
@@ -208,17 +193,17 @@ public:
         GilWrapper gil;
         {
             callback = PyNewRef(other.callback.get());
-            if (callback) {
-                Py_INCREF(callback.get());
-            }
-            return *this;
+            callback++;
         }
+        return *this;
     }
 
     string operator()(const string& key) {
         if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
+        char* buffer = NULL;
+        Py_ssize_t l = 0;
         GilWrapper gil;
         {
             // convert the two strings into python 'bytes' objects (they are new references)
@@ -250,20 +235,20 @@ public:
                     BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
                 }
             }
-            char* buffer = NULL;
-            Py_ssize_t l = 0;
+
             if (PyBytes_AsStringAndSize(obj.get(), &buffer, &l) == -1) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
             }
-            string s(buffer, l);
-            return s;
         }
+        return string(buffer, l);
     }
 
     string operator()(const string& key, const string& value) {
         if (!callback) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
+        char* buffer = NULL;
+        Py_ssize_t l = 0;
         GilWrapper gil;
         {
             // convert the two strings into python 'bytes' objects (they are new references)
@@ -299,14 +284,11 @@ public:
                     BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to bytes failed :(") );
                 }
             }
-            char* buffer = NULL;
-            Py_ssize_t l = 0;
             if (PyBytes_AsStringAndSize(obj.get(), &buffer, &l) == -1) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
             }
-            string s(buffer, l);
-            return s;
         }
+        return string(buffer, l);
     }
 
 };
@@ -327,7 +309,7 @@ public:
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
             }
             iterator = PyNewRef(obj);
-            Py_INCREF(obj);
+            iterator++;
             empty = false;
             _next_value();
         }
@@ -346,9 +328,7 @@ public:
         GilWrapper gil;
         {
             iterator = PyNewRef(other.iterator.get());
-            if (iterator) {
-                Py_INCREF(iterator.get());
-            }
+            iterator++;
             empty = other.empty;
             current_value = other.current_value;
         }
@@ -358,9 +338,7 @@ public:
         GilWrapper gil;
         {
             iterator = PyNewRef(other.iterator.get());
-            if (iterator) {
-                Py_INCREF(iterator.get());
-            }
+            iterator++;
             empty = other.empty;
             current_value = other.current_value;
             return *this;
@@ -406,7 +384,7 @@ protected:
             PyNewRef next_obj(Py_TYPE(iterator.get())->tp_iternext(iterator.get()));      // new ref
             if (!next_obj) {
                 PyObject* exc_type = PyErr_Occurred();
-                if (exc_type != NULL) {
+                if (exc_type) {
                     if (exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)) {
                         PyErr_Clear();
                     } else {

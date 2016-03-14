@@ -78,8 +78,8 @@ public:
         } else if (res == 0) {
             BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("not a logging.Logger instance"));
         } else {
-            Py_INCREF(obj);
             logger = PyNewRef(obj);
+            logger++;
             logger_name = PyNewRef(PyObject_GetAttrString(obj, "name"));     // retrieve logger.name
         }
     }
