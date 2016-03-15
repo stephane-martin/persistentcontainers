@@ -414,14 +414,14 @@ cdef class PersistentStringDict(object):
         return d
 
     cpdef transform_values(self, binary_funct):
-        cdef PyObject* obj = <PyObject*> binary_funct
+        #cdef PyObject* obj = <PyObject*> binary_funct
         with nogil:
-            self.ptr.transform_values(make_binary_functor(obj))
+            self.ptr.transform_values(make_binary_functor(binary_funct))
 
     cpdef remove_if(self, binary_pred):
-        cdef PyObject* obj = <PyObject*> binary_pred
+        #cdef PyObject* obj = <PyObject*> binary_pred
         with nogil:
-            self.ptr.remove_if(make_binary_predicate(obj))
+            self.ptr.remove_if(make_binary_predicate(binary_pred))
 
     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):
         cdef string dirn = make_utf8(dirname)
@@ -617,15 +617,15 @@ cdef class PersistentDict(PersistentStringDict):
 
     cpdef transform_values(self, binary_funct):
         binary_funct = adapt_binary_functor(binary_funct)
-        cdef PyObject* obj = <PyObject*> binary_funct
+        #cdef PyObject* obj = <PyObject*> binary_funct
         with nogil:
-            self.ptr.transform_values(make_binary_functor(obj))
+            self.ptr.transform_values(make_binary_functor(binary_funct))
 
     cpdef remove_if(self, binary_pred):
         binary_pred = adapt_binary_predicate(binary_pred)
-        cdef PyObject* obj = <PyObject*> binary_pred
+        #cdef PyObject* obj = <PyObject*> binary_pred
         with nogil:
-            self.ptr.remove_if(make_binary_predicate(obj))
+            self.ptr.remove_if(make_binary_predicate(binary_pred))
 
     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):
         cdef string dirn = make_utf8(dirname)
@@ -768,28 +768,28 @@ cdef class PersistentStringQueue(object):
 
     def push_front_many(self, vals):
         vals = iter(vals)
-        cdef PyObject* v = <PyObject*> vals
+        #cdef PyObject* v = <PyObject*> vals
         with nogil:
-            self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
+            self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
 
     def push_back_many(self, vals):
         vals = iter(vals)
-        cdef PyObject* v = <PyObject*> vals
+        #cdef PyObject* v = <PyObject*> vals
         with nogil:
-            self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
+            self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
 
     def push_many(self, vals):
         self.push_back_many(vals)
 
     cpdef transform_values(self, unary_funct):
-        cdef PyObject* obj = <PyObject*> unary_funct
+        #cdef PyObject* obj = <PyObject*> unary_funct
         with nogil:
-            self.ptr.transform_values(make_unary_functor(obj))
+            self.ptr.transform_values(make_unary_functor(unary_funct))
 
     cpdef remove_if(self, unary_pred):
-        cdef PyObject* obj = <PyObject*> unary_pred
+        #cdef PyObject* obj = <PyObject*> unary_pred
         with nogil:
-            self.ptr.remove_if(make_unary_predicate(obj))
+            self.ptr.remove_if(make_unary_predicate(unary_pred))
 
     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):
         cdef string dirn = make_utf8(dirname)
@@ -858,15 +858,15 @@ cdef class PersistentQueue(PersistentStringQueue):
 
     cpdef transform_values(self, unary_funct):
         unary_funct = adapt_unary_functor(unary_funct)
-        cdef PyObject* obj = <PyObject*> unary_funct
+        #cdef PyObject* obj = <PyObject*> unary_funct
         with nogil:
-            self.ptr.transform_values(make_unary_functor(obj))
+            self.ptr.transform_values(make_unary_functor(unary_funct))
 
     cpdef remove_if(self, unary_pred):
         unary_pred = adapt_unary_predicate(unary_pred)
-        cdef PyObject* obj = <PyObject*> unary_pred
+        #cdef PyObject* obj = <PyObject*> unary_pred
         with nogil:
-            self.ptr.remove_if(make_unary_predicate(obj))
+            self.ptr.remove_if(make_unary_predicate(unary_pred))
 
     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):
         cdef string dirn = make_utf8(dirname)

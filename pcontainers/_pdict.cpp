@@ -656,7 +656,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_14PersistentDict_pop {
 };
 
 /* "pcontainers/_pdict.pyx":630
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -670,7 +670,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_14PersistentDict_copy_to {
 };
 
 /* "pcontainers/_pdict.pyx":871
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -10869,13 +10869,12 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_59fromkey
  *         return d
  * 
  *     cpdef transform_values(self, binary_funct):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_20PersistentStringDict_62transform_values(PyObject *__pyx_v_self, PyObject *__pyx_v_binary_funct); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_transform_values(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringDict *__pyx_v_self, PyObject *__pyx_v_binary_funct, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -10929,20 +10928,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_transform_
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/_pdict.pyx":417
- * 
- *     cpdef transform_values(self, binary_funct):
- *         cdef PyObject* obj = <PyObject*> binary_funct             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.transform_values(make_binary_functor(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_binary_funct);
-
   /* "pcontainers/_pdict.pyx":418
  *     cpdef transform_values(self, binary_funct):
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  */
   {
@@ -10953,14 +10943,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_transform_
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":419
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:
- *             self.ptr.transform_values(make_binary_functor(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))             # <<<<<<<<<<<<<<
  * 
  *     cpdef remove_if(self, binary_pred):
  */
         try {
-          __pyx_v_self->ptr->transform_values(quiet::PyFunctor::make_binary_functor(__pyx_v_obj));
+          __pyx_v_self->ptr->transform_values(quiet::PyFunctor::make_binary_functor(__pyx_v_binary_funct));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -10975,9 +10965,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_transform_
 
       /* "pcontainers/_pdict.pyx":418
  *     cpdef transform_values(self, binary_funct):
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  */
       /*finally:*/ {
@@ -11001,7 +10991,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_transform_
  *         return d
  * 
  *     cpdef transform_values(self, binary_funct):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:
  */
 
@@ -11062,16 +11052,15 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_61transfo
 }
 
 /* "pcontainers/_pdict.pyx":421
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  *     cpdef remove_if(self, binary_pred):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_20PersistentStringDict_64remove_if(PyObject *__pyx_v_self, PyObject *__pyx_v_binary_pred); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_remove_if(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringDict *__pyx_v_self, PyObject *__pyx_v_binary_pred, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -11125,20 +11114,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_remove_if(
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/_pdict.pyx":422
- * 
- *     cpdef remove_if(self, binary_pred):
- *         cdef PyObject* obj = <PyObject*> binary_pred             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.remove_if(make_binary_predicate(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_binary_pred);
-
   /* "pcontainers/_pdict.pyx":423
  *     cpdef remove_if(self, binary_pred):
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  */
   {
@@ -11149,14 +11129,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_remove_if(
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":424
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:
- *             self.ptr.remove_if(make_binary_predicate(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))             # <<<<<<<<<<<<<<
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):
  */
         try {
-          __pyx_v_self->ptr->remove_if(quiet::PyPredicate::make_binary_predicate(__pyx_v_obj));
+          __pyx_v_self->ptr->remove_if(quiet::PyPredicate::make_binary_predicate(__pyx_v_binary_pred));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -11171,9 +11151,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_remove_if(
 
       /* "pcontainers/_pdict.pyx":423
  *     cpdef remove_if(self, binary_pred):
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  */
       /*finally:*/ {
@@ -11194,10 +11174,10 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_remove_if(
   }
 
   /* "pcontainers/_pdict.pyx":421
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  *     cpdef remove_if(self, binary_pred):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:
  */
 
@@ -11258,7 +11238,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20PersistentStringDict_63remove_
 }
 
 /* "pcontainers/_pdict.pyx":426
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -11584,7 +11564,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20PersistentStringDict_copy_to(st
   goto __pyx_L0;
 
   /* "pcontainers/_pdict.pyx":426
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -17601,12 +17581,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_45fromkeys(PyTy
  * 
  *     cpdef transform_values(self, binary_funct):             # <<<<<<<<<<<<<<
  *         binary_funct = adapt_binary_functor(binary_funct)
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_14PersistentDict_48transform_values(PyObject *__pyx_v_self, PyObject *__pyx_v_binary_funct); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values(struct __pyx_obj_11pcontainers_6_pdict_PersistentDict *__pyx_v_self, PyObject *__pyx_v_binary_funct, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -17665,7 +17644,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values
  * 
  *     cpdef transform_values(self, binary_funct):
  *         binary_funct = adapt_binary_functor(binary_funct)             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_adapt_binary_functor); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 619; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17698,20 +17677,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values
   __Pyx_DECREF_SET(__pyx_v_binary_funct, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":620
- *     cpdef transform_values(self, binary_funct):
- *         binary_funct = adapt_binary_functor(binary_funct)
- *         cdef PyObject* obj = <PyObject*> binary_funct             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.transform_values(make_binary_functor(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_binary_funct);
-
   /* "pcontainers/_pdict.pyx":621
  *         binary_funct = adapt_binary_functor(binary_funct)
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  */
   {
@@ -17722,14 +17692,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":622
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:
- *             self.ptr.transform_values(make_binary_functor(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))             # <<<<<<<<<<<<<<
  * 
  *     cpdef remove_if(self, binary_pred):
  */
         try {
-          __pyx_v_self->__pyx_base.ptr->transform_values(quiet::PyFunctor::make_binary_functor(__pyx_v_obj));
+          __pyx_v_self->__pyx_base.ptr->transform_values(quiet::PyFunctor::make_binary_functor(__pyx_v_binary_funct));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -17744,9 +17714,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values
 
       /* "pcontainers/_pdict.pyx":621
  *         binary_funct = adapt_binary_functor(binary_funct)
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  */
       /*finally:*/ {
@@ -17771,7 +17741,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_transform_values
  * 
  *     cpdef transform_values(self, binary_funct):             # <<<<<<<<<<<<<<
  *         binary_funct = adapt_binary_functor(binary_funct)
- *         cdef PyObject* obj = <PyObject*> binary_funct
+ *         #cdef PyObject* obj = <PyObject*> binary_funct
  */
 
   /* function exit code */
@@ -17832,16 +17802,15 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_47transform_val
 }
 
 /* "pcontainers/_pdict.pyx":624
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  *     cpdef remove_if(self, binary_pred):             # <<<<<<<<<<<<<<
  *         binary_pred = adapt_binary_predicate(binary_pred)
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_14PersistentDict_50remove_if(PyObject *__pyx_v_self, PyObject *__pyx_v_binary_pred); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct __pyx_obj_11pcontainers_6_pdict_PersistentDict *__pyx_v_self, PyObject *__pyx_v_binary_pred, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -17900,7 +17869,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct
  * 
  *     cpdef remove_if(self, binary_pred):
  *         binary_pred = adapt_binary_predicate(binary_pred)             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_adapt_binary_predicate); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17933,20 +17902,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct
   __Pyx_DECREF_SET(__pyx_v_binary_pred, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":626
- *     cpdef remove_if(self, binary_pred):
- *         binary_pred = adapt_binary_predicate(binary_pred)
- *         cdef PyObject* obj = <PyObject*> binary_pred             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.remove_if(make_binary_predicate(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_binary_pred);
-
   /* "pcontainers/_pdict.pyx":627
  *         binary_pred = adapt_binary_predicate(binary_pred)
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  */
   {
@@ -17957,14 +17917,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":628
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:
- *             self.ptr.remove_if(make_binary_predicate(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))             # <<<<<<<<<<<<<<
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):
  */
         try {
-          __pyx_v_self->__pyx_base.ptr->remove_if(quiet::PyPredicate::make_binary_predicate(__pyx_v_obj));
+          __pyx_v_self->__pyx_base.ptr->remove_if(quiet::PyPredicate::make_binary_predicate(__pyx_v_binary_pred));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -17979,9 +17939,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct
 
       /* "pcontainers/_pdict.pyx":627
  *         binary_pred = adapt_binary_predicate(binary_pred)
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  */
       /*finally:*/ {
@@ -18002,11 +17962,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_remove_if(struct
   }
 
   /* "pcontainers/_pdict.pyx":624
- *             self.ptr.transform_values(make_binary_functor(obj))
+ *             self.ptr.transform_values(make_binary_functor(binary_funct))
  * 
  *     cpdef remove_if(self, binary_pred):             # <<<<<<<<<<<<<<
  *         binary_pred = adapt_binary_predicate(binary_pred)
- *         cdef PyObject* obj = <PyObject*> binary_pred
+ *         #cdef PyObject* obj = <PyObject*> binary_pred
  */
 
   /* function exit code */
@@ -18067,7 +18027,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_14PersistentDict_49remove_if(str
 }
 
 /* "pcontainers/_pdict.pyx":630
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -18393,7 +18353,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_14PersistentDict_copy_to(struct _
   goto __pyx_L0;
 
   /* "pcontainers/_pdict.pyx":630
- *             self.ptr.remove_if(make_binary_predicate(obj))
+ *             self.ptr.remove_if(make_binary_predicate(binary_pred))
  * 
  *     cpdef copy_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -22042,7 +22002,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_32get_no
  * 
  *     def push_front_many(self, vals):             # <<<<<<<<<<<<<<
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  */
 
 /* Python wrapper */
@@ -22059,7 +22019,6 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_21PersistentStringQueue_35push_f
 }
 
 static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_front_many(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringQueue *__pyx_v_self, PyObject *__pyx_v_vals) {
-  PyObject *__pyx_v_v;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -22073,7 +22032,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
  * 
  *     def push_front_many(self, vals):
  *         vals = iter(vals)             # <<<<<<<<<<<<<<
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:
  */
   __pyx_t_1 = PyObject_GetIter(__pyx_v_vals); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 770; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -22081,20 +22040,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
   __Pyx_DECREF_SET(__pyx_v_vals, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":771
- *     def push_front_many(self, vals):
- *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
- */
-  __pyx_v_v = ((PyObject *)__pyx_v_vals);
-
   /* "pcontainers/_pdict.pyx":772
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  */
   {
@@ -22105,14 +22055,14 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":773
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())             # <<<<<<<<<<<<<<
+ *             self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())             # <<<<<<<<<<<<<<
  * 
  *     def push_back_many(self, vals):
  */
         try {
-          __pyx_v_self->ptr->push_front(quiet::PyStringInputIterator(__pyx_v_v), quiet::PyStringInputIterator());
+          __pyx_v_self->ptr->push_front(quiet::PyStringInputIterator(__pyx_v_vals), quiet::PyStringInputIterator());
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -22127,9 +22077,9 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
 
       /* "pcontainers/_pdict.pyx":772
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  */
       /*finally:*/ {
@@ -22154,7 +22104,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
  * 
  *     def push_front_many(self, vals):             # <<<<<<<<<<<<<<
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  */
 
   /* function exit code */
@@ -22172,11 +22122,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_34push_f
 }
 
 /* "pcontainers/_pdict.pyx":775
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  *     def push_back_many(self, vals):             # <<<<<<<<<<<<<<
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  */
 
 /* Python wrapper */
@@ -22193,7 +22143,6 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_21PersistentStringQueue_37push_b
 }
 
 static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_back_many(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringQueue *__pyx_v_self, PyObject *__pyx_v_vals) {
-  PyObject *__pyx_v_v;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -22207,7 +22156,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
  * 
  *     def push_back_many(self, vals):
  *         vals = iter(vals)             # <<<<<<<<<<<<<<
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:
  */
   __pyx_t_1 = PyObject_GetIter(__pyx_v_vals); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 776; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -22215,20 +22164,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
   __Pyx_DECREF_SET(__pyx_v_vals, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":777
- *     def push_back_many(self, vals):
- *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
- */
-  __pyx_v_v = ((PyObject *)__pyx_v_vals);
-
   /* "pcontainers/_pdict.pyx":778
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  */
   {
@@ -22239,14 +22179,14 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":779
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())             # <<<<<<<<<<<<<<
+ *             self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())             # <<<<<<<<<<<<<<
  * 
  *     def push_many(self, vals):
  */
         try {
-          __pyx_v_self->ptr->push_back(quiet::PyStringInputIterator(__pyx_v_v), quiet::PyStringInputIterator());
+          __pyx_v_self->ptr->push_back(quiet::PyStringInputIterator(__pyx_v_vals), quiet::PyStringInputIterator());
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -22261,9 +22201,9 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
 
       /* "pcontainers/_pdict.pyx":778
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  */
       /*finally:*/ {
@@ -22284,11 +22224,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
   }
 
   /* "pcontainers/_pdict.pyx":775
- *             self.ptr.push_front(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  *     def push_back_many(self, vals):             # <<<<<<<<<<<<<<
  *         vals = iter(vals)
- *         cdef PyObject* v = <PyObject*> vals
+ *         #cdef PyObject* v = <PyObject*> vals
  */
 
   /* function exit code */
@@ -22306,7 +22246,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_36push_b
 }
 
 /* "pcontainers/_pdict.pyx":781
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  *     def push_many(self, vals):             # <<<<<<<<<<<<<<
  *         self.push_back_many(vals)
@@ -22375,7 +22315,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_38push_m
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "pcontainers/_pdict.pyx":781
- *             self.ptr.push_back(PyStringInputIterator(v), PyStringInputIterator())
+ *             self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
  * 
  *     def push_many(self, vals):             # <<<<<<<<<<<<<<
  *         self.push_back_many(vals)
@@ -22402,13 +22342,12 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_38push_m
  *         self.push_back_many(vals)
  * 
  *     cpdef transform_values(self, unary_funct):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_21PersistentStringQueue_41transform_values(PyObject *__pyx_v_self, PyObject *__pyx_v_unary_funct); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_transform_values(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringQueue *__pyx_v_self, PyObject *__pyx_v_unary_funct, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -22462,20 +22401,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_transform
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/_pdict.pyx":785
- * 
- *     cpdef transform_values(self, unary_funct):
- *         cdef PyObject* obj = <PyObject*> unary_funct             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.transform_values(make_unary_functor(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_unary_funct);
-
   /* "pcontainers/_pdict.pyx":786
  *     cpdef transform_values(self, unary_funct):
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  */
   {
@@ -22486,14 +22416,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_transform
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":787
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:
- *             self.ptr.transform_values(make_unary_functor(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))             # <<<<<<<<<<<<<<
  * 
  *     cpdef remove_if(self, unary_pred):
  */
         try {
-          __pyx_v_self->ptr->transform_values(quiet::PyFunctor::make_unary_functor(__pyx_v_obj));
+          __pyx_v_self->ptr->transform_values(quiet::PyFunctor::make_unary_functor(__pyx_v_unary_funct));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -22508,9 +22438,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_transform
 
       /* "pcontainers/_pdict.pyx":786
  *     cpdef transform_values(self, unary_funct):
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  */
       /*finally:*/ {
@@ -22534,7 +22464,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_transform
  *         self.push_back_many(vals)
  * 
  *     cpdef transform_values(self, unary_funct):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:
  */
 
@@ -22595,16 +22525,15 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_40transf
 }
 
 /* "pcontainers/_pdict.pyx":789
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  *     cpdef remove_if(self, unary_pred):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_21PersistentStringQueue_43remove_if(PyObject *__pyx_v_self, PyObject *__pyx_v_unary_pred); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_remove_if(struct __pyx_obj_11pcontainers_6_pdict_PersistentStringQueue *__pyx_v_self, PyObject *__pyx_v_unary_pred, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -22658,20 +22587,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_remove_if
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/_pdict.pyx":790
- * 
- *     cpdef remove_if(self, unary_pred):
- *         cdef PyObject* obj = <PyObject*> unary_pred             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.remove_if(make_unary_predicate(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_unary_pred);
-
   /* "pcontainers/_pdict.pyx":791
  *     cpdef remove_if(self, unary_pred):
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  */
   {
@@ -22682,14 +22602,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_remove_if
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":792
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:
- *             self.ptr.remove_if(make_unary_predicate(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))             # <<<<<<<<<<<<<<
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):
  */
         try {
-          __pyx_v_self->ptr->remove_if(quiet::PyPredicate::make_unary_predicate(__pyx_v_obj));
+          __pyx_v_self->ptr->remove_if(quiet::PyPredicate::make_unary_predicate(__pyx_v_unary_pred));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -22704,9 +22624,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_remove_if
 
       /* "pcontainers/_pdict.pyx":791
  *     cpdef remove_if(self, unary_pred):
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  */
       /*finally:*/ {
@@ -22727,10 +22647,10 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_remove_if
   }
 
   /* "pcontainers/_pdict.pyx":789
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  *     cpdef remove_if(self, unary_pred):             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:
  */
 
@@ -22791,7 +22711,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21PersistentStringQueue_42remove
 }
 
 /* "pcontainers/_pdict.pyx":794
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -23136,7 +23056,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21PersistentStringQueue_move_to(s
   goto __pyx_L0;
 
   /* "pcontainers/_pdict.pyx":794
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -25312,12 +25232,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_15PersistentQueue_16push_back_ma
  * 
  *     cpdef transform_values(self, unary_funct):             # <<<<<<<<<<<<<<
  *         unary_funct = adapt_unary_functor(unary_funct)
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_15PersistentQueue_19transform_values(PyObject *__pyx_v_self, PyObject *__pyx_v_unary_funct); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_values(struct __pyx_obj_11pcontainers_6_pdict_PersistentQueue *__pyx_v_self, PyObject *__pyx_v_unary_funct, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -25376,7 +25295,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_value
  * 
  *     cpdef transform_values(self, unary_funct):
  *         unary_funct = adapt_unary_functor(unary_funct)             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_adapt_unary_functor); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 860; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -25409,20 +25328,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_value
   __Pyx_DECREF_SET(__pyx_v_unary_funct, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":861
- *     cpdef transform_values(self, unary_funct):
- *         unary_funct = adapt_unary_functor(unary_funct)
- *         cdef PyObject* obj = <PyObject*> unary_funct             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.transform_values(make_unary_functor(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_unary_funct);
-
   /* "pcontainers/_pdict.pyx":862
  *         unary_funct = adapt_unary_functor(unary_funct)
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  */
   {
@@ -25433,14 +25343,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_value
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":863
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:
- *             self.ptr.transform_values(make_unary_functor(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))             # <<<<<<<<<<<<<<
  * 
  *     cpdef remove_if(self, unary_pred):
  */
         try {
-          __pyx_v_self->__pyx_base.ptr->transform_values(quiet::PyFunctor::make_unary_functor(__pyx_v_obj));
+          __pyx_v_self->__pyx_base.ptr->transform_values(quiet::PyFunctor::make_unary_functor(__pyx_v_unary_funct));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -25455,9 +25365,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_value
 
       /* "pcontainers/_pdict.pyx":862
  *         unary_funct = adapt_unary_functor(unary_funct)
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  */
       /*finally:*/ {
@@ -25482,7 +25392,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_transform_value
  * 
  *     cpdef transform_values(self, unary_funct):             # <<<<<<<<<<<<<<
  *         unary_funct = adapt_unary_functor(unary_funct)
- *         cdef PyObject* obj = <PyObject*> unary_funct
+ *         #cdef PyObject* obj = <PyObject*> unary_funct
  */
 
   /* function exit code */
@@ -25543,16 +25453,15 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_15PersistentQueue_18transform_va
 }
 
 /* "pcontainers/_pdict.pyx":865
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  *     cpdef remove_if(self, unary_pred):             # <<<<<<<<<<<<<<
  *         unary_pred = adapt_unary_predicate(unary_pred)
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  */
 
 static PyObject *__pyx_pw_11pcontainers_6_pdict_15PersistentQueue_21remove_if(PyObject *__pyx_v_self, PyObject *__pyx_v_unary_pred); /*proto*/
 static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struct __pyx_obj_11pcontainers_6_pdict_PersistentQueue *__pyx_v_self, PyObject *__pyx_v_unary_pred, int __pyx_skip_dispatch) {
-  PyObject *__pyx_v_obj;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -25611,7 +25520,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struc
  * 
  *     cpdef remove_if(self, unary_pred):
  *         unary_pred = adapt_unary_predicate(unary_pred)             # <<<<<<<<<<<<<<
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_adapt_unary_predicate); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 866; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -25644,20 +25553,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struc
   __Pyx_DECREF_SET(__pyx_v_unary_pred, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/_pdict.pyx":867
- *     cpdef remove_if(self, unary_pred):
- *         unary_pred = adapt_unary_predicate(unary_pred)
- *         cdef PyObject* obj = <PyObject*> unary_pred             # <<<<<<<<<<<<<<
- *         with nogil:
- *             self.ptr.remove_if(make_unary_predicate(obj))
- */
-  __pyx_v_obj = ((PyObject *)__pyx_v_unary_pred);
-
   /* "pcontainers/_pdict.pyx":868
  *         unary_pred = adapt_unary_predicate(unary_pred)
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  */
   {
@@ -25668,14 +25568,14 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struc
       /*try:*/ {
 
         /* "pcontainers/_pdict.pyx":869
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:
- *             self.ptr.remove_if(make_unary_predicate(obj))             # <<<<<<<<<<<<<<
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))             # <<<<<<<<<<<<<<
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):
  */
         try {
-          __pyx_v_self->__pyx_base.ptr->remove_if(quiet::PyPredicate::make_unary_predicate(__pyx_v_obj));
+          __pyx_v_self->__pyx_base.ptr->remove_if(quiet::PyPredicate::make_unary_predicate(__pyx_v_unary_pred));
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -25690,9 +25590,9 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struc
 
       /* "pcontainers/_pdict.pyx":868
  *         unary_pred = adapt_unary_predicate(unary_pred)
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  *         with nogil:             # <<<<<<<<<<<<<<
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  */
       /*finally:*/ {
@@ -25713,11 +25613,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_remove_if(struc
   }
 
   /* "pcontainers/_pdict.pyx":865
- *             self.ptr.transform_values(make_unary_functor(obj))
+ *             self.ptr.transform_values(make_unary_functor(unary_funct))
  * 
  *     cpdef remove_if(self, unary_pred):             # <<<<<<<<<<<<<<
  *         unary_pred = adapt_unary_predicate(unary_pred)
- *         cdef PyObject* obj = <PyObject*> unary_pred
+ *         #cdef PyObject* obj = <PyObject*> unary_pred
  */
 
   /* function exit code */
@@ -25778,7 +25678,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_15PersistentQueue_20remove_if(st
 }
 
 /* "pcontainers/_pdict.pyx":871
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)
@@ -26123,7 +26023,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_15PersistentQueue_move_to(struct 
   goto __pyx_L0;
 
   /* "pcontainers/_pdict.pyx":871
- *             self.ptr.remove_if(make_unary_predicate(obj))
+ *             self.ptr.remove_if(make_unary_predicate(unary_pred))
  * 
  *     cpdef move_to(self, dirname, dbname="", opts=None, chunk_size=-1):             # <<<<<<<<<<<<<<
  *         cdef string dirn = make_utf8(dirname)

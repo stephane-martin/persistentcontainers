@@ -46,15 +46,15 @@ cdef extern from "pyfunctor.h" namespace "quiet" nogil:
     cppclass binary_functor:
         pass
 
-    cdef unary_predicate make_unary_predicate "quiet::PyPredicate::make_unary_predicate"(PyObject* obj)
-    cdef binary_predicate make_binary_predicate "quiet::PyPredicate::make_binary_predicate"(PyObject* obj)
-    cdef unary_functor make_unary_functor "quiet::PyFunctor::make_unary_functor"(PyObject* obj)
-    cdef binary_functor make_binary_functor "quiet::PyFunctor::make_binary_functor"(PyObject* obj)
+    cdef unary_predicate make_unary_predicate "quiet::PyPredicate::make_unary_predicate"(object obj)
+    cdef binary_predicate make_binary_predicate "quiet::PyPredicate::make_binary_predicate"(object obj)
+    cdef unary_functor make_unary_functor "quiet::PyFunctor::make_unary_functor"(object obj)
+    cdef binary_functor make_binary_functor "quiet::PyFunctor::make_binary_functor"(object obj)
 
     # noinspection PyPep8Naming
     cdef cppclass PyStringInputIterator:
         PyStringInputIterator()
-        PyStringInputIterator(PyObject* obj)
+        PyStringInputIterator(object obj)
 
 cdef extern from "logging.h" namespace "utils" nogil:
     void add_console "utils::Logger::add_console"()

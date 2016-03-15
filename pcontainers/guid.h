@@ -25,8 +25,6 @@ THE SOFTWARE.
 
 #pragma once
 
-#include "created_by_setup.py.h"
-
 #include <iostream>
 #include <vector>
 #include <sstream>
