@@ -39,9 +39,15 @@ cdef inline void* copy_mdb_val(MDB_val v) nogil:
     return ptr
 
 
-cdef inline make_mbufferio(void* ptr, size_t size):
+cdef inline make_mbufferio(void* ptr, size_t size, bint take_ownership):
     cdef Py_buffer* view = <Py_buffer*> PyMem_Malloc(sizeof(Py_buffer))
     PyBuffer_FillInfo(view, None, ptr, size, 1, PyBUF_SIMPLE)
-    memory_view = PyMemoryView_FromBuffer(view)         # the new mview object now owns the view buffer, no need to free view
-    return MBufferIO.from_mview(memory_view, True)      # the release and free operations will be taken cared by MBufferIO
+    # the new mview object now owns the view buffer, no need to free view
+    # the release and free operations will be taken cared by MBufferIO
+    return MBufferIO.from_mview(PyMemoryView_FromBuffer(view), bool(take_ownership))
 
+cdef inline topy(const CBString& s):
+    return PyBytes_FromStringAndSize(<char*> s.data, s.slen)
+
+cdef inline CBString tocbstring(bytes s):
+    return CBString(<char*> s, len(s))

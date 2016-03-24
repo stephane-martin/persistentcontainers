@@ -1,4 +1,19 @@
 
+cdef class DirectAccess(object):
+    def __cinit__(self, PRawDict d, bytes item):
+        cdef CBString key = tocbstring(item)
+        self.cpp_iterator = move(cppConstIterator(d.ptr, key))
+        if self.cpp_iterator.has_reached_end():
+            raise NotFound()
+        cdef MDB_val v = self.cpp_iterator.get_value_buffer()
+        self.buf = make_mbufferio(v.mv_data, v.mv_size, 0)
+
+    def __dealloc__(self):
+        self.buf = None
+
+    cpdef read(self, ssize_t n=-1):
+        return self.buf.read(n)
+
 cdef class PRawDict(object):
     def __cinit__(self, dirname, dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
         self.rmrf_at_delete = 0
@@ -95,7 +110,7 @@ cdef class PRawDict(object):
         with nogil:
             k = it.get_key_buffer()
             ptr = copy_mdb_val(k)
-        return make_mbufferio(ptr, k.mv_size)
+        return make_mbufferio(ptr, k.mv_size, 1)
 
     cdef raw_get_key_buf_const(self, cppConstIterator& it):
         cdef MDB_val k
@@ -103,7 +118,7 @@ cdef class PRawDict(object):
         with nogil:
             k = it.get_key_buffer()
             ptr = copy_mdb_val(k)
-        return make_mbufferio(ptr, k.mv_size)
+        return make_mbufferio(ptr, k.mv_size, 1)
 
     cdef raw_get_value(self, cppConstIterator& it):
         cdef MDB_val v
@@ -133,7 +148,7 @@ cdef class PRawDict(object):
         with nogil:
             v = it.get_value_buffer()
             ptr = copy_mdb_val(v)
-        return make_mbufferio(ptr, v.mv_size)
+        return make_mbufferio(ptr, v.mv_size, 1)
 
     cdef raw_get_value_buf_const(self, cppConstIterator& it):
         cdef MDB_val v
@@ -141,7 +156,7 @@ cdef class PRawDict(object):
         with nogil:
             v = it.get_value_buffer()
             ptr = copy_mdb_val(v)
-        return make_mbufferio(ptr, v.mv_size)
+        return make_mbufferio(ptr, v.mv_size, 1)
 
 
     cdef raw_get_item(self, cppConstIterator& it):
@@ -182,7 +197,7 @@ cdef class PRawDict(object):
             kv = it.get_item_buffer()
             key_ptr = copy_mdb_val(kv.first)
             value_ptr = copy_mdb_val(kv.second)
-        return make_mbufferio(key_ptr, kv.first.mv_size), make_mbufferio(value_ptr, kv.second.mv_size)
+        return make_mbufferio(key_ptr, kv.first.mv_size, 1), make_mbufferio(value_ptr, kv.second.mv_size, 1)
 
     cdef raw_get_item_buf_const(self, cppConstIterator& it):
         cdef pair[MDB_val, MDB_val] kv
@@ -192,7 +207,7 @@ cdef class PRawDict(object):
             kv = it.get_item_buffer()
             key_ptr = copy_mdb_val(kv.first)
             value_ptr = copy_mdb_val(kv.second)
-        return make_mbufferio(key_ptr, kv.first.mv_size), make_mbufferio(value_ptr, kv.second.mv_size)
+        return make_mbufferio(key_ptr, kv.first.mv_size, 1), make_mbufferio(value_ptr, kv.second.mv_size, 1)
 
     cdef raw_set_item_buf(self, cppIterator& it, k, v):
         cdef PyBufferWrap key_view = move(PyBufferWrap(k))
@@ -212,6 +227,9 @@ cdef class PRawDict(object):
             return self[item]
         except NotFound:
             return default
+
+    cpdef get_direct(self, item):
+        return DirectAccess(self, item)
 
     cpdef setdefault(self, key, default=''):
         cdef PyBufferWrap key_view = move(PyBufferWrap(make_utf8(key)))

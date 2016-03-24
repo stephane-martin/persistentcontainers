@@ -16,3 +16,7 @@ cdef extern from "lmdb_options.h" namespace "lmdb" nogil:
         size_t map_size;
         unsigned int max_readers;
         unsigned int max_dbs;
+
+
+cdef class LmdbOptions(object):
+    cdef lmdb_options opts

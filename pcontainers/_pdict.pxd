@@ -33,12 +33,6 @@ include "scoped_ptr.pxi"
 include "shared_ptr.pxi"
 include "cbstring.pxi"
 
-cdef inline topy(const CBString& s):
-    return PyBytes_FromStringAndSize(<char*> s.data, s.slen)
-
-cdef inline CBString tocbstring(bytes s):
-    return CBString(<char*> s, len(s))
-
 cdef extern from "lmdb.h" nogil:
     ctypedef struct MDB_txn:
         pass
@@ -91,9 +85,5 @@ cpdef set_python_logger(name)
 include "pdict.pxi"
 include "pqueue.pxi"
 include "expirydict.pxi"
-
-cdef class LmdbOptions(object):
-    cdef lmdb_options opts
-
 include "helpers.pxi"
 include "filters.pxi"

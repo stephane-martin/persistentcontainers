@@ -1,4 +1,9 @@
 
+cdef class DirectAccess(object):
+    cdef cppConstIterator cpp_iterator
+    cdef object buf
+    cpdef read(self, ssize_t n=?)
+
 cdef class PRawDict(object):
     cdef cppPersistentDict* ptr
     cdef bint rmrf_at_delete
@@ -8,6 +13,7 @@ cdef class PRawDict(object):
     cpdef noiteritems(self)
     cpdef erase(self, first, last)
     cpdef get(self, key, default=?)
+    cpdef get_direct(self, item)
     cpdef setdefault(self, key, default=?)
     cpdef pop(self, key, default=?)
     cpdef popitem(self)
