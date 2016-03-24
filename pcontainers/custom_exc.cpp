@@ -6,12 +6,10 @@
 #include "custom_exc.h"
 #include "_py_exceptions.h"
 #include "lmdb_exceptions.h"
-#include "utils.h"
 
 namespace quiet {
 
 using namespace lmdb;
-using namespace utils;
 
 void custom_exception_handler() {
     // Catch a handful of different errors here and turn them into the equivalent Python errors.

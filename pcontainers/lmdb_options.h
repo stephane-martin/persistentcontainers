@@ -9,6 +9,7 @@
 #include <map>
 #include <utility>
 #include <algorithm>
+#include <boost/core/explicit_operator_bool.hpp>
 #include "lmdb.h"
 
 namespace lmdb {

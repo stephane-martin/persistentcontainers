@@ -5,7 +5,9 @@
 #include <iomanip>
 #include <string>
 #include <boost/scoped_ptr.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
 #include <plog/Log.h>
+#include <plog/Severity.h>
 #include <plog/Appenders/ConsoleAppender.h>
 #include "mutexwrap.h"
 
@@ -21,24 +23,7 @@ using quiet::MutexWrapLock;
 class MutexedConsoleAppender: public plog::IAppender {
 public:
     MutexedConsoleAppender(MutexWrap& mutex) : m_mutex(mutex) {}
-
-    virtual void write(const plog::Record& record) {
-        tm t;
-        plog::util::localtime_s(&t, &record.getTime().time);
-
-        plog::util::nstringstream ss;
-        ss << t.tm_year + 1900 << "-" << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mon + 1 << "-" << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mday << " ";
-        ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << ":" << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << ":" << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << "." << std::setfill(PLOG_NSTR('0')) << std::setw(3) << record.getTime().millitm << " ";
-        ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << getSeverityName(record.getSeverity()) << " ";
-        ss << "[" << record.getTid() << "] ";
-        ss << "[" << record.getFunc().c_str() << " @ " << ((const char*) record.getObject()) << ":" << record.getLine() << "] ";
-        ss << record.getMessage().c_str() << "\n";
-
-        MutexWrapLock lock(m_mutex);
-        {
-            cerr << ss.str() << flush;
-        }
-    }
+    virtual void write(const plog::Record& record);
 
 protected:
     MutexWrap& m_mutex;
@@ -53,15 +38,16 @@ protected:
     static bool default_has_console;
 
 public:
-    static inline void add_console() {
+    static inline void set_console_logger(plog::Severity level=plog::debug) {
         if (!default_has_been_created) {
-            plog::init<0>(plog::debug);
+            plog::init<0>(level);
             default_has_been_created = true;
         }
         if (!default_has_console) {
             get_default()->addAppender(&consoleAppender);
             default_has_console = true;
         }
+        plog::get<0>()->setMaxSeverity(level);
     }
 
     static inline plog::Logger<0>* get_default() {

@@ -10,10 +10,13 @@
 #include <map>
 #include <utility>
 #include <algorithm>
-#include <cerrno>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
+#include <boost/smart_ptr/detail/spinlock.hpp>
+#include <bstrlib/bstrwrap.h>
+#include <errno.h>
 #include "mutexwrap.h"
 #include "lmdb_options.h"
 #include "lmdb_exceptions.h"
@@ -33,6 +36,7 @@ using std::ostringstream;
 using quiet::MutexWrap;
 using quiet::MutexWrapLock;
 using namespace utils;
+using Bstrlib::CBString;
 
 
 class environment {
@@ -41,20 +45,22 @@ private:
     environment& operator=(const environment& other);
 
 protected:
-    static map<string, boost::shared_ptr<environment> > opened_environments;
+    static map<CBString, boost::shared_ptr<environment> > opened_environments;
     static MutexWrap lock_envs;
     static MutexWrap lock_dbis;
-    map<string, MDB_dbi> opened_dbis;
+    map<CBString, MDB_dbi> opened_dbis;
 
 public:
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !ptr; }    // should always be false
 
     class transaction;
     typedef boost::shared_ptr<environment> shared_ptr;
     typedef boost::shared_ptr<transaction> transaction_ptr;
 
-    friend environment::shared_ptr env_factory(const string& directory_name, const lmdb_options& opts);
+    friend environment::shared_ptr env_factory(const CBString& directory_name, const lmdb_options& opts);
 
-    MDB_dbi get_dbi(const string& dbname) {
+    MDB_dbi get_dbi(const CBString& dbname) {
         int res;
         MDB_dbi dbi;
         MutexWrapLock lock(lock_dbis);
@@ -63,10 +69,10 @@ public:
                 dbi = opened_dbis[dbname];
             } else {
                 boost::shared_ptr<transaction> txn = start_transaction(false);
-                if (dbname.empty()) {
+                if (!dbname.length()) {
                     res = mdb_dbi_open(txn->txn, NULL, MDB_CREATE, &dbi);
                 } else {
-                    res = mdb_dbi_open(txn->txn, dbname.c_str(), MDB_CREATE, &dbi);
+                    res = mdb_dbi_open(txn->txn, dbname, MDB_CREATE, &dbi);
                 }
                 if (res != 0) {
                     txn->set_rollback();
@@ -81,7 +87,7 @@ public:
 
     MDB_env* ptr;
 
-    environment(const string& directory_name, const lmdb_options& opts) {
+    environment(const CBString& directory_name, const lmdb_options& opts) {
         int res = mdb_env_create(&ptr);
         if (res != 0) {
             BOOST_THROW_EXCEPTION(lmdb_error() << lmdb_error::what("mdb_env_create_failed with: " + any_tostring(res)));
@@ -108,7 +114,7 @@ public:
             BOOST_THROW_EXCEPTION(lmdb_error() << lmdb_error::what("mdb_env_set_maxreaders failed with: " + any_tostring(res)));
         }
 
-        res = mdb_env_open(ptr, directory_name.c_str(), opts.get_flags(), 448);
+        res = mdb_env_open(ptr, directory_name, opts.get_flags(), 448);
         if (res != 0) {
             mdb_env_close(ptr);
             ptr = NULL;
@@ -127,13 +133,9 @@ public:
     }
 
     ~environment() {
-        if (ptr != NULL) {
+        if (ptr) {
             mdb_env_close(ptr);
         }
-    }
-
-    operator bool() const {
-        return ptr != NULL;     // should always be true
     }
 
     int get_maxkeysize() const {
@@ -144,12 +146,12 @@ public:
     private:
         transaction(const transaction& other);
         transaction& operator=(const transaction&);
-
+        boost::detail::spinlock rollback_lock;
     public:
         const environment& env;
         MDB_txn* txn;
         bool rollback;
-        bool readonly;
+        const bool readonly;
 
         transaction(const environment& e, bool ro=true): env(e), txn(NULL), rollback(false), readonly(ro) {
             int res;
@@ -165,7 +167,7 @@ public:
         }
 
         ~transaction() {
-            if (txn != NULL) {
+            if (txn) {
                 if (rollback) {
                     mdb_txn_abort(txn);
                 } else {
@@ -174,7 +176,7 @@ public:
             }
         }
 
-        inline size_t size(MDB_dbi d) const {
+        size_t size(MDB_dbi d) const {
             MDB_stat stat;
             int res = mdb_stat(txn, d, &stat);
             if (res != 0) {
@@ -184,6 +186,7 @@ public:
         }
 
         void set_rollback(bool val=true) {
+            boost::detail::spinlock::scoped_lock slock(rollback_lock);
             rollback = val;
         }
 
@@ -194,7 +197,7 @@ public:
         public:
             MDB_cursor* c;
             transaction& txn;
-            MDB_dbi dbi;
+            const MDB_dbi dbi;
 
             cursor(transaction& t, MDB_dbi d): txn(t), dbi(d) {
                 int res = mdb_cursor_open(txn.txn, dbi, &c);
@@ -205,7 +208,7 @@ public:
             }
 
             ~cursor() {
-                if (c != NULL) {
+                if (c) {
                     mdb_cursor_close(c);
                 }
             }
@@ -258,7 +261,7 @@ public:
                 return res;
             }
 
-            int position(MDB_val& key) {
+            int position(MDB_val key) {
                 MDB_val v = make_mdb_val();
                 int res = _get(key, v, MDB_SET);
                 if (res != 0 and res != MDB_NOTFOUND) {
@@ -278,7 +281,7 @@ public:
                 return res;
             }
 
-            inline size_t size() const {
+            size_t size() const {
                 return txn.size(dbi);
             }
 
@@ -323,7 +326,7 @@ public:
                 }
                 MDB_val key = make_mdb_val();
                 get_current_key(key);
-                string s = make_string(key);    // need to copy the key, as the next mdb_cursor call invalidates the MDB_val
+                CBString s = make_string(key);    // need to copy the key, as the next mdb_cursor call invalidates the MDB_val
                 key = make_mdb_val(s);
                 int res = mdb_cursor_put(c, &key, &value, MDB_CURRENT);
                 if (res != 0) {
@@ -406,6 +409,6 @@ public:
 
 };      // end class environment
 
-environment::shared_ptr env_factory(const string& directory_name, const lmdb_options& opts);
+environment::shared_ptr env_factory(const CBString& directory_name, const lmdb_options& opts);
 
 }       // end NS lmdb

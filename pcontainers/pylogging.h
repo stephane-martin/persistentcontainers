@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 #include <boost/throw_exception.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
+#include <bstrlib/bstrwrap.h>
 #include <plog/Log.h>
 #include <plog/Appenders/IAppender.h>
 #include <Python.h>
@@ -15,9 +18,11 @@ namespace utils {
 
 using std::string;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::flush;
 using lmdb::runtime_error;
+using Bstrlib::CBString;
 
 // py: CRITICAL 50, ERROR 40, WARNING 30, INFO 20, DEBUG 10, NOTSET 0
 // plog: none = 0, fatal = 1, error = 2, warning = 3, info = 4, debug = 5, verbose = 6
@@ -47,22 +52,32 @@ inline int severity_to_py(plog::Severity s) {
 class PyAppender : public plog::IAppender {
 public:
 
-    PyAppender(): logger(NULL) {
-        logging_module = PyNewRef(PyImport_ImportModule("logging"));
-        if (!logging_module) {
-            BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'import logging' failed"));
-        }
-        logger_class = PyNewRef(PyObject_GetAttrString(logging_module.get(), "Logger"));
-        if (!logger_class) {
-            BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.Logger' not found"));
-        }
-        logrecord_class = PyNewRef(PyObject_GetAttrString(logging_module.get(), "LogRecord"));
-        if (!logrecord_class) {
-            BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.LogRecord' not found"));
-        }
-        getlogger_function = PyNewRef(PyObject_GetAttrString(logging_module.get(), "getLogger"));
-        if (!getlogger_function) {
-            BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.getLogger' not found"));
+    PyAppender(): logger() {
+        try {
+            logging_module = PyNewRef(PyImport_ImportModule("logging"));
+            if (!logging_module) {
+                BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'import logging' failed"));
+            }
+            logger_class = PyNewRef(PyObject_GetAttrString(logging_module.get(), "Logger"));
+            if (!logger_class) {
+                BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.Logger' not found"));
+            }
+            logrecord_class = PyNewRef(PyObject_GetAttrString(logging_module.get(), "LogRecord"));
+            if (!logrecord_class) {
+                BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.LogRecord' not found"));
+            }
+            getlogger_function = PyNewRef(PyObject_GetAttrString(logging_module.get(), "getLogger"));
+            if (!getlogger_function) {
+                BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("'logging.getLogger' not found"));
+            }
+        } catch (boost::exception & e) {
+            cerr << "Exception happened when initializing PyAppender" << endl;
+            cerr << boost::diagnostic_information(e);
+            throw;
+
+        } catch (...) {
+            cerr << "Unkwon exception happened when initializing PyAppender" << endl;
+            throw;
         }
     }
 
@@ -84,13 +99,13 @@ public:
         }
     }
 
-    void set_pylogger(const string& name) {
+    void set_pylogger(const CBString& name) {
         // find logger with logging.getLogger(name)
-        if (name.empty()) {
+        if (!name.length()) {
             BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("empty logger name"));
         }
         // convert name to Unicode
-        PyNewRef unicode_name(PyUnicode_FromStringAndSize(name.c_str(), name.length()));
+        PyNewRef unicode_name(PyUnicode_FromStringAndSize(name, name.length()));
         if (!unicode_name) {
             BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("can't convert logger name to Unicode"));
         }
@@ -107,9 +122,9 @@ public:
             GilWrapper gil;
             {
                 int severity = severity_to_py(record.getSeverity());
-                string fname((const char*) (record.getObject()));
+                CBString fname((const char*) (record.getObject()));
                 // make a python LogRecord from the plog::Record
-                PyNewRef logrecord(PyObject_CallFunction(logrecord_class.get(), (char*) "OisnsOOs", logger_name.get(), severity, fname.c_str(), record.getLine(), record.getMessage().c_str(), Py_None, Py_None, record.getFunc().c_str()));
+                PyNewRef logrecord(PyObject_CallFunction(logrecord_class.get(), (char*) "OisnsOOs", logger_name.get(), severity, (const char*) fname, record.getLine(), record.getMessage().c_str(), Py_None, Py_None, record.getFunc().c_str()));
                 if (!logrecord) {
                     BOOST_THROW_EXCEPTION(runtime_error() << runtime_error::what("LogRecord creation failed"));
                 }
@@ -170,7 +185,7 @@ protected:
     static PyAppender pyAppender;
 
 public:
-    static inline void set_logger(const string& name) {
+    static inline void set_py_logger(const CBString& name) {
         if (!default_has_been_created) {
             plog::init<0>(plog::debug);
             default_has_been_created = true;
@@ -182,7 +197,7 @@ public:
         }
     }
 
-    static inline void set_logger(PyObject* obj) {
+    static inline void set_py_logger(PyObject* obj) {
         if (!default_has_been_created) {
             plog::init<0>(plog::debug);
             default_has_been_created = true;

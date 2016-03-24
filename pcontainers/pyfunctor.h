@@ -3,7 +3,11 @@
 #include <string>
 #include <stdexcept>
 #include <utility>
+#include <boost/move/move.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
+#include <boost/smart_ptr/detail/spinlock.hpp>
+#include <bstrlib/bstrwrap.h>
 #include <Python.h>
 #include "lmdb_exceptions.h"
 #include "utils.h"
@@ -15,6 +19,7 @@ namespace quiet {
 using std::string;
 using namespace lmdb;
 using namespace utils;
+using Bstrlib::CBString;
 
 
 class PyPredicate {
@@ -22,32 +27,31 @@ protected:
     PyNewRef callback;
 
 public:
-    PyPredicate(): callback(PyNewRef()) { }
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !bool(callback); }
+
+    PyPredicate(): callback() { }
 
     static inline unary_predicate make_unary_predicate(PyObject* obj) {
-        return PyPredicate(obj);
+        return unary_predicate(PyPredicate(obj));
     }
 
     static inline binary_predicate make_binary_predicate(PyObject* obj) {
-        return PyPredicate(obj);
+        return binary_predicate(PyPredicate(obj));
     }
 
-    PyPredicate(PyObject* obj) {
-        if (obj == NULL) {
-            callback = PyNewRef();
-            _LOG_DEBUG << "new trivial PyPredicate object";
-            return;
-        }
-        GilWrapper gil;
-        {
-            if (!PyCallable_Check(obj)) {
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: obj is not a python callable") );
+    explicit PyPredicate(PyObject* obj): callback() {
+        if (obj) {
+            GilWrapper gil;
+            {
+                if (!PyCallable_Check(obj)) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: obj is not a python callable") );
+                }
+                callback = PyNewRef(obj);
+                ++callback;
             }
-            callback = PyNewRef(obj);
-            callback++;
-        }
-        if (!callback) {
-            _LOG_WARNING << "'callback' has not been correctly initialized";
+        } else {
+            _LOG_DEBUG << "New trivial PyPredicate object";
         }
     }
 
@@ -60,31 +64,40 @@ public:
         }
     }
 
-    PyPredicate(const PyPredicate& other) {
+    friend bool operator==(const PyPredicate& one, const PyPredicate& other) {
+        return one.callback == other.callback;
+    }
+
+    friend bool operator!=(const PyPredicate& one, const PyPredicate& other) {
+        return one.callback != other.callback;
+    }
+
+
+    PyPredicate(const PyPredicate& other): callback() {
         GilWrapper gil;
         {
-            callback = PyNewRef(other.callback.get());
-            callback++;
+            callback = other.callback;
         }
     }
 
-    PyPredicate& operator=(PyPredicate other) {
-        GilWrapper gil;
-        {
-            callback = PyNewRef(other.callback.get());
-            callback++;
+    PyPredicate& operator=(const PyPredicate& other) {
+        if (*this != other) {
+            GilWrapper gil;
+            {
+                callback = other.callback;
+            }
         }
         return *this;
     }
 
-    bool operator()(const string& key) {
-        if (!callback) {
+    bool operator()(const CBString& key) {
+        if (!*this) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("This predicate is not initialized") );
         }
         GilWrapper gil;
         {
-            // convert the two strings into python 'bytes' objects (they are new references)
-            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            // convert the string into a python 'bytes' object (new reference)
+            PyNewRef py_key(PyBytes_FromStringAndSize(key, key.length()));
             if (!py_key) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed") );
             }
@@ -107,18 +120,18 @@ public:
         }
     }
 
-    bool operator()(const string& key, const string& value) {       // for binary predicates
-        if (!callback) {
+    bool operator()(const CBString& key, const CBString& value) {       // for binary predicates
+        if (!*this) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("This predicate is not initialized") );
         }
         GilWrapper gil;
         {
             // convert the two strings into python 'bytes' objects (they are new references)
-            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            PyNewRef py_key(PyBytes_FromStringAndSize(key, key.length()));
             if (!py_key) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
             }
-            PyNewRef py_value(PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size()));
+            PyNewRef py_value(PyBytes_FromStringAndSize(value, value.length()));
             if (!py_value) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyPredicate: PyString_FromStringAndSize failed :(") );
             }
@@ -146,29 +159,31 @@ class PyFunctor {
 private:
     PyNewRef callback;
 public:
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !bool(callback); }
 
     static inline unary_functor make_unary_functor(PyObject* obj) {
-        return PyFunctor(obj);
+        return unary_functor(PyFunctor(obj));
     }
 
     static inline binary_functor make_binary_functor(PyObject* obj) {
-        return PyFunctor(obj);
+        return binary_functor(PyFunctor(obj));
     }
 
-    PyFunctor(): callback(PyNewRef()) { }
+    PyFunctor(): callback() { }
 
-    PyFunctor(PyObject* obj) {
-        if (!obj) {
-            callback = PyNewRef();
-            return;
-        }
-        GilWrapper gil;
-        {
-            if (!PyCallable_Check(obj)) {
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: obj is not a python callable") );
+    explicit PyFunctor(PyObject* obj): callback() {
+        if (obj) {
+            GilWrapper gil;
+            {
+                if (!PyCallable_Check(obj)) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: obj is not a python callable") );
+                }
+                callback = PyNewRef(obj);
+                ++callback;
             }
-            callback = PyNewRef(obj);
-            callback++;
+        } else {
+            _LOG_DEBUG << "New trivial PyFunctor object";
         }
     }
 
@@ -181,25 +196,34 @@ public:
         }
     }
 
-    PyFunctor(const PyFunctor& other) {
+    PyFunctor(const PyFunctor& other): callback() {
         GilWrapper gil;
         {
-            callback = PyNewRef(other.callback.get());
-            callback++;
+            callback = other.callback;
         }
     }
 
-    PyFunctor& operator=(PyFunctor other) {
-        GilWrapper gil;
-        {
-            callback = PyNewRef(other.callback.get());
-            callback++;
+    friend bool operator==(const PyFunctor& one, const PyFunctor& other) {
+        return one.callback == other.callback;
+    }
+
+    friend bool operator!=(const PyFunctor& one, const PyFunctor& other) {
+        return one.callback != other.callback;
+    }
+
+
+    PyFunctor& operator=(const PyFunctor& other) {
+        if (*this != other) {
+            GilWrapper gil;
+            {
+                callback = other.callback;
+            }
         }
         return *this;
     }
 
-    string operator()(const string& key) {
-        if (!callback) {
+    CBString operator()(const CBString& key) {
+        if (!*this) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
         char* buffer = NULL;
@@ -207,7 +231,7 @@ public:
         GilWrapper gil;
         {
             // convert the two strings into python 'bytes' objects (they are new references)
-            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            PyNewRef py_key(PyBytes_FromStringAndSize(key, key.length()));
             if (!py_key) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
@@ -240,11 +264,11 @@ public:
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
             }
         }
-        return string(buffer, l);
+        return CBString(buffer, l);
     }
 
-    string operator()(const string& key, const string& value) {
-        if (!callback) {
+    CBString operator()(const CBString& key, const CBString& value) {
+        if (!*this) {
             BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("The PyFunctor is not initialized") );
         }
         char* buffer = NULL;
@@ -252,11 +276,11 @@ public:
         GilWrapper gil;
         {
             // convert the two strings into python 'bytes' objects (they are new references)
-            PyNewRef py_key(PyBytes_FromStringAndSize(key.c_str(), (Py_ssize_t) key.size()));
+            PyNewRef py_key(PyBytes_FromStringAndSize(key, key.length()));
             if (!py_key) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-            PyNewRef py_value(PyBytes_FromStringAndSize(value.c_str(), (Py_ssize_t) value.size()));
+            PyNewRef py_value(PyBytes_FromStringAndSize(value, value.length()));
             if (!py_value) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
@@ -288,30 +312,35 @@ public:
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: converting result to C char* failed :(") );
             }
         }
-        return string(buffer, l);
+        return CBString(buffer, l);
     }
 
 };
 
 class PyStringInputIterator {
+private:
+    BOOST_MOVABLE_BUT_NOT_COPYABLE(PyStringInputIterator)
 public:
-    PyStringInputIterator(): iterator(PyNewRef()), empty(true), current_value("") { }
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !bool(iterator); }
 
-    PyStringInputIterator(PyObject* obj): empty(true), current_value("") {
-        if (!obj) {
-            iterator = PyNewRef();
-            return;
-        }
-        GilWrapper gil;
-        {
-            int res = PyIter_Check(obj);
-            if (!res) {
-                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
+    PyStringInputIterator(): iterator(), empty(true), current_value("") { }
+
+    explicit PyStringInputIterator(PyObject* obj): iterator(), empty(true), current_value("") {
+        if (obj) {
+            GilWrapper gil;
+            {
+                int res = PyIter_Check(obj);
+                if (!res) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
+                }
+                iterator = PyNewRef(obj);
+                ++iterator;
+                empty = false;
+                _next_value();
             }
-            iterator = PyNewRef(obj);
-            iterator++;
-            empty = false;
-            _next_value();
+        } else {
+            _LOG_DEBUG << "New trivial PyStringInputIterator object";
         }
     }
 
@@ -324,29 +353,26 @@ public:
         }
     }
 
-    PyStringInputIterator(const PyStringInputIterator& other) {
-        GilWrapper gil;
-        {
-            iterator = PyNewRef(other.iterator.get());
-            iterator++;
-            empty = other.empty;
-            current_value = other.current_value;
-        }
+    PyStringInputIterator(BOOST_RV_REF(PyStringInputIterator) other): iterator(boost::move(other.iterator)), empty(other.empty), current_value(other.current_value) {
+        // move constructor (doesnt need the GIL, as iterator(boost::move(other.iterator)) is just a swap of pointers)
+        other.empty = true;
+        other.current_value = "";
     }
 
-    PyStringInputIterator& operator=(PyStringInputIterator other) {
+    PyStringInputIterator& operator=(BOOST_RV_REF(PyStringInputIterator) other) {   // move assignment
+        current_value = "";
+        empty = true;
         GilWrapper gil;
         {
-            iterator = PyNewRef(other.iterator.get());
-            iterator++;
-            empty = other.empty;
-            current_value = other.current_value;
-            return *this;
+            iterator = boost::move(other.iterator);
+            std::swap(empty, other.empty);
+            std::swap(current_value, other.current_value);
         }
+        return *this;
     }
 
     friend bool operator==(const PyStringInputIterator& one, const PyStringInputIterator& other) {
-        if (!(one.iterator) && !(other.iterator)) {
+        if (!one && !other) {
             return true;
         }
         if (one.empty && other.empty) {
@@ -365,17 +391,21 @@ public:
     }
 
     PyStringInputIterator operator++(int) {
-        PyStringInputIterator clone(*this);      // make a copy of iterator
-        this->operator++();
-        return clone;
+        return this->operator++();
     }
 
-    string operator*() {
+    CBString operator*() {
         return current_value;
     }
 
 protected:
+    PyNewRef iterator;
+    bool empty;
+    CBString current_value;
+    boost::detail::spinlock next_value_lock;
+
     void _next_value() {
+        boost::detail::spinlock::scoped_lock slock(next_value_lock);
         if (empty) {
             return;
         }
@@ -429,14 +459,12 @@ protected:
                 current_value = "";
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
             } else {
-                current_value = string(buffer, length);
+                current_value = CBString(buffer, length);
             }
         }
     }
 
-    PyNewRef iterator;
-    bool empty;
-    string current_value;
-};
+
+}; // END CLASS PyStringInputIterator
 
 } // end namespace quiet

@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <pthread.h>
 #include <boost/throw_exception.hpp>
+#include <boost/core/noncopyable.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
 #include "lmdb_exceptions.h"
 
 namespace quiet {
@@ -20,11 +22,8 @@ inline string tostring(int x) {
     return ss.str();
 }
 
-class MutexWrap {
+class MutexWrap: private boost::noncopyable {
 protected:
-    // Prevent copying or assignment
-    MutexWrap(const MutexWrap& arg);
-    MutexWrap& operator=(const MutexWrap& rhs);
 
     pthread_mutex_t mutex;
 
@@ -84,14 +83,12 @@ public:
 };
 
 
-class MutexWrapLock {
+class MutexWrapLock: private boost::noncopyable {
 protected:
     MutexWrap& mutex;
-    MutexWrapLock(const MutexWrapLock& other);
-    MutexWrapLock& operator=(const MutexWrap& other);
 
 public:
-    MutexWrapLock(MutexWrap& m): mutex(m) { mutex.lock(); }
+    explicit MutexWrapLock(MutexWrap& m): mutex(m) { mutex.lock(); }
     ~MutexWrapLock() { mutex.unlock(); }
 };
 

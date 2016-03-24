@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <bstrlib/bstrwrap.h>
 #include "lmdb_environment.h"
 #include "mutexwrap.h"
 
@@ -20,16 +21,16 @@ using std::vector;
 using std::map;
 using std::cout;
 using std::endl;
-
 using quiet::MutexWrap;
 using quiet::MutexWrapLock;
+using Bstrlib::CBString;
 
-map<string, boost::shared_ptr<environment> > environment::opened_environments = map<string, boost::shared_ptr<environment> >();
+map<CBString, boost::shared_ptr<environment> > environment::opened_environments = map<CBString, boost::shared_ptr<environment> >();
 
 MutexWrap environment::lock_envs;
 MutexWrap environment::lock_dbis;
 
-environment::shared_ptr env_factory(const string& directory_name, const lmdb_options& opts) {
+environment::shared_ptr env_factory(const CBString& directory_name, const lmdb_options& opts) {
     environment::shared_ptr env;
     MutexWrapLock lock(environment::lock_envs);
     {

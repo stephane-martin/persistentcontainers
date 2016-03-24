@@ -9,8 +9,9 @@
 #include <map>
 #include <utility>
 #include <algorithm>
-#include <cerrno>
 #include <boost/exception/all.hpp>
+#include <boost/core/explicit_operator_bool.hpp>
+#include <errno.h>
 #include <string.h>
 #include "lmdb.h"
 
