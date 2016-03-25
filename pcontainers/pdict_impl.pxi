@@ -217,6 +217,8 @@ cdef class PRawDict(object):
             it.set_key_value(key_view.get_mdb_val(), value_view.get_mdb_val())
 
     def __getitem__(self, item):
+        if not item:
+            raise EmptyKey()
         cdef cppConstIterator it = move(cppConstIterator(self.ptr, PyBufferWrap(make_utf8(item)).get_mdb_val()))
         if it.has_reached_end():
             raise NotFound()
@@ -266,7 +268,7 @@ cdef class PRawDict(object):
     cpdef noitervalues(self):
         cdef vector[CBString] k_vec
         with nogil:
-            k_vec = self.ptr.get_all_keys()
+            k_vec = self.ptr.get_all_values()
         return [topy(k) for k in k_vec]
 
     cpdef noiteritems(self):

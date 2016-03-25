@@ -10,4 +10,8 @@ from ._pdict import PDict
 from ._pdict import PRawQueue
 from ._pdict import PQueue
 from ._pdict import LmdbOptions
-from ._pdict import NotFound
+
+from ._py_exceptions import LmdbError, NotInitialized, AccessError, KeyExist, NotFound, EmptyKey, EmptyDatabase
+from ._py_exceptions import PageNotFound, Corrupted, Panic, VersionMismatch, Invalid, MapFull, DbsFull, ReadersFull
+from ._py_exceptions import TlsFull, TxnFull, CursorFull, PageFull, MapResized, Incompatible, BadRslot, BadTxn
+from ._py_exceptions import BadValSize, BadDbi

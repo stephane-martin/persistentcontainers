@@ -18,7 +18,7 @@ class AccessError(LmdbError, IOError):
 class KeyExist(LmdbError, KeyError):
     pass
 
-class NotFound(LmdbError):
+class NotFound(LmdbError, KeyError):
     pass
 
 class EmptyKey(LmdbError, ValueError):
@@ -27,7 +27,7 @@ class EmptyKey(LmdbError, ValueError):
 class EmptyDatabase(LmdbError):
     pass
 
-class PageNotFound(NotFound):
+class PageNotFound(LmdbError):
     pass
 
 class Corrupted(LmdbError):
@@ -75,10 +75,10 @@ class BadRslot(LmdbError):
 class BadTxn(LmdbError):
     pass
 
-class BadValSize(LmdbError):
+class BadValSize(LmdbError, ValueError):
     pass
 
-class BadDbi(LmdbError):
+class BadDbi(LmdbError, ValueError):
     pass
 
 cdef public PyObject* py_lmdb_error = <PyObject*>LmdbError

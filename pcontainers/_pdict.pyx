@@ -18,7 +18,7 @@ from queue import Empty
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
 
-from ._py_exceptions import EmptyDatabase, NotFound
+from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey
 
 include "lmdb_options_impl.pxi"
 include "pdict_impl.pxi"

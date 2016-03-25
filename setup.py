@@ -26,7 +26,7 @@ def check_libuuid():
 requirements = ['future', 'mbufferio']
 
 setup_requires = [
-    'setuptools_git', 'setuptools', 'twine', 'wheel', 'pip'
+    'setuptools_git', 'setuptools', 'twine', 'wheel', 'pip', 'pytest'
 ]
 
 extensions = [

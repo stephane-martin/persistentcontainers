@@ -42,7 +42,7 @@ vector<pair<CBString, CBString> > PersistentDict::get_all_items_if(binary_predic
     if (!*this) {
         return vector<pair<CBString, CBString> >();
     }
-    const_iterator it = cbegin();
+    const_iterator it(cbegin());
     vector< pair<CBString, CBString> > v;
     pair<CBString, CBString> p;
     for (; !it.has_reached_end(); ++it) {
@@ -59,7 +59,7 @@ vector<CBString> PersistentDict::get_all_values() const {
         return vector<CBString>();
     }
     int pos = 0;
-    const_iterator it = cbegin();
+    const_iterator it(cbegin());
     vector<CBString> v(it.size());
     for (; !it.has_reached_end(); ++it) {
         v[pos] = it.get_value();
@@ -73,7 +73,7 @@ vector<CBString> PersistentDict::get_all_keys() const {
         return vector<CBString>();
     }
     int pos = 0;
-    const_iterator it = cbegin();
+    const_iterator it(cbegin());
     vector<CBString> v(it.size());
     for (; !it.has_reached_end(); ++it) {
         v[pos] = it.get_key();

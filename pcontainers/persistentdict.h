@@ -362,6 +362,7 @@ public:
             swap(ro, other.ro);
             swap(reached_end, other.reached_end);
             swap(reached_beginning, other.reached_beginning);
+            swap(dbi, other.dbi);
             cursor.swap(other.cursor);
             txn.swap(other.txn);
             swap(initialized, other.initialized);
@@ -381,6 +382,7 @@ public:
             ro = true;
             reached_end = false;
             reached_beginning = false;
+            dbi = MDB_dbi();
             cursor.reset();
             txn.reset();
             if (other) {
