@@ -14,7 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
-#include <boost/smart_ptr/detail/spinlock.hpp>
+#include <boost/atomic.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <errno.h>
 #include "mutexwrap.h"
@@ -146,11 +146,10 @@ public:
     private:
         transaction(const transaction& other);
         transaction& operator=(const transaction&);
-        boost::detail::spinlock rollback_lock;
     public:
         const environment& env;
         MDB_txn* txn;
-        bool rollback;
+        boost::atomic_bool rollback;
         const bool readonly;
 
         transaction(const environment& e, bool ro=true): env(e), txn(NULL), rollback(false), readonly(ro) {
@@ -168,7 +167,7 @@ public:
 
         ~transaction() {
             if (txn) {
-                if (rollback) {
+                if (rollback.load()) {
                     mdb_txn_abort(txn);
                 } else {
                     mdb_txn_commit(txn);
@@ -186,8 +185,7 @@ public:
         }
 
         void set_rollback(bool val=true) {
-            boost::detail::spinlock::scoped_lock slock(rollback_lock);
-            rollback = val;
+            rollback.store(val);
         }
 
         class cursor {
@@ -271,7 +269,7 @@ public:
                 return res;
             }
 
-            int after(MDB_val& key) {
+            int after(MDB_val key) {
                 MDB_val v = make_mdb_val();
                 int res = _get(key, v, MDB_SET_RANGE);
                 if (res != 0 and res != MDB_NOTFOUND) {

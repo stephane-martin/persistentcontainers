@@ -22,16 +22,6 @@ using std::exception;
 using Bstrlib::CBString;
 
 
-vector<CBString> PersistentQueue::pop_all() {
-    vector<CBString> v;
-    iiterator it(this);
-    iiterator end;
-    for(; it != end; ++it) {
-        v.push_back(*it);
-    }
-    return v;
-}
-
 void PersistentQueue::push_front(size_t n, const CBString& val) {
     if (n <= 0) {
         return;

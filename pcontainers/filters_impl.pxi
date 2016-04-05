@@ -1,9 +1,9 @@
 
 
 cdef class Filter(object):
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         raise NotImplementedError()
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         raise NotImplementedError()
 
 # noinspection PyAbstractClass
@@ -12,17 +12,11 @@ cdef class Serializer(Filter):
 
 
 cdef class NoneSerializer(Serializer):
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
         return obj
-
-    cpdef loads(self, obj):
-        if isinstance(obj, MBufferIO):
-            return obj.tobytes()
-        return obj
-
 
 cdef class PickleSerializer(Serializer):
     def __init__(self, protocol=2):
@@ -35,13 +29,13 @@ cdef class PickleSerializer(Serializer):
             self.pickle_module = pickle
         self.protocol = protocol
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         buf = MBufferIO()
         self.pickle_module.dump(obj, buf, protocol=self.protocol)
         buf.seek(0)
         return buf
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -61,13 +55,13 @@ cdef class MessagePackSerializer(Serializer):
         self.use_list = bool(use_list)
         self.ext_hook = ext_hook if ext_hook else self.messagepack_module.ExtType
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         buf = MBufferIO()
         self.messagepack_module.pack(obj, buf, **self.mpack_args)
         buf.seek(0)
         return buf
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -88,14 +82,14 @@ cdef class JsonSerializer(Serializer):
             self.json_module = json
             self.default = default
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         buf = MBufferIO()
         self.json_module.dump(obj, buf, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, indent=None,
                               separators=(',', ':'), encoding='utf-8', default=self.default)
         buf.seek(0)
         return buf
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -109,12 +103,12 @@ cdef class Signer(Filter):
 
 
 cdef class NoneSigner(Signer):
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
         return obj
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -131,7 +125,7 @@ cdef class HMACSigner(Signer):
             import hashlib
             self.hashlib_module = hashlib
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         if self.secret:
@@ -141,7 +135,7 @@ cdef class HMACSigner(Signer):
         obj.seek(0)
         return obj
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         if self.secret:
@@ -159,9 +153,9 @@ cdef class Compresser(Filter):
 
 
 cdef class NoneCompresser(Compresser):
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         return obj
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         return obj
 
 
@@ -171,9 +165,9 @@ cdef class SnappyCompresser(Compresser):
             # noinspection PyPackageRequirements
             import snappyx
             self.snappyx_module = snappyx
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         return MBufferIO(self.snappyx_module.compress(obj))
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         return MBufferIO(self.snappyx_module.decompress(obj))
 
 
@@ -189,7 +183,7 @@ cdef class LZ4Compresser(Compresser):
         self.block_mode_linked = bool(block_mode_linked)
         self.checksum = bool(checksum)
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         compressed = MBufferIO()
@@ -203,7 +197,7 @@ cdef class LZ4Compresser(Compresser):
         compressed.seek(0)
         return compressed
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         decompressed = MBufferIO()
@@ -219,9 +213,13 @@ cdef class Chain(Filter):
         self.signer = signer if signer else NoneSigner()
         self.compresser = compresser if compresser else NoneCompresser()
 
-    cpdef dumps(self, obj):
+    cdef dumps(self, obj):
         return self.signer.dumps(self.compresser.dumps(self.serializer.dumps(obj)))
 
-    cpdef loads(self, obj):
+    cdef loads(self, obj):
         return self.serializer.loads(self.compresser.loads(self.signer.loads(obj)))
+
+cdef class NoneChain(Chain):
+    def __init__(self):
+        super(NoneChain, self).__init__()
 

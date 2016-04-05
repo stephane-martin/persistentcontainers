@@ -1,6 +1,6 @@
 
 
-cdef class expiry_dict(object):
+cdef class ExpiryDict(object):
     cdef time_t default_expiry
     cdef time_t prune_period
     cdef PDict values_dict

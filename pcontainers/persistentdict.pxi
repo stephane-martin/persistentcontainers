@@ -21,9 +21,24 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
         CBString pop(const CBString& key) except +custom_handler
         CBString pop(MDB_val k) except +custom_handler
         pair[CBString, CBString] popitem() except +custom_handler
-        vector[CBString] get_all_keys() except +custom_handler
-        vector[CBString] get_all_values() except +custom_handler
-        vector[pair[CBString, CBString]] get_all_items() except +custom_handler
+
+        void map_keys[OutputIterator](OutputIterator oit)
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first)
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f)
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred)
+
+        void map_values[OutputIterator](OutputIterator oit)
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first)
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f)
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred)
+
+        void map_keys_values[OutputIterator](OutputIterator oit)
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first)
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f)
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f, binary_predicate unary_pred)
 
         void insert(const CBString& key, const CBString& value) except +custom_handler
         void insert(MDB_val k, MDB_val v) except +custom_handler
@@ -49,10 +64,10 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
         cpp_bool contains(const CBString& key) except +custom_handler
         cpp_bool contains(MDB_val key) except +custom_handler
 
-        void transform_values(binary_functor binary_funct) except +custom_handler
-        void transform_values(binary_functor binary_funct, const CBString& first_key) except +custom_handler
-        void transform_values(binary_functor binary_funct, const CBString& first_key, const CBString& last_key) except +custom_handler
-        void transform_values(binary_functor binary_funct, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
+        void transform_values(binary_scalar_functor binary_funct) except +custom_handler
+        void transform_values(binary_scalar_functor binary_funct, const CBString& first_key) except +custom_handler
+        void transform_values(binary_scalar_functor binary_funct, const CBString& first_key, const CBString& last_key) except +custom_handler
+        void transform_values(binary_scalar_functor binary_funct, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
 
         void remove_if(binary_predicate binary_pred) except +custom_handler
         void remove_if(binary_predicate binary_pred, const CBString& first_key) except +custom_handler

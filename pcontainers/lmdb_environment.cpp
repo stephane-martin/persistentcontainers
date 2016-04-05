@@ -43,4 +43,5 @@ environment::shared_ptr env_factory(const CBString& directory_name, const lmdb_o
     }
 }
 
+
 }   // end NS lmdb

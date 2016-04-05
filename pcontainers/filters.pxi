@@ -1,13 +1,14 @@
 
 cdef class Filter(object):
-    cpdef dumps(self, obj)
-    cpdef loads(self, obj)
+    cdef dumps(self, obj)
+    cdef loads(self, obj)
 
 cdef class Serializer(Filter):
     pass
 
 cdef class NoneSerializer(Serializer):
-    pass
+    cdef inline loads(self, obj):
+        return obj.tobytes() if isinstance(obj, MBufferIO) else obj
 
 cdef class PickleSerializer(Serializer):
     cdef object pickle_module
@@ -56,4 +57,8 @@ cdef class Chain(Filter):
     cdef Signer signer
     cdef Compresser compresser
 
-
+cdef class NoneChain(Chain):
+    cdef inline dumps(self, obj):
+        return obj
+    cdef inline loads(self, obj):
+        return obj.tobytes() if isinstance(obj, MBufferIO) else obj

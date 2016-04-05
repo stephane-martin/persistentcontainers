@@ -17,6 +17,7 @@
 #include <boost/type_traits/conditional.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
+#include <boost/atomic.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -29,6 +30,7 @@
 #include "lmdb_environment.h"
 #include "utils.h"
 #include "logging.h"
+#include "mutexwrap.h"
 
 namespace quiet {
 
@@ -45,17 +47,6 @@ using boost::conditional;
 using Bstrlib::CBString;
 using namespace lmdb;
 using namespace utils;
-
-
-inline bool key_is_in_interval(const CBString& key, const CBString& first, const CBString& last) {
-    if (bool(first.length()) && (key < first)) {
-        return false;
-    }
-    if (bool(last.length()) && (key >= last)) {
-        return false;
-    }
-    return true;
-}
 
 
 class PersistentDict {
@@ -125,7 +116,7 @@ public:
     template <typename InputIterator>
     void insert(InputIterator first, InputIterator last, ssize_t chunk_size=-1) {
         if (!*this) {
-            BOOST_THROW_EXCEPTION(not_initialized());
+            BOOST_THROW_EXCEPTION( not_initialized() );
         }
         if (chunk_size == -1) {
             chunk_size = SSIZE_MAX;
@@ -150,6 +141,9 @@ public:
         if (!*this) {
             BOOST_THROW_EXCEPTION(not_initialized());
         }
+        if (k.mv_size == 0 || k.mv_data == NULL) {
+            BOOST_THROW_EXCEPTION(empty_key());
+        }
         insert_iterator output(this);
         output = make_pair(k, v);
     }
@@ -158,11 +152,11 @@ public:
 
     void transform_values(unary_functor unary_funct, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1) {
         // value = f(value)
-        binary_functor binary_funct = boost::bind(unary_funct, _2);
+        binary_scalar_functor binary_funct = boost::bind(unary_funct, _2);
         transform_values(binary_funct, first_key, last_key, chunk_size);
     }
 
-    void transform_values(binary_functor binary_funct, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1);
+    void transform_values(binary_scalar_functor binary_funct, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1);
 
     void remove_if_pred_key(unary_predicate unary_pred, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1) {
         // remove_if(predicate(keys))
@@ -177,11 +171,8 @@ public:
     }
 
     void remove_if(binary_predicate binary_pred, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1);
-
     void remove_duplicates(const CBString& first_key="", const CBString& last_key="");
-
     CBString get_dirname() const { return dirname; }
-
     CBString get_dbname() const { return dbname; }
 
     bool empty() const {
@@ -242,7 +233,7 @@ public:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(insert_iterator)
 
     protected:
-        bool initialized;
+        boost::atomic_bool initialized;
         boost::shared_ptr<environment::transaction> txn;
         boost::shared_ptr<environment::transaction::cursor> cursor;
 
@@ -255,7 +246,7 @@ public:
         typedef std::output_iterator_tag iterator_category;
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
-        bool operator!() const { return !this->initialized; }
+        bool operator!() const { return !initialized.load(); }
 
         ~insert_iterator() {
             cursor.reset();
@@ -263,7 +254,7 @@ public:
         }
 
         void set_rollback(bool val=true) {
-            if (initialized) {
+            if (*this) {
                 txn->set_rollback(val);
             }
         }
@@ -272,29 +263,28 @@ public:
             if (bool(d) && bool(*d)) {
                 txn = d->env->start_transaction(false);
                 cursor = txn->make_cursor(d->dbi);
-                initialized = true;
+                initialized.store(true);
             }
-        }
-
-        void swap(insert_iterator& other) {
-            using std::swap;
-            cursor.swap(other.cursor);
-            txn.swap(other.txn);
-            swap(initialized, other.initialized);
         }
 
         insert_iterator(BOOST_RV_REF(insert_iterator) other): initialized(false), txn(), cursor() {
             if (other) {
-                swap(other);
+                other.initialized.store(false);
+                cursor.swap(other.cursor);
+                txn.swap(other.txn);
+                initialized.store(true);
             }
         }
 
         insert_iterator& operator=(BOOST_RV_REF(insert_iterator) other) {
-            initialized = false;
+            initialized.store(false);
             cursor.reset();
             txn.reset();
             if (other) {
-                swap(other);
+                other.initialized.store(false);
+                cursor.swap(other.cursor);
+                txn.swap(other.txn);
+                initialized.store(true);
             }
             return *this;
         }
@@ -330,6 +320,16 @@ public:
     private:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(tmpl_iterator)
 
+    protected:
+        boost::atomic_bool initialized;
+        MutexWrap lock;
+        bool ro;
+        bool reached_end;
+        bool reached_beginning;
+        MDB_dbi dbi;
+        boost::shared_ptr<environment::transaction::cursor> cursor;
+        boost::shared_ptr<environment::transaction> txn;
+
     public:
         virtual ~tmpl_iterator() = 0;
 
@@ -340,7 +340,7 @@ public:
         tmpl_iterator(): initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() { }
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
-        bool operator!() const { return !this->initialized; }
+        bool operator!() const { return !initialized.load(); }
 
         tmpl_iterator(dict_ptr_type d, int pos=0):
             initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
@@ -357,28 +357,19 @@ public:
             init(d, key);
         }
 
-        void swap(tmpl_iterator& other) {
-            using std::swap;
-            swap(ro, other.ro);
-            swap(reached_end, other.reached_end);
-            swap(reached_beginning, other.reached_beginning);
-            swap(dbi, other.dbi);
-            cursor.swap(other.cursor);
-            txn.swap(other.txn);
-            swap(initialized, other.initialized);
-        }
-
         // move constructor
         tmpl_iterator(BOOST_RV_REF(tmpl_iterator) other):
             initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
             if (other) {
+                other.initialized.store(false);
                 swap(other);
+                initialized.store(true);
             }
         }
 
         // move assignment
         tmpl_iterator& operator=(BOOST_RV_REF(tmpl_iterator) other) {
-            initialized = false;
+            initialized.store(false);
             ro = true;
             reached_end = false;
             reached_beginning = false;
@@ -386,7 +377,9 @@ public:
             cursor.reset();
             txn.reset();
             if (other) {
+                other.initialized.store(false);
                 swap(other);
+                initialized.store(true);
             }
             return *this;
         }
@@ -399,9 +392,7 @@ public:
         }
 
         bool has_reached_end() const { return reached_end; }
-
         bool has_reached_beginning() const { return reached_beginning; }
-
         void set_rollback(bool val=true) { txn->set_rollback(val); }
 
         bool operator==(const tmpl_iterator& other) const {
@@ -411,10 +402,12 @@ public:
             if (!*this) {
                 return true;
             }
-            // todo: mouf
-            // if ( ((*the_dict) != *(other.the_dict)) || (reached_end != other.reached_end) || (reached_beginning != other.reached_beginning) || (ro != other.ro)) {
-            if ( (reached_end != other.reached_end) || (reached_beginning != other.reached_beginning) || (ro != other.ro)) {
-                return false;
+
+            if (    (reached_end != other.reached_end) ||
+                    (reached_beginning != other.reached_beginning) ||
+                    (ro != other.ro) ||
+                    (dbi != other.dbi)  ) {
+                        return false;
             }
             if (reached_end || reached_beginning) {
                 return true;
@@ -429,6 +422,7 @@ public:
             if (reached_end || !initialized || !cursor) {
                 return *this;
             }
+            MutexWrapLock w(lock);
             if (reached_beginning) {
                 res = cursor->first();  // position on first element
             } else {
@@ -443,9 +437,10 @@ public:
 
         virtual tmpl_iterator& operator--() {
             int res = 0;
-            if (reached_beginning || !initialized || !cursor) {
+            if (reached_beginning || !(*this) || !cursor) {
                 return *this;
             }
+            MutexWrapLock w(lock);
             if (reached_end) {
                 res = cursor->last();
             } else {
@@ -462,7 +457,7 @@ public:
         virtual tmpl_iterator& operator--(int) { return this->operator--(); }
 
         CBString get_key() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -474,7 +469,7 @@ public:
         }
 
         MDB_val get_key_buffer() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -486,7 +481,7 @@ public:
         }
 
         CBString get_value() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -498,7 +493,7 @@ public:
         }
 
         MDB_val get_value_buffer() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -510,7 +505,7 @@ public:
         }
 
         pair<const CBString, CBString> get_item() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -523,7 +518,7 @@ public:
         }
 
         pair<MDB_val, MDB_val> get_item_buffer() const {
-            if (!initialized) {
+            if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
             if (reached_end || reached_beginning) {
@@ -536,13 +531,15 @@ public:
         }
 
     protected:
-        bool initialized;
-        bool ro;
-        bool reached_end;
-        bool reached_beginning;
-        MDB_dbi dbi;
-        boost::shared_ptr<environment::transaction::cursor> cursor;
-        boost::shared_ptr<environment::transaction> txn;
+        void swap(tmpl_iterator& other) {
+            using std::swap;
+            swap(ro, other.ro);
+            swap(reached_end, other.reached_end);
+            swap(reached_beginning, other.reached_beginning);
+            swap(dbi, other.dbi);
+            cursor.swap(other.cursor);
+            txn.swap(other.txn);
+        }
 
         void init(dict_ptr_type d, int pos=0, bool readonly=true) {
             if (!d || !(*d)) {
@@ -552,28 +549,18 @@ public:
             ro = readonly;
             txn = d->env->start_transaction(ro);
             cursor = txn->make_cursor(dbi);
-            initialized = true;
             if (pos > 0) {
                 reached_end = true;
             } else if (pos < 0) {
                 reached_beginning = true;
             } else {
-                if (cursor->first() == MDB_NOTFOUND) {
-                    reached_end = true;
-                }
+                reached_end = cursor->first() == MDB_NOTFOUND;
             }
+            initialized.store(true);
         }
 
         void init(dict_ptr_type d, const CBString& key, bool readonly=true) {
-            if (!d || !(*d)) {
-                return;
-            }
-            dbi = d->dbi;
-            ro = readonly;
-            txn = d->env->start_transaction(ro);
-            cursor = txn->make_cursor(dbi);
-            initialized = true;
-            init_set_position(key);
+            init(d, make_mdb_val(key), readonly);
         }
 
         void init(dict_ptr_type d, MDB_val key, bool readonly=true) {
@@ -584,33 +571,28 @@ public:
             ro = readonly;
             txn = d->env->start_transaction(ro);
             cursor = txn->make_cursor(d->dbi);
-            initialized = true;
-            init_set_position(key);
+            _set_position(key, readonly);
+            initialized.store(true);
         }
 
-        void init_set_position(const CBString& key) { init_set_position(make_mdb_val(key)); }
-
-        void init_set_position(MDB_val k) {
-            if (k.mv_size == 0 || k.mv_data == NULL) {
-                reached_end = true;
-                return;
+        void _set_position(MDB_val key, bool readonly=true) {
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                reached_end = cursor->first() == MDB_NOTFOUND;
+            } else {
+                reached_end = cursor->position(key) == MDB_NOTFOUND;
             }
-            reached_end = cursor->position(k) == MDB_NOTFOUND;
         }
 
-        void init_set_range(const CBString& key) { init_set_range(make_mdb_val(key)); }
-
-        void init_set_range(MDB_val k) {
-            if (k.mv_size == 0 || k.mv_data == NULL) {
-                reached_end = true;
-                return;
+        void _set_range(MDB_val key, bool readonly=true) {
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                reached_end = cursor->first() == MDB_NOTFOUND;
+            } else {
+                reached_end = cursor->after(key) == MDB_NOTFOUND;
             }
-            reached_end = cursor->after(k) == MDB_NOTFOUND;
         }
+
 
     }; // end class tmpl_iterator
-
-
 
     typedef tmpl_iterator<true> _const_iterator;
     typedef tmpl_iterator<false> _iterator;
@@ -639,7 +621,7 @@ public:
         virtual const_iterator& operator++(int) { return operator++(); }
 
         virtual const_iterator& operator--() {
-            _const_iterator::operator++();
+            _const_iterator::operator--();
             return *this;
         }
         virtual const_iterator& operator--(int) { return operator--(); }
@@ -649,7 +631,16 @@ public:
             return *this;
         }
 
-        static const_iterator range(const PersistentDict* d, const CBString& key);
+        static inline const_iterator range(const PersistentDict& d, const CBString& key) {
+            if (!d) {
+                BOOST_THROW_EXCEPTION( not_initialized() );
+            }
+            const_iterator it(&d, 0);
+            it._set_range(make_mdb_val(key));
+            return it;
+
+        }
+
         pair<const CBString, CBString> operator*() const { return get_item(); }
 
     }; // END CLASS const_iterator
@@ -665,7 +656,7 @@ public:
             txn.reset();
         }
 
-        class PairProxy {      // kind of a reference like pair<const CBString, CBString>&
+        class PairProxy {      // kind of a reference-like pair<const CBString, CBString>&
         private:
             PairProxy(const PairProxy& other);
             PairProxy& operator=(const PairProxy& other);
@@ -759,7 +750,14 @@ public:
             return *this;
         }
 
-        static iterator range(PersistentDict* d, const CBString& key, bool readonly=true);
+        static inline iterator range(PersistentDict& d, const CBString& key, bool readonly=true) {
+            if (!d) {
+                BOOST_THROW_EXCEPTION( not_initialized() );
+            }
+            iterator it(&d, 0, readonly);
+            it._set_range(make_mdb_val(key), readonly);
+            return it;
+        }
 
         PairProxy& operator*() { return pproxy; }
         PairProxy& operator->() { return pproxy; }
@@ -776,10 +774,63 @@ public:
 
     };
 
-    vector<CBString> get_all_keys() const;
-    vector<CBString> get_all_values() const;
-    vector<pair<CBString, CBString> > get_all_items_if(binary_predicate binary_pred) const;
-    vector<pair<CBString, CBString> > get_all_items() const { return get_all_items_if(binary_true_pred); }
+    template <typename OutputIterator>
+    void map_keys(OutputIterator oit,
+                    const CBString& first="", const CBString& last="",
+                    unary_functor f=unary_identity_functor,
+                    unary_predicate unary_pred=unary_true_pred) {
+
+        const_iterator iit(const_iterator::range(*this, first));
+        CBString k;
+        for(; !iit.has_reached_end(); ++iit) {
+            k = iit.get_key();
+            if (last.length() > 0 && k >= last) {
+                break;
+            }
+            if (unary_pred(k)) {
+                *oit = f(k);
+            }
+        }
+    }
+
+    template <typename OutputIterator>
+    void map_values(OutputIterator oit,
+                    const CBString& first="", const CBString& last="",
+                    unary_functor f=unary_identity_functor,
+                    unary_predicate unary_pred=unary_true_pred) {
+
+        const_iterator iit(const_iterator::range(*this, first));
+        CBString v;
+        for(; !iit.has_reached_end(); ++iit) {
+            pair<const CBString, CBString> p(iit.get_item());
+            if (last.length() > 0 && p.first >= last) {
+                break;
+            }
+            if (unary_pred(p.second)) {
+                *oit = f(p.second);
+            }
+        }
+    }
+
+    template <typename OutputIterator>
+    void map_keys_values(OutputIterator oit,
+                    const CBString& first="", const CBString& last="",
+                    binary_functor f=binary_identity_functor,
+                    binary_predicate binary_pred=binary_true_pred) {
+
+        const_iterator iit(const_iterator::range(*this, first));
+        CBString v;
+        for(; !iit.has_reached_end(); ++iit) {
+            pair<const CBString, CBString> p(iit.get_item());
+            if (last.length() > 0 && p.first >= last) {
+                break;
+            }
+            if (binary_pred(p.first, p.second)) {
+                *oit = f(p.first, p.second);
+            }
+        }
+    }
+
     iterator before(bool readonly=true) { return iterator(this, -1, readonly); }
     const_iterator cbefore() { return const_iterator(this, -1); }
     iterator begin(bool readonly=true) { return iterator(this, 0, readonly); }
@@ -825,10 +876,5 @@ inline bool operator!=(const PersistentDict& one, const PersistentDict& other)  
 
 }   // end NS quiet
 
-namespace std {
-    inline void swap(quiet::PersistentDict::insert_iterator& one, quiet::PersistentDict::insert_iterator& other) { one.swap(other); }
-    inline void swap(quiet::PersistentDict::iterator& one, quiet::PersistentDict::iterator& other) { one.swap(other); }
-    inline void swap(quiet::PersistentDict::const_iterator& one, quiet::PersistentDict::const_iterator& other) { one.swap(other); }
-}
 
 

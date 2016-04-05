@@ -14,11 +14,12 @@ import collections
 import threading
 from time import sleep
 from queue import Empty
+from os.path import join
 
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
 
-from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey
+from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey, BadValSize
 
 include "lmdb_options_impl.pxi"
 include "pdict_impl.pxi"
@@ -28,13 +29,18 @@ include "logging_impl.pxi"
 include "filters_impl.pxi"
 
 
+def _adapt_list_append(l):
+    def append(k, v):
+        return l.append((k, v))
+    return append
+
 def _adapt_unary_functor(unary_funct, Chain value_chain):
     def functor(x):
         return value_chain.dumps(unary_funct(value_chain.loads(x))).tobytes()
     return functor
 
 
-def _adapt_binary_functor(binary_funct, Chain key_chain, Chain value_chain):
+def _adapt_binary_scalar_functor(binary_funct, Chain key_chain, Chain value_chain):
     def functor(x, y):
         return value_chain.dumps(
             binary_funct(

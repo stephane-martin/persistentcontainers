@@ -1,8 +1,8 @@
 
 cdef class PRawQueue(object):
     def __cinit__(self, dirname, dbname, LmdbOptions opts=None, Chain value_chain=None):
-        cdef CBString dirn = tocbstring(make_utf8(dirname))
-        cdef CBString dbn = tocbstring(make_utf8(dbname))
+        cdef CBString dirn = tocbstring(dirname)
+        cdef CBString dbn = tocbstring(dbname)
         if dirn.length() == 0:
             raise ValueError("empty dirname")
         if opts is None:
@@ -43,12 +43,12 @@ cdef class PRawQueue(object):
         self.ptr.clear()
 
     cpdef push_front(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(make_utf8(val)))
+        cdef PyBufferWrap view = move(PyBufferWrap(val))
         with nogil:
             self.ptr.push_front(view.get_mdb_val())
 
     cpdef push_back(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(make_utf8(val)))
+        cdef PyBufferWrap view = move(PyBufferWrap(val))
         with nogil:
             self.ptr.push_back(view.get_mdb_val())
 
@@ -59,22 +59,27 @@ cdef class PRawQueue(object):
         self.push_back(item)
 
     cpdef pop_back(self):
-        cdef CBString v
+        cdef QueueIterator it
+        cdef MDB_val v
         with nogil:
-            v = self.ptr.pop_back()
-        return topy(v)
+            it = QueueIterator(self.ptr, 1)
+            v = it.get_value_buffer()
+        return PyBytes_FromStringAndSize(<char*> v.mv_data, v.mv_size)
 
     cpdef pop_front(self):
-        cdef CBString v
+        cdef QueueIterator it
+        cdef MDB_val v
         with nogil:
-            v = self.ptr.pop_front()
-        return topy(v)
+            it = QueueIterator(self.ptr)
+            v = it.get_value_buffer()
+        return PyBytes_FromStringAndSize(<char*> v.mv_data, v.mv_size)
 
     cpdef pop_all(self):
-        cdef vector[CBString] vec
+        l = []
+        append = l.append
         with nogil:
-            vec = self.ptr.pop_all()
-        return [topy(val) for val in vec]
+            self.ptr.pop_all(PyFunctionOutputIterator(append))
+        return l
 
     cpdef get(self, block=True, timeout=None):
         cdef double delay
@@ -177,19 +182,20 @@ cdef class PQueue(PRawQueue):
         cdef CBString v
         with nogil:
             v = self.ptr.pop_back()
-        return self.value_chain.loads(topy(v))
+        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_front(self):
         cdef CBString v
         with nogil:
             v = self.ptr.pop_front()
-        return self.value_chain.loads(topy(v))
+        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_all(self):
-        cdef vector[CBString] vec
+        l = []
+        append = _adapt_append_pqueue_pop_all(self, l)
         with nogil:
-            vec = self.ptr.pop_all()
-        return [self.value_chain.loads(topy(v)) for v in vec]
+            self.ptr.pop_all(PyFunctionOutputIterator(append))
+        return l
 
     def push_front_many(self, vals):
         values_iter = (self.value_chain.dumps(val).tobytes() for val in vals)
@@ -217,3 +223,8 @@ cdef class PQueue(PRawQueue):
         with nogil:
             self.ptr.move_to(deref((<PQueue> other).ptr), chunk_size)
 
+
+def _adapt_append_pqueue_pop_all(PQueue q, list l):
+    def append(v):
+        return l.append(q.value_chain.loads(v))
+    return append

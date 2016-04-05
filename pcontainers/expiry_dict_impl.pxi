@@ -1,16 +1,25 @@
 
-cdef class expiry_dict(object):
-    def __init__(self, PDict values_dict, PDict index_dict, time_t default_expiry=3600, time_t prune_period=5):
-        if not values_dict:
-            raise ValueError('values_dict is not initialized')
-        if not index_dict:
-            raise ValueError('index_dict is not initialized')
-        if values_dict == index_dict:
-            raise ValueError('values_dict and index_dict can not point to the same LMDB database')
+cdef class ExpiryDict(object):
+    def __init__(self, bytes dirname, time_t default_expiry=3600, time_t prune_period=5, LmdbOptions opts=None,
+                 Chain key_chain=None, Chain value_chain=None):
+
+        if opts is None:
+            opts = LmdbOptions()
+        if key_chain is None:
+            key_chain = Chain(None, None, None)
+        if value_chain is None:
+            value_chain = Chain(PickleSerializer(), None, None)
         if prune_period <= 0:
             raise ValueError("prune_period must be strictly positive")
-        self.values_dict = values_dict
-        self.index_dict = index_dict
+
+        nonechain = NoneChain()
+
+        self.index_dict = PDict(dirname=join(dirname, 'index'), dbname=b'', opts=opts, mapping=None,
+                                key_chain=key_chain, value_chain=nonechain)
+
+        self.values_dict = PDict(dirname=join(dirname, 'values'), dbname=b'', opts=opts, mapping=None,
+                                 key_chain=key_chain, value_chain=value_chain)
+
         self.default_expiry = default_expiry
         self.prune_period = prune_period
         self.stopping = threading.Event()
@@ -34,52 +43,48 @@ cdef class expiry_dict(object):
     cpdef prune_expired(self):
         cdef time_t now = c_time(NULL)
         cdef time_t expiry
-        cdef PyBufferWrap values_key_view
 
-        cdef scoped_ptr[cppIterator] index_it
-        cdef scoped_ptr[cppIterator] values_it
-        index_it.reset(new cppIterator(self.index_dict.ptr, 0, 0))
-        values_it.reset(new cppIterator(self.values_dict.ptr, 0, 0))
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
+        cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
 
-        try:
-            while not index_it.get().has_reached_end():
-                s_expiry = self.index_dict.loads(self.index_dict.raw_get_value_buf(deref(index_it)))
-                if s_expiry == b"none":
-                    continue
-                expiry = int(s_expiry)
-                if now >= expiry:
-                    key = self.index_dict.key_chain.loads(self.index_dict.raw_get_key_buf(deref(index_it)))
-                    values_key_view = move(PyBufferWrap(self.values_dict.key_chain.dumps(key)))
-                    with nogil:
-                        index_it.get().dlte()
-                        values_it.get().dlte(values_key_view.get_mdb_val())
+        with index_it:
+            with values_it:
+                try:
+                    while not index_it.has_reached_end():
+                        s_expiry = index_it.get_value_buf()
+                        if s_expiry == b"none":
+                            continue
+                        expiry = int(s_expiry)
+                        if now >= expiry:
+                            key = index_it.get_key_buf()
+                            index_it.dlte()
+                            values_it.dlte(key)
+                        index_it.incr()
 
-                index_it.get().incr()
-
-        except:
-            index_it.get().set_rollback()
-            values_it.get().set_rollback()
-            raise
-
-        finally:
-            values_it.reset()
-            index_it.reset()
+                except:
+                    index_it.set_rollback()
+                    values_it.set_rollback()
+                    raise
 
 
     def __getitem__(self, key):
+        if not key:
+            raise EmptyKey()
         cdef time_t expiry
-        if key in self.index_dict:
-            s_expiry = self.index_dict[key]
-            if s_expiry == b"none":
-                return self.values_dict[key]
-            else:
+        cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict, key=key)
+        cdef PRawDictIterator values_it = PRawDictConstIterator(self.values_dict, key=key)
+
+        with index_it:
+            with values_it:
+                if index_it.has_reached_end():
+                    raise NotFound()
+                s_expiry = index_it.get_value_buf()
+                if s_expiry == b"none":
+                    return values_it.get_value_buf()
                 expiry = int(s_expiry)
                 if c_time(NULL) < expiry:
-                    return self.values_dict[key]
-                else:
-                    raise NotFound()
-        else:
-            raise NotFound()
+                    return values_it.get_value_buf()
+                raise NotFound()
 
     cpdef get(self, key, default=None):
         try:
@@ -91,97 +96,114 @@ cdef class expiry_dict(object):
         self.set(key, value)
 
     cpdef set(self, key, value, time_t expiry=0):
+        if not key:
+            raise EmptyKey()
         if expiry == 0:
             expiry = self.default_expiry
+        s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
 
-        if expiry > 0:
-            index_v = self.index_dict.value_chain.dumps(bytes(expiry + c_time(NULL)))
-        else:
-            index_v = self.index_dict.value_chain.dumps(b'none')
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
+        cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
 
-        cdef scoped_ptr[cppIterator] index_it
-        cdef scoped_ptr[cppIterator] values_it
-        index_it.reset(new cppIterator(self.index_dict.ptr, 0, 0))
-        values_it.reset(new cppIterator(self.values_dict.ptr, 0, 0))
-
-        try:
-            self.index_dict.raw_set_item_buf(deref(index_it), self.index_dict.key_chain.dumps(key), index_v)
-            self.values_dict.raw_set_item_buf(deref(values_it), self.values_dict.key_chain.dumps(key), self.values_dict.value_chain.dumps(value))
-        except:
-            index_it.get().set_rollback()
-            values_it.get().set_rollback()
-            raise
-        finally:
-            values_it.reset()
-            index_it.reset()
+        with index_it:
+            with values_it:
+                try:
+                    index_it.set_item_buf(key, s_expiry)
+                    values_it.set_item_buf(key, value)
+                except:
+                    index_it.set_rollback()
+                    values_it.set_rollback()
+                    raise
 
     def __delitem__(self, key):
+        if not key:
+            raise EmptyKey()
         cdef time_t now = c_time(NULL)
-        index_key = self.index_dict.key_chain.dumps(key)
-        cdef cppIterator index_it = move(cppIterator(self.index_dict.ptr, PyBufferWrap(index_key).get_mdb_val(), 0))
+        before = bytes(now - 1)
 
-        if index_it.has_reached_end():
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict, key=key)
+        cdef time_t expiry
+
+        with index_it:
+            if index_it.has_reached_end():
+                raise NotFound()
+            s_expiry = index_it.get_value_buf()
+            if s_expiry == b"none":
+                index_it.set_item_buf(key, before)
+                return
+            expiry = int(s_expiry)
+            if now < expiry:
+                index_it.set_item_buf(key, before)
+                return
             raise NotFound()
-        s_expiry = self.index_dict.loads(self.index_dict.raw_get_value_buf(index_it))
-        if s_expiry == b"none":
-            self.index_dict.raw_set_item_buf(index_it, index_key, self.index_dict.value_chain.dumps(bytes(now - 1)))
-            return
-        cdef time_t expiry = int(s_expiry)
-        if now < expiry:
-            self.index_dict.raw_set_item_buf(index_it, index_key, self.index_dict.value_chain.dumps(bytes(now - 1)))
-            return
-        raise NotFound()
 
     cpdef pop(self, key, default=None):
+        if not key:
+            raise EmptyKey()
         cdef time_t now = c_time(NULL)
-        index_key = self.index_dict.key_chain.dumps(key)
-        cdef cppIterator index_it = move(cppIterator(self.index_dict.ptr, PyBufferWrap(index_key).get_mdb_val(), 0))
-        if index_it.has_reached_end():
-            raise NotFound()
-        s_expiry = self.index_dict.loads(self.index_dict.raw_get_value_buf(index_it))
-        if s_expiry == b"none":
-            self.index_dict.raw_set_item_buf(index_it, index_key, self.index_dict.value_chain.dumps(bytes(now - 1)))
-            return self.values_dict[key]
-        cdef time_t expiry = int(s_expiry)
-        if now < expiry:
-            self.index_dict.raw_set_item_buf(index_it, index_key, self.index_dict.value_chain.dumps(bytes(now - 1)))
-            return self.values_dict[key]
-        if default:
-            return default
-        raise NotFound()
+        cdef time_t expiry
+        before = bytes(now - 1)
+
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict, key=key)
+        cdef PRawDictIterator values_it = PRawDictConstIterator(self.values_dict, key=key)
+
+        with index_it:
+            with values_it:
+                try:
+                    if index_it.has_reached_end():
+                        raise NotFound()
+                    s_expiry = index_it.get_value_buf()
+                    if s_expiry == b"none":
+                        index_it.set_item_buf(key, before)
+                        return values_it.get_value_buf()
+                    expiry = int(s_expiry)
+                    if now < expiry:
+                        index_it.set_item_buf(key, before)
+                        return values_it.get_value_buf()
+                    if default:
+                        return default
+                    raise NotFound()
+                except:
+                    index_it.set_rollback()
+                    raise
+
 
     cpdef popitem(self):
         cdef time_t expiry
-        cdef cppIterator index_it = move(cppIterator(self.index_dict.ptr, 0, 0))
         cdef time_t now = c_time(NULL)
-        cdef PyBufferWrap index_value_view = move(PyBufferWrap(self.index_dict.value_chain.dumps(bytes(now - 1))))
-
-        while not index_it.has_reached_end():
-            key = self.index_dict.key_chain.loads(self.index_dict.raw_get_key_buf(index_it))
-            s_expiry = self.index_dict.value_chain.loads(self.index_dict.raw_get_value_buf(index_it))
-            if s_expiry == b"none":
-                with nogil:
-                    index_it.set_value(index_value_view.get_mdb_val())
-                return key, self.values_dict[key]
-            expiry = int(s_expiry)
-            if now < expiry:
-                with nogil:
-                    index_it.set_value(index_value_view.get_mdb_val())
-                return key, self.values_dict[key]
-            index_it.incr()
-
-        raise EmptyDatabase()
+        before = bytes(now - 1)
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
+        cdef PRawDictIterator values_it
+        with index_it:
+            while not index_it.has_reached_end():
+                s_expiry = index_it.get_value_buf()
+                key = index_it.get_key_buf()
+                values_it = PRawDictConstIterator(self.values_dict, key=key)
+                with values_it:
+                    if s_expiry == b"none":
+                        index_it.set_item_buf(key, before)
+                        return key, values_it.get_value_buf()
+                    expiry = int(s_expiry)
+                    if now < expiry:
+                        index_it.set_item_buf(key, before)
+                        return key, values_it.get_value_buf()
+                index_it.incr()
+            raise EmptyDatabase()
 
     def __iter__(self):
         cdef time_t expiry
         cdef time_t now = c_time(NULL)
-        for key, s_expiry in self.index_dict.items():
-            if s_expiry == b"none":
-                yield key
-            else:
-                expiry = int(s_expiry)
-                if now < expiry:
-                    yield key
+        cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
+        with index_it:
+            while not index_it.has_reached_end():
+                s_expiry = index_it.get_value_buf()
+                if s_expiry == b"none":
+                    yield index_it.get_key_buf()
+                else:
+                    expiry = int(s_expiry)
+                    if now < expiry:
+                        yield index_it.get_key_buf()
+                index_it.incr()
 
     def keys(self):
         return self.__iter__(self)
@@ -189,65 +211,77 @@ cdef class expiry_dict(object):
     def values(self):
         cdef time_t expiry
         cdef time_t now = c_time(NULL)
-        for key, s_expiry in self.index_dict.items():
-            if s_expiry == b"none":
-                yield self.values_dict[key]
-            else:
-                expiry = int(s_expiry)
-                if now < expiry:
-                    yield self.values_dict[key]
+        cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
+        cdef PRawDictIterator values_it = PRawDictConstIterator(self.index_dict)
+        with index_it:
+            with values_it:
+                while not index_it.has_reached_end():
+                    s_expiry = index_it.get_value_buf()
+                    if s_expiry == b"none":
+                        yield values_it.get_value_buf()
+                    else:
+                        expiry = int(s_expiry)
+                        if now < expiry:
+                            yield values_it.get_value_buf()
+                    index_it.incr()
+                    values_it.incr()
 
     def items(self):
         cdef time_t expiry
         cdef time_t now = c_time(NULL)
-        for key, s_expiry in self.index_dict.items():
-            if s_expiry == b"none":
-                yield (key, self.values_dict[key])
-            else:
-                expiry = int(s_expiry)
-                if now < expiry:
-                    yield (key, self.values_dict[key])
+        cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
+        cdef PRawDictIterator values_it = PRawDictConstIterator(self.index_dict)
+        with index_it:
+            with values_it:
+                while not index_it.has_reached_end():
+                    s_expiry = index_it.get_value_buf()
+                    if s_expiry == b"none":
+                        yield values_it.get_item_buf()
+                    else:
+                        expiry = int(s_expiry)
+                        if now < expiry:
+                            yield values_it.get_item_buf()
+                    index_it.incr()
+                    values_it.incr()
 
     def __contains__(self, key):
+        if not key:
+            raise EmptyKey()
         cdef time_t expiry
-        if key in self.index_dict:
-            s_expiry = self.index_dict[key]
+        cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict, key=key)
+        with index_it:
+            if index_it.has_reached_end():
+                return False
+            s_expiry = index_it.get_value_buf()
             if s_expiry == b"none":
+                return False
+            expiry = int(s_expiry)
+            if c_time(NULL) < expiry:
                 return True
-            else:
-                expiry = int(s_expiry)
-                if c_time(NULL) < expiry:
-                    return True
-                else:
-                    raise False
-        else:
             return False
 
     def update(self, e=None, **kwds):
-        future = self.index_dict.value_chain.dumps(bytes(c_time(NULL) + self.default_expiry))
-        cdef scoped_ptr[cppIterator] index_it
-        cdef scoped_ptr[cppIterator] values_it
-        index_it.reset(new cppIterator(self.index_dict.ptr, 0, 0))
-        values_it.reset(new cppIterator(self.values_dict.ptr, 0, 0))
+        cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
+        cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
+        s_expiry = bytes(self.default_expiry + c_time(NULL))
 
-        try:
-            if e is not None:
-                if hasattr(e, 'keys'):
-                    for key in e.keys():
-                        self.values_dict.raw_set_item_buf(deref(values_it), self.values_dict.key_chain.dumps(key), self.values_dict.value_chain.dumps(e[key]))
-                        self.index_dict.raw_set_item_buf(deref(index_it), self.index_dict.key_chain.dumps(key), future)
-                else:
-                    for (key, value) in e:
-                        self.values_dict.raw_set_item_buf(deref(values_it), self.values_dict.key_chain.dumps(key), self.values_dict.value_chain.dumps(value))
-                        self.index_dict.raw_set_item_buf(deref(index_it), self.index_dict.key_chain.dumps(key), future)
+        with index_it:
+            with values_it:
+                try:
+                    if e is not None:
+                        if hasattr(e, 'keys'):
+                            for key in e.keys():
+                                index_it.set_item_buf(key, s_expiry)
+                                values_it.set_item_buf(key, e[key])
+                        else:
+                            for (key, value) in e:
+                                index_it.set_item_buf(key, s_expiry)
+                                values_it.set_item_buf(key, value)
+                    for key in kwds:
+                        index_it.set_item_buf(key, s_expiry)
+                        values_it.set_item_buf(key, kwds[key])
+                except:
+                    index_it.set_rollback()
+                    values_it.set_rollback()
+                    raise
 
-            for key in kwds:
-                self.values_dict.raw_set_item_buf(deref(values_it), self.values_dict.key_chain.dumps(key), self.values_dict.value_chain.dumps(kwds[key]))
-                self.index_dict.raw_set_item_buf(deref(index_it), self.index_dict.key_chain.dumps(key), future)
-        except:
-            index_it.get().set_rollback()
-            values_it.get().set_rollback()
-            raise
-        finally:
-            values_it.reset()
-            index_it.reset()

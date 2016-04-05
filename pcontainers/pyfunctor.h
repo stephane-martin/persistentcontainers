@@ -6,7 +6,7 @@
 #include <boost/move/move.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
-#include <boost/smart_ptr/detail/spinlock.hpp>
+#include <boost/atomic.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <Python.h>
 #include "lmdb_exceptions.h"
@@ -16,10 +16,10 @@
 
 namespace quiet {
 
-using std::string;
 using namespace lmdb;
 using namespace utils;
 using Bstrlib::CBString;
+using std::pair;
 
 
 class PyPredicate {
@@ -166,8 +166,8 @@ public:
         return unary_functor(PyFunctor(obj));
     }
 
-    static inline binary_functor make_binary_functor(PyObject* obj) {
-        return binary_functor(PyFunctor(obj));
+    static inline binary_scalar_functor make_binary_scalar_functor(PyObject* obj) {
+        return binary_scalar_functor(PyFunctor(obj));
     }
 
     PyFunctor(): callback() { }
@@ -235,7 +235,6 @@ public:
             if (!py_key) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-
             PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), NULL));
 
             if (!obj) {
@@ -284,7 +283,6 @@ public:
             if (!py_value) {
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctor: PyString_FromStringAndSize failed :(") );
             }
-
             PyNewRef obj(PyObject_CallFunctionObjArgs(callback.get(), py_key.get(), py_value.get(), NULL));
 
             if (!obj) {
@@ -320,53 +318,59 @@ public:
 class PyStringInputIterator {
 private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE(PyStringInputIterator)
+protected:
+    PyNewRef iterator;
+    boost::atomic_bool finished;
+    CBString current_value;
 public:
     BOOST_EXPLICIT_OPERATOR_BOOL()
     bool operator!() const { return !bool(iterator); }
+    PyStringInputIterator(): iterator(), finished(true), current_value("") { }
 
-    PyStringInputIterator(): iterator(), empty(true), current_value("") { }
-
-    explicit PyStringInputIterator(PyObject* obj): iterator(), empty(true), current_value("") {
+    explicit PyStringInputIterator(PyObject* obj): iterator(obj), finished(false), current_value("") {
         if (obj) {
-            GilWrapper gil;
             {
-                int res = PyIter_Check(obj);
-                if (!res) {
+                GilWrapper gil;
+                ++iterator;
+                if (!PyIter_Check(obj)) {
                     BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyStringInputIterator: obj is not an iterator") );
                 }
-                iterator = PyNewRef(obj);
-                ++iterator;
-                empty = false;
                 _next_value();
             }
         } else {
+            finished.store(true);
             _LOG_DEBUG << "New trivial PyStringInputIterator object";
         }
     }
 
     ~PyStringInputIterator() {
         if (iterator) {
-            GilWrapper gil;
             {
+                GilWrapper gil;
                 iterator.reset();
             }
         }
     }
 
-    PyStringInputIterator(BOOST_RV_REF(PyStringInputIterator) other): iterator(boost::move(other.iterator)), empty(other.empty), current_value(other.current_value) {
-        // move constructor (doesnt need the GIL, as iterator(boost::move(other.iterator)) is just a swap of pointers)
-        other.empty = true;
-        other.current_value = "";
+    // move constructor
+    PyStringInputIterator(BOOST_RV_REF(PyStringInputIterator) other): iterator(), finished(true), current_value() {
+        if (other) {
+            bool other_is_finished = other.finished.exchange(true);
+            iterator = boost::move(other.iterator);
+            std::swap(current_value, other.current_value);
+            finished.store(other_is_finished);
+        }
     }
 
     PyStringInputIterator& operator=(BOOST_RV_REF(PyStringInputIterator) other) {   // move assignment
+        finished.store(true);
         current_value = "";
-        empty = true;
-        GilWrapper gil;
-        {
+        iterator.reset();
+        if (other) {
+            bool other_is_finished = other.finished.exchange(true);
             iterator = boost::move(other.iterator);
-            std::swap(empty, other.empty);
             std::swap(current_value, other.current_value);
+            finished.store(other_is_finished);
         }
         return *this;
     }
@@ -375,7 +379,7 @@ public:
         if (!one && !other) {
             return true;
         }
-        if (one.empty && other.empty) {
+        if (one.finished.load() && other.finished.load()) {
             return true;
         }
         return false;
@@ -386,6 +390,7 @@ public:
     }
 
     PyStringInputIterator& operator++() {
+        GilWrapper gil;
         _next_value();
         return *this;
     }
@@ -395,76 +400,171 @@ public:
     }
 
     CBString operator*() {
+        if (finished.load()) {
+            return "";
+        }
         return current_value;
     }
 
 protected:
-    PyNewRef iterator;
-    bool empty;
-    CBString current_value;
-    boost::detail::spinlock next_value_lock;
+    void _next_value() {        // not protected by GilWrapper, have to be careful when calling _next_value
 
-    void _next_value() {
-        boost::detail::spinlock::scoped_lock slock(next_value_lock);
-        if (empty) {
+        if (!iterator) {
             return;
         }
-        GilWrapper gil;
-        {
-            PyNewRef next_obj(Py_TYPE(iterator.get())->tp_iternext(iterator.get()));      // new ref
-            if (!next_obj) {
-                PyObject* exc_type = PyErr_Occurred();
-                if (exc_type) {
-                    if (exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)) {
-                        PyErr_Clear();
-                    } else {
-                        // a python exception occurred, but it's not a StopIteration. let it flow to python code.
-                        empty = true;
-                        current_value = "";
-                        BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
-                    }
-                }
-                empty = true;
-                current_value = "";
-                return;
-            }
 
-            if (PyUnicode_Check(next_obj.get())) {
-                // ooops, the callback returned a unicode object... lets encode it in utf8 first
-                next_obj = PyNewRef(PyUnicode_AsUTF8String(next_obj.get()));
-                if (!next_obj) {
-                    // should not happen
-                    empty = true;
-                    current_value = "";
-                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyIterator: converting result to UTF-8 failed :(") );
-                }
-            }
+        if (finished.load()) {
+            return;
+        }
 
-            if (!PyBytes_Check(next_obj.get())) {
-                next_obj = PyNewRef(PyObject_Bytes(next_obj.get()));
-                if (!next_obj) {
-                    // conversion to bytes failed
-                    empty = true;
+        PyNewRef next_obj(Py_TYPE(iterator.get())->tp_iternext(iterator.get()));      // new ref
+        if (!next_obj) {
+            PyObject* exc_type = PyErr_Occurred();
+            if (exc_type) {
+                if (exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)) {
+                    PyErr_Clear();
+                } else {
+                    // a python exception occurred, but it's not a StopIteration. let it flow to python code.
+                    finished.store(true);
                     current_value = "";
                     BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
                 }
             }
+            finished.store(true);
+            current_value = "";
+            return;
+        }
 
-            char* buffer = NULL;
-            Py_ssize_t length = 0;
-            int res = PyBytes_AsStringAndSize(next_obj.get(), &buffer, &length);
-            if (res == -1) {
-                // should not happen...
-                empty = true;
+        if (PyUnicode_Check(next_obj.get())) {
+            // ooops, the callback returned a unicode object... lets encode it in utf8 first
+            next_obj = PyNewRef(PyUnicode_AsUTF8String(next_obj.get()));
+            if (!next_obj) {
+                // should not happen
+                finished.store(true);
+                current_value = "";
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyIterator: converting result to UTF-8 failed :(") );
+            }
+        }
+
+        if (!PyBytes_Check(next_obj.get())) {
+            next_obj = PyNewRef(PyObject_Bytes(next_obj.get()));
+            if (!next_obj) {
+                // conversion to bytes failed
+                finished.store(true);
                 current_value = "";
                 BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
-            } else {
-                current_value = CBString(buffer, length);
             }
+        }
+
+        char* buffer = NULL;
+        Py_ssize_t length = 0;
+        int res = PyBytes_AsStringAndSize(next_obj.get(), &buffer, &length);
+        if (res == -1) {
+            // should not happen...
+            finished.store(true);
+            current_value = "";
+            BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("python exception happened") );
+        } else {
+            current_value = CBString(buffer, length);
         }
     }
 
 
 }; // END CLASS PyStringInputIterator
+
+class PyFunctionOutputIterator {
+protected:
+    PyNewRef pyfunction;
+public:
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !bool(pyfunction); }
+
+    PyFunctionOutputIterator(): pyfunction() { }
+
+    explicit PyFunctionOutputIterator(PyObject* obj): pyfunction(obj) {
+        if (obj) {
+            GilWrapper gil;
+            {
+                ++pyfunction;
+                int res = PyCallable_Check(obj);
+                if (!res) {
+                    BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: obj is not callable") );
+                }
+            }
+        } else {
+            _LOG_DEBUG << "New trivial PyStringInputIterator object";
+        }
+    }
+
+    ~PyFunctionOutputIterator() {
+        if (pyfunction) {
+            GilWrapper gil;
+            {
+                pyfunction.reset();
+            }
+        }
+    }
+
+    PyFunctionOutputIterator(const PyFunctionOutputIterator& other) {
+        GilWrapper gil;
+        {
+            pyfunction = other.pyfunction;
+        }
+    }
+
+    PyFunctionOutputIterator& operator=(const PyFunctionOutputIterator& other) {   // move assignment
+        GilWrapper gil;
+        {
+            pyfunction = other.pyfunction;
+        }
+        return *this;
+    }
+
+    PyFunctionOutputIterator& operator*() { return *this; }
+
+    PyFunctionOutputIterator& operator=(const std::string& s) {
+        return *this;
+    }
+
+    PyFunctionOutputIterator& operator=(const CBString& s) {
+        GilWrapper gil;
+        {
+            PyNewRef py_s(PyBytes_FromStringAndSize(s, s.length()));
+            if (!py_s) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: PyString_FromStringAndSize failed") );
+            }
+            PyNewRef obj(PyObject_CallFunctionObjArgs(pyfunction.get(), py_s.get(), NULL));
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: Calling python callback failed") );
+            }
+        }
+        return *this;
+    }
+
+    PyFunctionOutputIterator& operator=(const pair<const CBString, CBString>& p) {
+        GilWrapper gil;
+        {
+            PyNewRef py_first(PyBytes_FromStringAndSize(p.first, p.first.length()));
+            if (!py_first) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: PyString_FromStringAndSize failed") );
+            }
+            PyNewRef py_second(PyBytes_FromStringAndSize(p.second, p.second.length()));
+            if (!py_second) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: PyString_FromStringAndSize failed") );
+            }
+            PyNewRef obj(PyObject_CallFunctionObjArgs(pyfunction.get(), py_first.get(), py_second.get(), NULL));
+            if (!obj) {
+                BOOST_THROW_EXCEPTION( runtime_error() << lmdb_error::what("PyFunctionOutputIterator: Calling python callback failed") );
+            }
+
+
+        }
+        return *this;
+    }
+
+
+
+};
+
 
 } // end namespace quiet

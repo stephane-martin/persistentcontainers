@@ -26,6 +26,8 @@ namespace utils {
 
 using std::setfill;
 using std::setw;
+using std::pair;
+using std::make_pair;
 using std::ostringstream;
 using lmdb::lmdb_error;
 using lmdb::io_error;
@@ -36,11 +38,44 @@ using Bstrlib::CBString;
 typedef boost::function<bool (const CBString& x)> unary_predicate;
 typedef boost::function<bool (const CBString& x, const CBString& y)> binary_predicate;
 typedef boost::function<CBString (const CBString& x)> unary_functor;
-typedef boost::function<CBString (const CBString& x, const CBString& y)> binary_functor;
+typedef boost::function<CBString (const CBString& x, const CBString& y)> binary_scalar_functor;
+typedef boost::function< pair<CBString, CBString> (const CBString& x, const CBString& y) > binary_functor;
+
+
+inline bool key_is_in_interval(const CBString& key, const CBString& first, const CBString& last) {
+    if (bool(first.length()) && (key < first)) {
+        return false;
+    }
+    if (bool(last.length()) && (key >= last)) {
+        return false;
+    }
+    return true;
+}
 
 inline bool binary_true_pred(const CBString& s1, const CBString& s2) {
     return true;
 }
+
+inline bool unary_true_pred(const CBString& s) {
+    return true;
+}
+
+inline CBString unary_identity_functor(const CBString& s) {
+    return s;
+}
+
+inline pair<CBString, CBString> binary_identity_functor(const CBString& s1, const CBString& s2) {
+    return make_pair(s1, s2);
+}
+
+class KeyInIntervalUnaryPredicate {
+protected:
+    const CBString first;
+    const CBString last;
+public:
+    KeyInIntervalUnaryPredicate(const CBString& f, const CBString& l): first(f), last(l) { }
+    bool operator()(const CBString& key) { return key_is_in_interval(key, first, last); }
+};
 
 inline MDB_val make_mdb_val() {
     MDB_val m;
@@ -213,13 +248,12 @@ private:
     TempDirectory& operator=(const TempDirectory&);
 protected:
     CBString path;
-    bool _create;
-    bool _destroy;
+    const bool _create;
+    const bool _destroy;
 
     void do_destroy() {
         if (bool(path.length()) && _destroy) {
             rmrf(path);
-            _destroy = false;
             _LOG_DEBUG << "Deleted temp directory: " << (const char*) path;
         }
     }
@@ -246,7 +280,7 @@ public:
 
     TempDirectory(bool create=true, bool destroy=true, const CBString& tmpl="persistent_XXXXXX"): _create(create), _destroy(destroy) {
         CBString full_tmpl(CBString(P_tmpdir) + CBString("/") + tmpl);
-        path = cpp_mkdtemp(full_tmpl, create);
+        path = cpp_mkdtemp(full_tmpl, _create);
     }
 
     friend bool operator==(const TempDirectory& one, const TempDirectory& other) {

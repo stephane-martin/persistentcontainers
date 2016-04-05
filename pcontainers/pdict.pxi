@@ -1,4 +1,36 @@
 
+cdef class PRawDictConstIterator(object):
+    cdef PRawDict dict
+    cdef int pos
+    cdef object key
+    cdef cppConstIterator cpp_iterator
+    cdef cpp_bool has_reached_end(self)
+    cdef cpp_bool has_reached_beginning(self)
+    cdef incr(self)
+    cdef decr(self)
+    cdef get_key(self)
+    cdef get_key_buf(self)
+    cdef get_value(self)
+    cdef get_value_buf(self)
+    cdef get_item(self)
+    cdef get_item_buf(self)
+
+cdef class PRawDictIterator(object):
+    cdef PRawDict dict
+    cdef int pos
+    cdef object key
+    cdef cppIterator cpp_iterator
+    cdef cpp_bool readonly
+    cdef cpp_bool has_reached_end(self)
+    cdef cpp_bool has_reached_beginning(self)
+    cdef set_rollback(self)
+    cdef incr(self)
+    cdef decr(self)
+    cdef set_item_buf(self, k, v)
+    cdef get_key_buf(self)
+    cdef get_value_buf(self)
+    cdef dlte(self, key=?)
+
 cdef class DirectAccess(object):
     cdef cppConstIterator cpp_iterator
     cdef object buf
@@ -24,23 +56,13 @@ cdef class PRawDict(object):
     cpdef iterkeys(self, reverse=?)
     cpdef itervalues(self, reverse=?)
     cpdef iteritems(self, reverse=?)
-    cpdef copy_to(self, other, ssize_t chunk_size=?)
     cpdef move_to(self, other, ssize_t chunk_size=?)
     cpdef remove_duplicates(self, first=?, last=?)
 
-    cdef raw_get_key(self, cppConstIterator& it)
-    cdef raw_get_key_buf(self, cppIterator& it)
-    cdef raw_get_key_buf_const(self, cppConstIterator& it)
-    cdef raw_get_value(self, cppConstIterator& it)
-    cdef raw_get_value_buf(self, cppIterator& it)
-    cdef raw_get_value_buf_const(self, cppConstIterator& it)
-    cdef raw_get_item(self, cppConstIterator& it)
-    cdef raw_get_item_buf(self, cppIterator& it)
-    cdef raw_get_item_buf_const(self, cppConstIterator& it)
-    cdef raw_set_item_buf(self, cppIterator& it, k, v)
-
-
-cdef class PDict(PRawDict):
     cdef Chain key_chain
     cdef Chain value_chain
+
+cdef class PDict(PRawDict):
+    pass
+
 

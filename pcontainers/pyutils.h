@@ -11,6 +11,12 @@
 #include "logging.h"
 #include "lmdb.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define MyPyInt_Check PyLong_Check
+#else
+#define MyPyInt_Check PyInt_Check
+#endif
+
 
 namespace utils {
 
@@ -99,11 +105,16 @@ private:
 
     void _set_view() {
         if (obj) {
+            if (PyUnicode_Check(obj.get())) {
+                obj = PyNewRef(PyUnicode_AsUTF8String(obj.get()));
+            }
+            if (MyPyInt_Check(obj.get()) || PyLong_Check(obj.get()) || PyFloat_Check(obj.get())) {
+                obj = PyNewRef(PyObject_Bytes(obj.get()));
+            }
             obj_view = (Py_buffer*) PyMem_Malloc(sizeof(Py_buffer));
             if (!obj_view) {
                 BOOST_THROW_EXCEPTION(std::bad_alloc());
             }
-            // _LOG_DEBUG << "PyBufferWrap new view";
             if (PyObject_GetBuffer(obj.get(), obj_view, PyBUF_SIMPLE) == -1) {
                 PyMem_Free(obj_view);
                 obj_view = NULL;
@@ -176,8 +187,6 @@ public:
         return v;
     }
 
-
-
     Py_ssize_t length() const {
         if (obj_view) {
             return obj_view->len;
@@ -194,7 +203,6 @@ public:
 
     void close() {
         if (obj_view) {
-            // _LOG_DEBUG << "PyBufferWrap releasing view";
             PyBuffer_Release(obj_view);
             PyMem_Free(obj_view);
             obj_view = NULL;
