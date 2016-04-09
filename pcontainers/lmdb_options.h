@@ -1,26 +1,8 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <memory>
-#include <vector>
-#include <map>
-#include <utility>
-#include <algorithm>
-#include <boost/core/explicit_operator_bool.hpp>
 #include "lmdb.h"
 
 namespace lmdb {
-
-using std::string;
-using std::pair;
-using std::vector;
-using std::map;
-using std::cout;
-using std::endl;
-using std::exception;
 
 class lmdb_options {
 public:

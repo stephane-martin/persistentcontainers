@@ -1,35 +1,20 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <memory>
-#include <vector>
-#include <map>
-#include <utility>
-#include <algorithm>
-#include <stdlib.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 #include <bstrlib/bstrwrap.h>
 
 #include "persistentdict.h"
-#include "mutexwrap.h"
 #include "lmdb.h"
 
 namespace quiet {
 
-using std::string;
-using std::pair;
-using std::vector;
-using std::map;
-using std::cout;
-using std::endl;
-using std::exception;
+using boost::mutex;
+using boost::lock_guard;
 using Bstrlib::CBString;
 
 class PersistentQueue {
@@ -155,33 +140,7 @@ public:
             return operator=(make_mdb_val(new_value));
         }
 
-        back_insert_iterator& operator=(MDB_val v) {
-            if (!*this) {
-                BOOST_THROW_EXCEPTION(not_initialized());
-            }
-            MDB_val k = make_mdb_val();
-            CBString insert_key;
-
-            int res = (direction > 0) ? cursor->last() : cursor->first();
-            if (res == MDB_NOTFOUND) {
-                insert_key = any_tocbstring(MIDDLE);
-            } else {
-                cursor->get_current_key(k);
-                insert_key = make_string(k);
-                long long int_k = strtoull(insert_key, NULL, 10);
-                if (int_k == 0) {
-                    BOOST_THROW_EXCEPTION( lmdb_error() << lmdb_error::what("A key in the database in not an integer key") );
-                }
-                insert_key = any_tocbstring(int_k + direction, NDIGITS);
-            }
-            k = make_mdb_val(insert_key);
-            if (direction > 0) {
-                cursor->append_key_value(k, v);
-            } else {
-                cursor->set_key_value(k, v);
-            }
-            return *this;
-        }
+        back_insert_iterator& operator=(MDB_val v);
 
         void set_rollback(bool val=true) {
             if (*this) {
@@ -253,7 +212,7 @@ public:
 
     protected:
         boost::atomic_bool initialized;
-        MutexWrap current_value_lock;
+        mutex current_value_lock;
         boost::scoped_ptr<CBString> current_value;
 
         PersistentQueue* the_queue;
@@ -267,31 +226,8 @@ public:
             return true;
         }
 
-        void _next_value() {
-            MutexWrapLock slock(current_value_lock);
-            if (bool(cursor) && cursor->first() != MDB_NOTFOUND) {
-                MDB_val v;
-                cursor->get_current_value(v);
-                current_value.reset(new CBString(v.mv_data, v.mv_size));
-                cursor->del();
-            } else {
-                _LOG_DEBUG << "iiterator: no next_value";
-                current_value.reset();
-            }
-        }
-
-        void _last_value() {
-            MutexWrapLock slock(current_value_lock);
-            if (bool(cursor) && cursor->last() != MDB_NOTFOUND) {
-                MDB_val v;
-                cursor->get_current_value(v);
-                current_value.reset(new CBString(v.mv_data, v.mv_size));
-                cursor->del();
-            } else {
-                _LOG_DEBUG << "iiterator: no last_value";
-                current_value.reset();
-            }
-        }
+        void _next_value();
+        void _last_value();
 
         void swap(iiterator& other) {
             using std::swap;
@@ -448,12 +384,12 @@ public:
         }
     }
 
-    inline void push_front(const CBString& val) {
+    void push_front(const CBString& val) {
         front_insert_iterator it(this);
         it = val;
     }
 
-    inline void push_front(MDB_val val) {
+    void push_front(MDB_val val) {
         front_insert_iterator it(this);
         it = val;
     }
@@ -479,8 +415,6 @@ public:
         }
     }
 
-    // todo: rewrite with an OutputIterator
-    vector<CBString> pop_all();
     void clear() { the_dict.clear(); }
     void remove_duplicates() { the_dict.remove_duplicates(); }
 

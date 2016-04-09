@@ -18,8 +18,16 @@ cdef class NoneSerializer(Serializer):
         obj.seek(0)
         return obj
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            return isinstance(other, NoneSerializer)
+        elif op == 3:
+            return not isinstance(other, NoneSerializer)
+        else:
+            raise ValueError("unsupported operation")
+
 cdef class PickleSerializer(Serializer):
-    def __init__(self, protocol=2):
+    def __init__(self, int protocol=2):
         if self.pickle_module is None:
             try:
                 # noinspection PyPep8Naming
@@ -41,6 +49,17 @@ cdef class PickleSerializer(Serializer):
         obj.seek(0)
         return self.pickle_module.load(obj)
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, PickleSerializer):
+                return False
+            return self.protocol == (<PickleSerializer> other).protocol
+        elif op == 3:
+            if isinstance(other, PickleSerializer):
+                return self.protocol != (<PickleSerializer> other).protocol
+            return True
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class MessagePackSerializer(Serializer):
     def __init__(self, unicode_errors='strict', use_single_float=False, use_list=True, default=None, ext_hook=None):
@@ -49,7 +68,7 @@ cdef class MessagePackSerializer(Serializer):
             self.messagepack_module = msgpack
 
         self.mpack_args = {
-            'unicode_errors': unicode_errors, 'use_single_float': use_single_float,
+            'unicode_errors': str(unicode_errors), 'use_single_float': bool(use_single_float),
             'encoding': 'utf-8', 'use_bin_type': True, 'default': default
         }
         self.use_list = bool(use_list)
@@ -69,6 +88,22 @@ cdef class MessagePackSerializer(Serializer):
             obj, use_list=self.use_list, encoding="utf-8", unicode_errors=self.mpack_args['unicode_errors'],
             ext_hook=self.ext_hook
         )
+
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, MessagePackSerializer):
+                return False
+            return self.mpack_args == (<MessagePackSerializer> other).mpack_args and \
+                self.use_list == (<MessagePackSerializer> other).use_list and \
+                self.ext_hook == (<MessagePackSerializer> other).ext_hook
+        elif op == 3:
+            if isinstance(other, MessagePackSerializer):
+                return self.mpack_args != (<MessagePackSerializer> other).mpack_args or \
+                    self.use_list != (<MessagePackSerializer> other).use_list or \
+                    self.ext_hook != (<MessagePackSerializer> other).ext_hook
+            return True
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class JsonSerializer(Serializer):
 
@@ -95,12 +130,23 @@ cdef class JsonSerializer(Serializer):
         obj.seek(0)
         return self.json_module.load(obj, encoding='utf-8')
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, JsonSerializer):
+                return False
+            return self.default == (<JsonSerializer> other).default
+        elif op == 3:
+            if isinstance(other, JsonSerializer):
+                return self.default != (<JsonSerializer> other).default
+            return True
+        else:
+            raise ValueError("unsupported operation")
+
 
 # noinspection PyAbstractClass
 cdef class Signer(Filter):
     def __init__(self, bytes secret=b''):
         self.secret = secret
-
 
 cdef class NoneSigner(Signer):
     cdef dumps(self, obj):
@@ -114,6 +160,13 @@ cdef class NoneSigner(Signer):
         obj.seek(0)
         return obj
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            return isinstance(other, NoneSigner)
+        elif op == 3:
+            return not isinstance(other, NoneSigner)
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class HMACSigner(Signer):
     def __init__(self, secret):
@@ -147,6 +200,18 @@ cdef class HMACSigner(Signer):
         obj.seek(0)
         return obj
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, HMACSigner):
+                return False
+            return self.secret == (<HMACSigner> other).secret
+        elif op == 3:
+            if isinstance(other, HMACSigner):
+                return self.secret != (<HMACSigner> other).secret
+            return True
+        else:
+            raise ValueError("unsupported operation")
+
 # noinspection PyAbstractClass
 cdef class Compresser(Filter):
     pass
@@ -158,6 +223,13 @@ cdef class NoneCompresser(Compresser):
     cdef loads(self, obj):
         return obj
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            return isinstance(other, NoneCompresser)
+        elif op == 3:
+            return not isinstance(other, NoneCompresser)
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class SnappyCompresser(Compresser):
     def __init__(self):
@@ -170,6 +242,13 @@ cdef class SnappyCompresser(Compresser):
     cdef loads(self, obj):
         return MBufferIO(self.snappyx_module.decompress(obj))
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            return isinstance(other, SnappyCompresser)
+        elif op == 3:
+            return not isinstance(other, SnappyCompresser)
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class LZ4Compresser(Compresser):
     def __init__(self, level=None, block_size_id=None, block_mode_linked=True, checksum=True):
@@ -178,8 +257,8 @@ cdef class LZ4Compresser(Compresser):
             self.lz4_module = lz4framed
             self.blocksize_default = lz4framed.LZ4F_BLOCKSIZE_DEFAULT
             self.compression_min = lz4framed.LZ4F_COMPRESSION_MIN
-        self.level = level if level is not None else self.compression_min
-        self.block_size_id = block_size_id if block_size_id is not None else self.blocksize_default
+        self.level = int(level) if level is not None else self.compression_min
+        self.block_size_id = int(block_size_id) if block_size_id is not None else self.blocksize_default
         self.block_mode_linked = bool(block_mode_linked)
         self.checksum = bool(checksum)
 
@@ -206,6 +285,23 @@ cdef class LZ4Compresser(Compresser):
         decompressed.seek(0)
         return decompressed
 
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, LZ4Compresser):
+                return False
+            return self.level == (<LZ4Compresser> other).level and \
+                self.block_size_id == (<LZ4Compresser> other).block_size_id and \
+                self.block_mode_linked == (<LZ4Compresser> other).block_mode_linked and \
+                self.checksum == (<LZ4Compresser> other).checksum
+        elif op == 3:
+            if isinstance(other, LZ4Compresser):
+                return self.level != (<LZ4Compresser> other).level or \
+                    self.block_size_id != (<LZ4Compresser> other).block_size_id or \
+                    self.block_mode_linked != (<LZ4Compresser> other).block_mode_linked or \
+                    self.checksum != (<LZ4Compresser> other).checksum
+            return True
+        else:
+            raise ValueError("unsupported operation")
 
 cdef class Chain(Filter):
     def __init__(self, Serializer serializer=None, Signer signer=None, Compresser compresser=None):
@@ -218,6 +314,22 @@ cdef class Chain(Filter):
 
     cdef loads(self, obj):
         return self.serializer.loads(self.compresser.loads(self.signer.loads(obj)))
+
+    def __richcmp__(self, other, op):
+        if op == 2:
+            if not isinstance(other, Chain):
+                return False
+            return (<Chain> self).serializer == (<Chain> other).serializer and \
+                (<Chain> self).signer == (<Chain> other).signer and \
+                (<Chain> self).compresser == (<Chain> other).compresser
+        elif op == 3:
+            return (<Chain> self).serializer != (<Chain> other).serializer or \
+                (<Chain> self).signer != (<Chain> other).signer or \
+                (<Chain> self).compresser != (<Chain> other).compresser
+        else:
+            raise ValueError("unsupported operation")
+
+
 
 cdef class NoneChain(Chain):
     def __init__(self):

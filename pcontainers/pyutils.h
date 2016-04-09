@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <utility>
 #include <stdexcept>
 #include <boost/move/move.hpp>
 #include <boost/throw_exception.hpp>

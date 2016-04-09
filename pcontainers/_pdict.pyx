@@ -15,11 +15,12 @@ import threading
 from time import sleep
 from queue import Empty
 from os.path import join
+import werkzeug.local
 
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
 
-from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey, BadValSize
+from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey, BadValSize, NotInitialized, LmdbError
 
 include "lmdb_options_impl.pxi"
 include "pdict_impl.pxi"

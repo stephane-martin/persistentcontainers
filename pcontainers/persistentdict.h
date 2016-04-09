@@ -2,13 +2,9 @@
 
 #include <string>
 #include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <memory>
 #include <vector>
 #include <map>
 #include <utility>
-#include <algorithm>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/move/move.hpp>
@@ -18,19 +14,19 @@
 #include <boost/throw_exception.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "lmdb.h"
-#include "mutexwrap.h"
 #include "lmdb_exceptions.h"
 #include "lmdb_options.h"
 #include "lmdb_environment.h"
 #include "utils.h"
 #include "logging.h"
-#include "mutexwrap.h"
 
 namespace quiet {
 
@@ -39,10 +35,10 @@ using std::pair;
 using std::make_pair;
 using std::vector;
 using std::map;
-using std::cout;
-using std::endl;
 using std::exception;
 using boost::conditional;
+using boost::mutex;
+using boost::lock_guard;
 
 using Bstrlib::CBString;
 using namespace lmdb;
@@ -315,20 +311,81 @@ public:
         }
     }; // end class insert_iterator
 
+    class abstract_iterator {
+    protected:
+        boost::shared_ptr<environment::transaction::cursor> cursor;
+        boost::shared_ptr<environment::transaction> txn;
+        bool reached_end;
+        bool reached_beginning;
+        mutex lock;
+
+    public:
+        abstract_iterator(): cursor(), txn(), reached_end(false), reached_beginning(false), lock() { }
+        virtual ~abstract_iterator() {
+            cursor.reset();
+            txn.reset();
+        }
+        virtual size_t size() const = 0;
+        virtual bool has_reached_end() const { return reached_end; };
+        virtual bool has_reached_beginning() const { return reached_beginning; }
+        virtual void set_rollback(bool val=true) { txn->set_rollback(val); }
+        virtual CBString get_key() const = 0;
+        virtual MDB_val get_key_buffer() const = 0;
+        virtual CBString get_value() const = 0;
+        virtual MDB_val get_value_buffer() const = 0;
+        virtual pair<const CBString, CBString> get_item() const = 0;
+        virtual pair<MDB_val, MDB_val> get_item_buffer() const = 0;
+
+        virtual abstract_iterator& operator++() {
+            int res = 0;
+            if (has_reached_end() || !cursor) {
+                return *this;
+            }
+            lock_guard<mutex> guard(lock);
+            if (reached_beginning) {
+                res = cursor->first();
+            } else {
+                res = cursor->next();
+            }
+            if (res == MDB_NOTFOUND) {
+                reached_end = true;
+            }
+            reached_beginning = false;
+            return *this;
+        }
+
+        virtual abstract_iterator& operator--() {
+            int res = 0;
+            if (has_reached_beginning() || !cursor) {
+                return *this;
+            }
+            lock_guard<mutex> guard(lock);
+            if (reached_end) {
+                res = cursor->last();
+            } else {
+                res = cursor->prev();
+            }
+            if (res == MDB_NOTFOUND) {
+                reached_beginning = true;
+            }
+            reached_end = false;
+            return *this;
+        }
+
+        virtual abstract_iterator& operator++(int) { return this->operator++(); }
+        virtual abstract_iterator& operator--(int) { return this->operator--(); }
+
+    };
+
     template<bool B>
-    class tmpl_iterator {
+    class tmpl_iterator: public abstract_iterator {
     private:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(tmpl_iterator)
 
     protected:
         boost::atomic_bool initialized;
-        MutexWrap lock;
         bool ro;
-        bool reached_end;
-        bool reached_beginning;
         MDB_dbi dbi;
-        boost::shared_ptr<environment::transaction::cursor> cursor;
-        boost::shared_ptr<environment::transaction> txn;
 
     public:
         virtual ~tmpl_iterator() = 0;
@@ -337,29 +394,29 @@ public:
         typedef pair<const CBString, CBString> value_type;
         typedef std::input_iterator_tag iterator_category;      // can't really be a forward iterator as operator* does not return a ref
 
-        tmpl_iterator(): initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() { }
+        tmpl_iterator(): abstract_iterator(), initialized(false), ro(true) { }
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
         bool operator!() const { return !initialized.load(); }
 
-        tmpl_iterator(dict_ptr_type d, int pos=0):
-            initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
+        tmpl_iterator(dict_ptr_type d, int pos):
+            abstract_iterator(), initialized(false), ro(true) {
             init(d, pos);
         }
 
         tmpl_iterator(dict_ptr_type d, const CBString& key):
-            initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
+            abstract_iterator(), initialized(false), ro(true) {
             init(d, key);
         }
 
         tmpl_iterator(dict_ptr_type d, MDB_val key):
-            initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
+            abstract_iterator(), initialized(false), ro(true) {
             init(d, key);
         }
 
         // move constructor
         tmpl_iterator(BOOST_RV_REF(tmpl_iterator) other):
-            initialized(false), ro(true), reached_end(false), reached_beginning(false), cursor(), txn() {
+            abstract_iterator(), initialized(false), ro(true) {
             if (other) {
                 other.initialized.store(false);
                 swap(other);
@@ -384,16 +441,12 @@ public:
             return *this;
         }
 
-        size_t size() const {
+        virtual size_t size() const {
             if (!txn) {
                 return 0;
             }
             return txn->size(dbi);
         }
-
-        bool has_reached_end() const { return reached_end; }
-        bool has_reached_beginning() const { return reached_beginning; }
-        void set_rollback(bool val=true) { txn->set_rollback(val); }
 
         bool operator==(const tmpl_iterator& other) const {
             if (bool(*this) != bool(other)) {
@@ -418,38 +471,12 @@ public:
         bool operator!=(const tmpl_iterator& other) const { return !(*this == other); }
 
         virtual tmpl_iterator& operator++() {
-            int res = 0;
-            if (reached_end || !initialized || !cursor) {
-                return *this;
-            }
-            MutexWrapLock w(lock);
-            if (reached_beginning) {
-                res = cursor->first();  // position on first element
-            } else {
-                res = cursor->next();   // position on next element
-            }
-            if (res == MDB_NOTFOUND) {
-                reached_end = true;
-            }
-            reached_beginning = false;
+            abstract_iterator::operator++();
             return *this;
         }
 
         virtual tmpl_iterator& operator--() {
-            int res = 0;
-            if (reached_beginning || !(*this) || !cursor) {
-                return *this;
-            }
-            MutexWrapLock w(lock);
-            if (reached_end) {
-                res = cursor->last();
-            } else {
-                res = cursor->prev();
-            }
-            if (res == MDB_NOTFOUND) {
-                reached_beginning = true;
-            }
-            reached_end = false;
+            abstract_iterator::operator--();
             return *this;
         }
 
@@ -541,7 +568,25 @@ public:
             txn.swap(other.txn);
         }
 
-        void init(dict_ptr_type d, int pos=0, bool readonly=true) {
+        void init(dict_ptr_type d, int pos) {
+            if (!d || !(*d)) {
+                return;
+            }
+            dbi = d->dbi;
+            ro = true;
+            txn = d->env->start_transaction();
+            cursor = txn->make_cursor(dbi);
+            if (pos > 0) {
+                reached_end = true;
+            } else if (pos < 0) {
+                reached_beginning = true;
+            } else {
+                reached_end = cursor->first() == MDB_NOTFOUND;
+            }
+            initialized.store(true);
+        }
+
+        void init(dict_ptr_type d, int pos, bool readonly) {
             if (!d || !(*d)) {
                 return;
             }
@@ -559,11 +604,27 @@ public:
             initialized.store(true);
         }
 
-        void init(dict_ptr_type d, const CBString& key, bool readonly=true) {
+        void init(dict_ptr_type d, const CBString& key) {
+            init(d, make_mdb_val(key));
+        }
+
+        void init(dict_ptr_type d, const CBString& key, bool readonly) {
             init(d, make_mdb_val(key), readonly);
         }
 
-        void init(dict_ptr_type d, MDB_val key, bool readonly=true) {
+        void init(dict_ptr_type d, MDB_val key) {
+            if (!d || !(*d)) {
+                return;
+            }
+            dbi = d->dbi;
+            ro = true;
+            txn = d->env->start_transaction();
+            cursor = txn->make_cursor(d->dbi);
+            _set_position(key, true);
+            initialized.store(true);
+        }
+
+        void init(dict_ptr_type d, MDB_val key, bool readonly) {
             if (!d || !(*d)) {
                 return;
             }
@@ -575,7 +636,7 @@ public:
             initialized.store(true);
         }
 
-        void _set_position(MDB_val key, bool readonly=true) {
+        void _set_position(MDB_val key, bool readonly) {
             if (key.mv_size == 0 || key.mv_data == NULL) {
                 reached_end = cursor->first() == MDB_NOTFOUND;
             } else {
@@ -583,7 +644,7 @@ public:
             }
         }
 
-        void _set_range(MDB_val key, bool readonly=true) {
+        void _set_range(MDB_val key, bool readonly) {
             if (key.mv_size == 0 || key.mv_data == NULL) {
                 reached_end = cursor->first() == MDB_NOTFOUND;
             } else {
@@ -601,15 +662,8 @@ public:
     private:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(const_iterator)
     public:
-
-        virtual ~const_iterator() {
-            // careful to release pointers in the proper order
-            cursor.reset();
-            txn.reset();
-        }
-
         const_iterator(): _const_iterator() { }
-        const_iterator(dict_ptr_type d, int pos=0): _const_iterator(d, pos) { }
+        const_iterator(dict_ptr_type d, int pos): _const_iterator(d, pos) { }
         const_iterator(dict_ptr_type d, const CBString& key): _const_iterator(d, key) { }
         const_iterator(dict_ptr_type d, MDB_val key): _const_iterator(d, key) { }
         const_iterator(BOOST_RV_REF(const_iterator) other): _const_iterator(BOOST_MOVE_BASE(_const_iterator, other)) { }
@@ -636,7 +690,7 @@ public:
                 BOOST_THROW_EXCEPTION( not_initialized() );
             }
             const_iterator it(&d, 0);
-            it._set_range(make_mdb_val(key));
+            it._set_range(make_mdb_val(key), true);
             return it;
 
         }
@@ -650,12 +704,6 @@ public:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(iterator)
 
     public:
-        virtual ~iterator() {
-            // careful to release pointers in the proper order
-            cursor.reset();
-            txn.reset();
-        }
-
         class PairProxy {      // kind of a reference-like pair<const CBString, CBString>&
         private:
             PairProxy(const PairProxy& other);

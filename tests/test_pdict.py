@@ -7,10 +7,9 @@ from __future__ import absolute_import
 
 import os
 import shutil
-
 import pytest
 
-from pcontainers import PRawDict, NotFound, EmptyKey, set_logger, BadValSize
+from pcontainers import PRawDict, NotFound, EmptyKey, set_logger, BadValSize, EmptyDatabase, LmdbError
 
 set_logger()
 
@@ -33,9 +32,9 @@ def init_temp_raw_dict(temp_raw_dict):
 # noinspection PyCompatibility
 class TestPRawDict(object):
     def test_empty_constructor(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(LmdbError):
             PRawDict(b"", b"")
-        with pytest.raises(ValueError):
+        with pytest.raises(LmdbError):
             PRawDict(b"", b"foo")
 
     def test_constructor(self):
@@ -195,3 +194,110 @@ class TestPRawDict(object):
             (b'7', b'bar7'),
             (b'9', b'bar9'),
         ])
+
+    def test_empty_pop(self, temp_raw_dict):
+        with pytest.raises(NotFound):
+            temp_raw_dict.pop('foo')
+
+    def test_pop(self, init_temp_raw_dict):
+        with pytest.raises(NotFound):
+            init_temp_raw_dict.pop('foo')
+        assert(init_temp_raw_dict.pop(b'4') == b'bar4')
+        with pytest.raises(NotFound):
+            init_temp_raw_dict.pop(b'4')
+        assert (init_temp_raw_dict.pop(b'7') == b'bar7')
+
+    def test_empty_popitem(self, temp_raw_dict):
+        with pytest.raises(EmptyDatabase):
+            temp_raw_dict.popitem()
+
+    def test_popitem(self, init_temp_raw_dict):
+        assert(init_temp_raw_dict.popitem() == (b'1', b'bar1'))
+        assert(init_temp_raw_dict.popitem() == (b'2', b'bar2'))
+        assert(init_temp_raw_dict.popitem() == (b'4', b'bar4'))
+        assert(init_temp_raw_dict.popitem() == (b'7', b'bar7'))
+        assert(init_temp_raw_dict.popitem() == (b'8', b'bar8'))
+        assert(init_temp_raw_dict.popitem() == (b'9', b'bar9'))
+        with pytest.raises(EmptyDatabase):
+            init_temp_raw_dict.popitem()
+
+    def test_empty_iter(self, temp_raw_dict):
+        assert(list(iter(temp_raw_dict)) == [])
+        assert(list(temp_raw_dict.keys(True)) == [])
+
+    def test_iter(self, init_temp_raw_dict):
+        assert(list(iter(init_temp_raw_dict)) == [b'1', b'2', b'4', b'7', b'8', b'9'])
+        assert(list(init_temp_raw_dict.keys(True)) == [b'9', b'8', b'7', b'4', b'2', b'1'])
+
+    def test_empty_values(self, temp_raw_dict):
+        assert(list(temp_raw_dict.values()) == [])
+        assert(list(temp_raw_dict.values(True)) == [])
+
+    def test_values(self, init_temp_raw_dict):
+        assert(list(init_temp_raw_dict.values()) == [b'bar1', b'bar2', b'bar4', b'bar7', b'bar8', b'bar9'])
+        assert(list(init_temp_raw_dict.values(True)) == [b'bar9', b'bar8', b'bar7', b'bar4', b'bar2', b'bar1'])
+
+    def test_empty_items(self, temp_raw_dict):
+        assert(list(temp_raw_dict.items()) == [])
+        assert(list(temp_raw_dict.items(True)) == [])
+
+    def test_items(self, init_temp_raw_dict):
+        assert(list(init_temp_raw_dict.items()) == [(b'1', b'bar1'), (b'2', b'bar2'), (b'4', b'bar4'), (b'7', b'bar7'), (b'8', b'bar8'), (b'9', b'bar9')])
+        assert (list(init_temp_raw_dict.items(True)) == [(b'9', b'bar9'), (b'8', b'bar8'), (b'7', b'bar7'), (b'4', b'bar4'), (b'2', b'bar2'), (b'1', b'bar1')])
+
+    def test_empty_bool(self, temp_raw_dict):
+        assert(bool(temp_raw_dict))
+
+    def test_bool(self, init_temp_raw_dict):
+        assert(bool(init_temp_raw_dict))
+
+    def test_empty_len(self, temp_raw_dict):
+        assert(len(temp_raw_dict) == 0)
+
+    def test_len(self, init_temp_raw_dict):
+        assert(len(init_temp_raw_dict) == 6)
+
+    def test_empty_clear(self, temp_raw_dict):
+        temp_raw_dict.clear()
+        assert(len(temp_raw_dict) == 0)
+
+    def test_clear(self, init_temp_raw_dict):
+        init_temp_raw_dict.clear()
+        assert(len(init_temp_raw_dict) == 0)
+
+    def test_empty_contains(self, temp_raw_dict):
+        assert(b"foo" not in temp_raw_dict)
+        assert(b"1" not in temp_raw_dict)
+
+    def test_contains(self, init_temp_raw_dict):
+        assert(b"foo" not in init_temp_raw_dict)
+        assert(b"1" in init_temp_raw_dict)
+        assert(u"1" in init_temp_raw_dict)
+
+    def test_update(self, temp_raw_dict):
+        g = ((bytes(i), b"foo" + bytes(i)) for i in xrange(1000))
+        temp_raw_dict.update(g)
+        assert(temp_raw_dict.noiterkeys() == sorted([bytes(i) for i in xrange(1000)]))
+        assert(temp_raw_dict.noitervalues() == sorted([b'foo' + bytes(i) for i in xrange(1000)]))
+
+    def test_remove_if(self, init_temp_raw_dict):
+        init_temp_raw_dict[b'10'] = b'zog'
+        init_temp_raw_dict[b'john'] = b'doh'
+        init_temp_raw_dict.remove_if(lambda key, val: key.isdigit())
+        for k in init_temp_raw_dict:
+            assert(not k.isdigit())
+        assert(b'10' not in init_temp_raw_dict)
+        assert(init_temp_raw_dict[b'john'] == b'doh')
+        assert(len(init_temp_raw_dict) == 1)
+
+    def test_empty_transform_values(self, temp_raw_dict):
+        temp_raw_dict.transform_values(lambda key, val: key + val)
+        assert(len(temp_raw_dict) == 0)
+
+    def test_transform_values(self, init_temp_raw_dict):
+        f = lambda key, val: key + val
+        initial_content = dict(init_temp_raw_dict)
+        transformed_content = {key: f(key, val) for key, val in initial_content.items()}
+        init_temp_raw_dict.transform_values(f)
+        assert(dict(init_temp_raw_dict) == transformed_content)
+

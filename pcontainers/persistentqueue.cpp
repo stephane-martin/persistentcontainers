@@ -7,6 +7,7 @@
 #include <map>
 #include <utility>
 #include <algorithm>
+#include <stdlib.h>
 #include <bstrlib/bstrwrap.h>
 #include "persistentqueue.h"
 
@@ -74,5 +75,63 @@ void PersistentQueue::move_to(PersistentQueue& other, ssize_t chunk_size) {
         }
     }
 }
+
+
+PersistentQueue::back_insert_iterator& PersistentQueue::back_insert_iterator::operator=(MDB_val v) {
+    if (!*this) {
+        BOOST_THROW_EXCEPTION(not_initialized());
+    }
+    MDB_val k = make_mdb_val();
+    CBString insert_key;
+
+    int res = (direction > 0) ? cursor->last() : cursor->first();
+    if (res == MDB_NOTFOUND) {
+        insert_key = longlong_to_cbstring(MIDDLE);
+    } else {
+        cursor->get_current_key(k);
+        insert_key = make_string(k);
+        long long int_k = strtoull(insert_key, NULL, 10);
+        if (int_k == 0) {
+            BOOST_THROW_EXCEPTION( lmdb_error() << lmdb_error::what("A key in the database in not an integer key") );
+        }
+        insert_key = longlong_to_cbstring(int_k + direction, NDIGITS);
+    }
+    k = make_mdb_val(insert_key);
+    if (direction > 0) {
+        cursor->append_key_value(k, v);
+    } else {
+        cursor->set_key_value(k, v);
+    }
+    return *this;
+}
+
+
+void PersistentQueue::iiterator::_next_value() {
+    lock_guard<mutex> guard(current_value_lock);
+    if (bool(cursor) && cursor->first() != MDB_NOTFOUND) {
+        MDB_val v;
+        cursor->get_current_value(v);
+        current_value.reset(new CBString(v.mv_data, v.mv_size));
+        cursor->del();
+    } else {
+        _LOG_DEBUG << "iiterator: no next_value";
+        current_value.reset();
+    }
+}
+
+void PersistentQueue::iiterator::_last_value() {
+    lock_guard<mutex> guard(current_value_lock);
+    if (bool(cursor) && cursor->last() != MDB_NOTFOUND) {
+        MDB_val v;
+        cursor->get_current_value(v);
+        current_value.reset(new CBString(v.mv_data, v.mv_size));
+        cursor->del();
+    } else {
+        _LOG_DEBUG << "iiterator: no last_value";
+        current_value.reset();
+    }
+}
+
+
 
 }

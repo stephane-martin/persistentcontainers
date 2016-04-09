@@ -105,9 +105,26 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
     cpp_bool operator==(const cppPersistentDict& one, const cppPersistentDict& other)
     cpp_bool operator!=(const cppPersistentDict& one, const cppPersistentDict& other)
 
+    cdef cppclass abstract_iterator "quiet::PersistentDict::abstract_iterator":
+        CBString get_key() except +custom_handler
+        MDB_val get_key_buffer() except +custom_handler
+        CBString get_value() except +custom_handler
+        MDB_val get_value_buffer() except +custom_handler
+        pair[CBString, CBString] get_item() except +custom_handler
+        pair[MDB_val, MDB_val] get_item_buffer() except +custom_handler
+
+        cpp_bool has_reached_end() except +custom_handler
+        cpp_bool has_reached_beginning() except +custom_handler
+
+        void set_rollback(cpp_bool val)
+
+        (abstract_iterator&) abs_incr "quiet::PersistentDict::abstract_iterator::operator++"() except +custom_handler
+        (abstract_iterator&) abs_decr "quiet::PersistentDict::abstract_iterator::operator--"() except +custom_handler
+
+
 
     # noinspection PyPep8Naming
-    cdef cppclass cppIterator "quiet::PersistentDict::iterator":
+    cdef cppclass cppIterator "quiet::PersistentDict::iterator" (abstract_iterator):
         cppIterator() except +custom_handler
         cppIterator(cppPersistentDict* d) except +custom_handler
         cppIterator(cppPersistentDict* d, int pos) except +custom_handler
@@ -120,33 +137,22 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
         cppIterator(const cppIterator& other) except +custom_handler
         cppIterator(const cppConstIterator& other) except +custom_handler
 
-        CBString get_key() except +custom_handler
-        MDB_val get_key_buffer() except +custom_handler
-        CBString get_value() except +custom_handler
-        MDB_val get_value_buffer() except +custom_handler
-        pair[CBString, CBString] get_item() except +custom_handler
-        pair[MDB_val, MDB_val] get_item_buffer() except +custom_handler
+        (cppIterator&) incr "quiet::PersistentDict::iterator::operator++"() except +custom_handler
+        (cppIterator&) decr "quiet::PersistentDict::iterator::operator--"() except +custom_handler
+
+        cpp_bool operator==(const cppIterator& other) except +custom_handler
+        cpp_bool operator!=(const cppIterator& other) except +custom_handler
+
         void set_value(const CBString& value) except +custom_handler
         void set_value(MDB_val value) except +custom_handler
         void set_key_value(const CBString& key, const CBString& value) except +custom_handler
         void set_key_value(MDB_val key, MDB_val value) except +custom_handler
 
-        cpp_bool has_reached_end() except +custom_handler
-        cpp_bool has_reached_beginning() except +custom_handler
-
-        (cppIterator&) incr "quiet::PersistentDict::iterator::operator++"() except +custom_handler
-        (cppIterator&) decr "quiet::PersistentDict::iterator::operator--"() except +custom_handler
         void dlte "quiet::PersistentDict::iterator::del"() except +custom_handler
         void dlte "quiet::PersistentDict::iterator::del"(MDB_val key) except +custom_handler
 
-        cpp_bool operator==(const cppIterator& other) except +custom_handler
-        cpp_bool operator!=(const cppIterator& other) except +custom_handler
-
-        void set_rollback()
-        void set_rollback(cpp_bool val)
-
     # noinspection PyPep8Naming
-    cdef cppclass cppConstIterator "quiet::PersistentDict::const_iterator":
+    cdef cppclass cppConstIterator "quiet::PersistentDict::const_iterator" (abstract_iterator):
         cppConstIterator() except +custom_handler
         cppConstIterator(cppPersistentDict* d) except +custom_handler
         cppConstIterator(cppPersistentDict* d, int pos) except +custom_handler
@@ -155,24 +161,13 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
 
         cppConstIterator(const cppConstIterator& other) except +custom_handler
 
-        CBString get_key() except +custom_handler
-        MDB_val get_key_buffer() except +custom_handler
-        CBString get_value() except +custom_handler
-        MDB_val get_value_buffer() except +custom_handler
-        pair[CBString, CBString] get_item() except +custom_handler
-        pair[MDB_val, MDB_val] get_item_buffer() except +custom_handler
-
-        cpp_bool has_reached_end() except +custom_handler
-        cpp_bool has_reached_beginning() except +custom_handler
-
         (cppConstIterator&) incr "quiet::PersistentDict::const_iterator::operator++"() except +custom_handler
         (cppConstIterator&) decr "quiet::PersistentDict::const_iterator::operator--"() except +custom_handler
 
         cpp_bool operator==(const cppConstIterator& other) except +custom_handler
         cpp_bool operator!=(const cppConstIterator& other) except +custom_handler
 
-        void set_rollback()
-        void set_rollback(cpp_bool val)
+
 
     cdef cppIterator move "boost::move"(cppIterator other)
     cdef cppConstIterator move "boost::move"(cppConstIterator other)

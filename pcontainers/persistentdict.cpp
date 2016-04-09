@@ -25,17 +25,10 @@ using namespace utils;
 using Bstrlib::CBString;
 
 void PersistentDict::init() {
-
-    if (!dirname.length()) {       // not initialized dict
-        return;
-    }
-    dirname.trim();
+    env = lmdb::environment::factory(dirname, opts);
+    dirname = env->get_dirname();
     dbname.trim();
-    create_if_needed(dirname);
-    dirname = cpp_realpath(dirname);
-    env = lmdb::env_factory(dirname, opts);
     dbi = env->get_dbi(dbname);
-
 }
 
 void PersistentDict::copy_to(PersistentDict& other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) const {
@@ -496,7 +489,6 @@ void PersistentDict::iterator::set_key_value(MDB_val key, MDB_val value) {
     reached_beginning = false;
     reached_end = false;
 }
-
 
 
 }   // END NS quiet

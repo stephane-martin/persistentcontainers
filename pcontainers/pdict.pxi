@@ -1,34 +1,29 @@
 
-cdef class PRawDictConstIterator(object):
+cdef class PRawDictAbstractIterator(object):
     cdef PRawDict dict
     cdef int pos
     cdef object key
-    cdef cppConstIterator cpp_iterator
+    cdef scoped_ptr[abstract_iterator] cpp_iterator_ptr
     cdef cpp_bool has_reached_end(self)
     cdef cpp_bool has_reached_beginning(self)
-    cdef incr(self)
-    cdef decr(self)
     cdef get_key(self)
     cdef get_key_buf(self)
     cdef get_value(self)
     cdef get_value_buf(self)
     cdef get_item(self)
     cdef get_item_buf(self)
+    cdef incr(self)
+    cdef decr(self)
 
-cdef class PRawDictIterator(object):
-    cdef PRawDict dict
-    cdef int pos
-    cdef object key
-    cdef cppIterator cpp_iterator
-    cdef cpp_bool readonly
-    cdef cpp_bool has_reached_end(self)
-    cdef cpp_bool has_reached_beginning(self)
+
+cdef class PRawDictConstIterator(PRawDictAbstractIterator):
+    pass
+
+cdef class PRawDictIterator(PRawDictAbstractIterator):
     cdef set_rollback(self)
     cdef incr(self)
     cdef decr(self)
     cdef set_item_buf(self, k, v)
-    cdef get_key_buf(self)
-    cdef get_value_buf(self)
     cdef dlte(self, key=?)
 
 cdef class DirectAccess(object):

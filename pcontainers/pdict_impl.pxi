@@ -1,31 +1,27 @@
 # noinspection PyPep8Naming
-cdef class PRawDictConstIterator(object):
+cdef class PRawDictAbstractIterator(object):
     def __init__(self, PRawDict d, int pos=0, key=None):
         self.dict = d
         self.pos = pos
         self.key = d.key_chain.dumps(key) if key is not None else None
 
-    def __enter__(self):
-        if self.key is None:
-            self.cpp_iterator = move(cppConstIterator(self.dict.ptr, self.pos))
-        else:
-            self.cpp_iterator = move(cppConstIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val()))
-        return self
+    def __dealloc__(self):
+        self.cpp_iterator_ptr.reset()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.cpp_iterator = move(cppConstIterator())
+        self.cpp_iterator_ptr.reset()
 
     cdef cpp_bool has_reached_end(self):
-        return self.cpp_iterator.has_reached_end()
+        return self.cpp_iterator_ptr.get().has_reached_end()
 
     cdef cpp_bool has_reached_beginning(self):
-        return self.cpp_iterator.has_reached_beginning()
+        return self.cpp_iterator_ptr.get().has_reached_beginning()
 
     cdef incr(self):
-        self.cpp_iterator.incr()
+        self.cpp_iterator_ptr.get().abs_incr()
 
     cdef decr(self):
-        self.cpp_iterator.decr()
+        self.cpp_iterator_ptr.get().abs_decr()
 
     cdef get_key(self):
         cdef int keysize = self.dict.ptr.get_maxkeysize()
@@ -33,7 +29,7 @@ cdef class PRawDictConstIterator(object):
         cdef bytearray obj = bytearray(keysize)
         cdef PyBufferWrap view = move(PyBufferWrap(obj))
         with nogil:
-            k = self.cpp_iterator.get_key_buffer()
+            k = self.cpp_iterator_ptr.get().get_key_buffer()
             memcpy(view.buf(), k.mv_data, k.mv_size)
         view.close()
         PyByteArray_Resize(obj, k.mv_size)
@@ -43,7 +39,7 @@ cdef class PRawDictConstIterator(object):
         cdef MDB_val k
         cdef void* ptr
         with nogil:
-            k = self.cpp_iterator.get_key_buffer()
+            k = self.cpp_iterator_ptr.get().get_key_buffer()
             ptr = copy_mdb_val(k)
         return self.dict.key_chain.loads(make_mbufferio(ptr, k.mv_size, 1))
 
@@ -53,7 +49,7 @@ cdef class PRawDictConstIterator(object):
         cdef bytearray obj = bytearray(4096)
         cdef PyBufferWrap view = move(PyBufferWrap(obj))
         with nogil:
-            v = self.cpp_iterator.get_value_buffer()
+            v = self.cpp_iterator_ptr.get().get_value_buffer()
             if v.mv_size <= 4096:
                 memcpy(view.buf(), v.mv_data, v.mv_size)
                 done = 1
@@ -73,7 +69,7 @@ cdef class PRawDictConstIterator(object):
         cdef MDB_val v
         cdef void* ptr
         with nogil:
-            v = self.cpp_iterator.get_value_buffer()
+            v = self.cpp_iterator_ptr.get().get_value_buffer()
             ptr = copy_mdb_val(v)
         return self.dict.value_chain.loads(make_mbufferio(ptr, v.mv_size, 1))
 
@@ -88,7 +84,7 @@ cdef class PRawDictConstIterator(object):
         cdef PyBufferWrap value_view = move(PyBufferWrap(value_obj))
 
         with nogil:
-            kv = self.cpp_iterator.get_item_buffer()
+            kv = self.cpp_iterator_ptr.get().get_item_buffer()
             memcpy(key_view.buf(), kv.first.mv_data, kv.first.mv_size)
             if kv.second.mv_size <= 4096:
                 memcpy(value_view.buf(), kv.second.mv_data, kv.second.mv_size)
@@ -112,43 +108,31 @@ cdef class PRawDictConstIterator(object):
         cdef void* key_ptr
         cdef void* value_ptr
         with nogil:
-            kv = self.cpp_iterator.get_item_buffer()
+            kv = self.cpp_iterator_ptr.get().get_item_buffer()
             key_ptr = copy_mdb_val(kv.first)
             value_ptr = copy_mdb_val(kv.second)
         return self.dict.key_chain.loads(make_mbufferio(key_ptr, kv.first.mv_size, 1)), self.dict.value_chain.loads(make_mbufferio(value_ptr, kv.second.mv_size, 1))
 
 # noinspection PyPep8Naming
-cdef class PRawDictIterator(object):
-    def __init__(self, PRawDict d, int pos=0, key=None, cpp_bool readonly=0):
-        self.dict = d
-        self.pos = pos
-        self.key = None if not key else d.key_chain.dumps(key)
-        self.readonly = readonly
-
+cdef class PRawDictConstIterator(PRawDictAbstractIterator):
     def __enter__(self):
         if self.key is None:
-            self.cpp_iterator = move(cppIterator(self.dict.ptr, self.pos, self.readonly))
+            self.cpp_iterator_ptr.reset(new cppConstIterator(self.dict.ptr, self.pos))
         else:
-            self.cpp_iterator = move(cppIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val(), self.readonly))
+            self.cpp_iterator_ptr.reset(new cppConstIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val()))
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.cpp_iterator = move(cppIterator())
-
-    cdef cpp_bool has_reached_end(self):
-        return self.cpp_iterator.has_reached_end()
-
-    cdef cpp_bool has_reached_beginning(self):
-        return self.cpp_iterator.has_reached_beginning()
-
-    cdef incr(self):
-        self.cpp_iterator.incr()
-
-    cdef decr(self):
-        self.cpp_iterator.decr()
+# noinspection PyPep8Naming
+cdef class PRawDictIterator(PRawDictAbstractIterator):
+    def __enter__(self):
+        if self.key is None:
+            self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, self.pos, 0))
+        else:
+            self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val(), 0))
+        return self
 
     cdef set_rollback(self):
-        self.cpp_iterator.set_rollback()
+        self.cpp_iterator_ptr.get().set_rollback(1)
 
     cdef set_item_buf(self, k, v):
         if not k:
@@ -157,33 +141,31 @@ cdef class PRawDictIterator(object):
         if key_view.length() > 511:
             raise BadValSize("key is too long")
         cdef PyBufferWrap value_view = move(PyBufferWrap(self.dict.value_chain.dumps(v)))
+        cdef cppIterator* it_ptr = <cppIterator*> self.cpp_iterator_ptr.get()
         with nogil:
-            self.cpp_iterator.set_key_value(key_view.get_mdb_val(), value_view.get_mdb_val())
-
-    cdef get_key_buf(self):
-        cdef MDB_val k
-        cdef void* ptr
-        with nogil:
-            k = self.cpp_iterator.get_key_buffer()
-            ptr = copy_mdb_val(k)
-        return self.dict.key_chain.loads(make_mbufferio(ptr, k.mv_size, 1))
-
-    cdef get_value_buf(self):
-        cdef MDB_val v
-        cdef void* ptr
-        with nogil:
-            v = self.cpp_iterator.get_value_buffer()
-            ptr = copy_mdb_val(v)
-        return self.dict.value_chain.loads(make_mbufferio(ptr, v.mv_size, 1))
+            it_ptr.set_key_value(key_view.get_mdb_val(), value_view.get_mdb_val())
 
     cdef dlte(self, key=None):
         cdef PyBufferWrap key_view
+        cdef cppIterator* it_ptr = <cppIterator*> self.cpp_iterator_ptr.get()
         if not key:
-            self.cpp_iterator.dlte()
+            it_ptr.dlte()
         else:
             key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
             with nogil:
-                self.cpp_iterator.dlte(key_view.get_mdb_val())
+                it_ptr.dlte(key_view.get_mdb_val())
+
+    def __setitem__(self, key, value):
+        if not self.cpp_iterator_ptr:
+            raise NotInitialized()
+        self.set_item_buf(key, value)
+
+    def __delitem__(self, key):
+        if not self.cpp_iterator_ptr:
+            raise NotInitialized()
+        if not key:
+            raise EmptyKey()
+        self.dlte(key)
 
 cdef class DirectAccess(object):
     def __cinit__(self, PRawDict d, bytes item):
@@ -200,17 +182,13 @@ cdef class DirectAccess(object):
     cpdef read(self, ssize_t n=-1):
         return self.buf.read(n)
 
-cdef class PRawDict(object):
-    def __cinit__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
 
-        cdef CBString dirn = tocbstring(dirname)
-        cdef CBString dbn = tocbstring(dbname)
-        if dirn.length() == 0:
-            raise ValueError("empty dirname")
+cdef class PRawDict(object):
+
+    def __cinit__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
         if opts is None:
             opts = LmdbOptions()
-        self.ptr = new cppPersistentDict(dirn, dbn, (<LmdbOptions> opts).opts)
-
+        self.ptr = new cppPersistentDict(tocbstring(dirname), tocbstring(dbname), (<LmdbOptions> opts).opts)
         self.rmrf_at_delete = 0
         self.key_chain = NoneChain()
         self.value_chain = NoneChain()
@@ -247,23 +225,18 @@ cdef class PRawDict(object):
         return dict, (self.noiteritems(), )
 
     def __richcmp__(self, other, op):
-        # todo: simplify
         if op == 2:
             if not isinstance(other, PRawDict):
                 return False
-            if isinstance(self, PDict) and not isinstance(other, PDict):
+            if deref((<PRawDict> self).ptr) != deref((<PRawDict> other).ptr):
                 return False
-            if isinstance(other, PDict) and not isinstance(self, PDict):
-                return False
-            return deref((<PRawDict> self).ptr) == deref((<PRawDict> other).ptr)
+            return (<PRawDict> self).key_chain == (<PRawDict> other).key_chain and (<PRawDict> self).value_chain == (<PRawDict> other).value_chain
         elif op == 3:
             if not isinstance(other, PRawDict):
                 return True
-            if isinstance(self, PDict) and not isinstance(other, PDict):
+            if deref((<PRawDict> self).ptr) != deref((<PRawDict> other).ptr):
                 return True
-            if isinstance(other, PDict) and not isinstance(self, PDict):
-                return True
-            return deref((<PRawDict> self).ptr) != deref((<PRawDict> other).ptr)
+            return (<PRawDict> self).key_chain != (<PRawDict> other).key_chain or (<PRawDict> self).value_chain != (<PRawDict> other).value_chain
         raise ValueError("unsupported comparison")
 
     property dirname:
@@ -281,7 +254,7 @@ cdef class PRawDict(object):
         with it:
             if it.has_reached_end():
                 raise NotFound()
-            return it.get_value()
+            return it.get_value_buf()
 
     cpdef get(self, item, default=b''):
         try:
@@ -361,13 +334,13 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_key()
+                    yield it.get_key_buf()
                     it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_key()
+                    yield it.get_key_buf()
                     it.incr()
 
     cpdef iterkeys(self, reverse=False):
@@ -380,13 +353,13 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_value()
+                    yield it.get_value_buf()
                     it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_value()
+                    yield it.get_value_buf()
                     it.incr()
 
     cpdef itervalues(self, reverse=False):
@@ -399,13 +372,13 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_item()
+                    yield it.get_item_buf()
                     it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_item()
+                    yield it.get_item_buf()
                     it.incr()
 
     cpdef iteritems(self, reverse=False):
@@ -429,6 +402,12 @@ cdef class PRawDict(object):
     cpdef has_key(self, key):
         return key in self
 
+    def write_batch(self):
+        return PRawDictIterator(self)
+
+    def read_transaction(self):
+        return PRawDictConstIterator(self)
+
     def update(self, e=None, **kwds):
         cdef PRawDictIterator it = PRawDictIterator(self)
         with it:
@@ -447,8 +426,8 @@ cdef class PRawDict(object):
     @classmethod
     def fromkeys(cls, dirname, dbname, opts=None, S=None, v=None):
         d = cls(dirname, dbname, opts=opts)
-        v = b'' if v is None else v
-        if S is not None:
+        v = b'' if not v else v
+        if S:
             d.update((key, v) for key in S)
         return d
 
@@ -467,7 +446,6 @@ cdef class PRawDict(object):
         with nogil:
             self.ptr.move_to(deref((<PRawDict> other).ptr), empt, empt, chunk_size)
 
-
     cpdef remove_duplicates(self, first="", last=""):
         cdef CBString firstkey = tocbstring(first)
         cdef CBString lastkey = tocbstring(last)
@@ -477,7 +455,7 @@ cdef class PRawDict(object):
 
 cdef class PDict(PRawDict):
     def __cinit__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
-        self.key_chain = key_chain if key_chain else Chain(None, None, None)
+        self.key_chain = key_chain if key_chain else NoneChain
         self.value_chain = value_chain if value_chain else Chain(PickleSerializer(), None, None)
 
     def __init__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
