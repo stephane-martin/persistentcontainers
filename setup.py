@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 from setuptools import setup, find_packages, Extension
 from os.path import dirname, abspath, exists, join
 import os
@@ -19,7 +20,7 @@ IS_LINUX = "linux" in PLATFORM
 
 def check_libuuid():
     sp = subprocess.Popen(['cpp'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sp.communicate(b'#include <uuid/uuid.h>\n')
+    sp.communicate('#include <uuid/uuid.h>\n')
     return sp.returncode == 0
 
 
@@ -27,6 +28,33 @@ requirements = ['future', 'mbufferio', 'werkzeug']
 
 setup_requires = [
     'setuptools_git', 'setuptools', 'twine', 'wheel', 'pip', 'pytest'
+]
+
+pdict_sources = [
+    'pcontainers/_pdict.pyx',
+    'pcontainers/boost/chrono.cpp',
+    'pcontainers/boost/error_code.cpp',
+    'pcontainers/boost/future.cpp',
+    'pcontainers/boost/lockpool.cpp',
+    'pcontainers/boost/once.cpp',
+    'pcontainers/boost/process_cpu_clocks.cpp',
+    'pcontainers/boost/thread.cpp',
+    'pcontainers/boost/thread_clock.cpp',
+    'pcontainers/boost/tss_null.cpp',
+    'pcontainers/lmdb/mdb.c',
+    'pcontainers/lmdb/midl.c',
+    'pcontainers/persistentdict.cpp',
+    'pcontainers/persistentqueue.cpp',
+    'pcontainers/lmdb_environment.cpp',
+    'pcontainers/logging.cpp',
+    'pcontainers/pylogging.cpp',
+    'pcontainers/pyfunctor.cpp',
+    'pcontainers/utils.cpp',
+    'pcontainers/lmdb_exceptions.cpp',
+    'pcontainers/includes/bstrlib/bstrlib.c',
+    'pcontainers/includes/bstrlib/bstrwrap.cpp',
+    'pcontainers/includes/bstrlib/utf8util.c',
+    'pcontainers/includes/bstrlib/buniutil.c'
 ]
 
 extensions = [
@@ -41,31 +69,7 @@ extensions = [
     ),
     Extension(
         name="pcontainers._pdict",
-        sources=[
-            'pcontainers/_pdict.cpp',
-            'pcontainers/boost/chrono.cpp',
-            'pcontainers/boost/error_code.cpp',
-            'pcontainers/boost/future.cpp',
-            'pcontainers/boost/lockpool.cpp',
-            'pcontainers/boost/once.cpp',
-            'pcontainers/boost/process_cpu_clocks.cpp',
-            'pcontainers/boost/thread.cpp',
-            'pcontainers/boost/thread_clock.cpp',
-            'pcontainers/boost/tss_null.cpp',
-            'pcontainers/lmdb/mdb.c',
-            'pcontainers/lmdb/midl.c',
-            'pcontainers/persistentdict.cpp',
-            'pcontainers/persistentqueue.cpp',
-            'pcontainers/lmdb_environment.cpp',
-            'pcontainers/logging.cpp',
-            'pcontainers/pylogging.cpp',
-            'pcontainers/utils.cpp',
-            'pcontainers/lmdb_exceptions.cpp',
-            'pcontainers/includes/bstrlib/bstrlib.c',
-            'pcontainers/includes/bstrlib/bstrwrap.cpp',
-            'pcontainers/includes/bstrlib/utf8util.c',
-            'pcontainers/includes/bstrlib/buniutil.c'
-        ],
+        sources=[srcfile.replace(".pyx", ".cpp") for srcfile in pdict_sources],
         include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++",
         define_macros=[

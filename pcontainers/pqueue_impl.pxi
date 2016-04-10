@@ -7,15 +7,13 @@ cdef class PRawQueue(object):
             raise ValueError("empty dirname")
         if opts is None:
             opts = LmdbOptions()
-        self.ptr = new cppPersistentQueue(dirn, dbn, (<LmdbOptions> opts).opts)
+        self.ptr = queue_factory(dirn, dbn, (<LmdbOptions> opts).opts)
 
     def __init__(self, dirname, dbname, LmdbOptions opts=None, Chain value_chain=None):
         pass
 
     def __dealloc__(self):
-        if self.ptr is not NULL:
-            del self.ptr
-            self.ptr = NULL
+        self.ptr.reset()
 
     def __repr__(self):
         return u"PRawQueue(dbname='{}', dirname='{}')".format(
@@ -24,33 +22,33 @@ cdef class PRawQueue(object):
 
     property dirname:
         def __get__(self):
-            return topy(self.ptr.get_dirname())
+            return topy(self.ptr.get().get_dirname())
 
     property dbname:
         def __get__(self):
-            return topy(self.ptr.get_dbname())
+            return topy(self.ptr.get().get_dbname())
 
     cpdef empty(self):
-        return self.ptr.empty()
+        return self.ptr.get().empty()
 
     cpdef qsize(self):
-        return self.ptr.size()
+        return self.ptr.get().size()
 
     cpdef full(self):
         return False
 
     cpdef clear(self):
-        self.ptr.clear()
+        self.ptr.get().clear()
 
     cpdef push_front(self, val):
         cdef PyBufferWrap view = move(PyBufferWrap(val))
         with nogil:
-            self.ptr.push_front(view.get_mdb_val())
+            self.ptr.get().push_front(view.get_mdb_val())
 
     cpdef push_back(self, val):
         cdef PyBufferWrap view = move(PyBufferWrap(val))
         with nogil:
-            self.ptr.push_back(view.get_mdb_val())
+            self.ptr.get().push_back(view.get_mdb_val())
 
     cpdef put(self, item, block=True, timeout=None):
         self.push_back(item)
@@ -78,7 +76,7 @@ cdef class PRawQueue(object):
         l = []
         append = l.append
         with nogil:
-            self.ptr.pop_all(PyFunctionOutputIterator(append))
+            self.ptr.get().pop_all(PyFunctionOutputIterator(append))
         return l
 
     cpdef get(self, block=True, timeout=None):
@@ -124,13 +122,13 @@ cdef class PRawQueue(object):
         vals = iter(vals)
         #cdef PyObject* v = <PyObject*> vals
         with nogil:
-            self.ptr.push_front(PyStringInputIterator(vals), PyStringInputIterator())
+            self.ptr.get().push_front(PyStringInputIterator(vals), PyStringInputIterator())
 
     def push_back_many(self, vals):
         vals = iter(vals)
         #cdef PyObject* v = <PyObject*> vals
         with nogil:
-            self.ptr.push_back(PyStringInputIterator(vals), PyStringInputIterator())
+            self.ptr.get().push_back(PyStringInputIterator(vals), PyStringInputIterator())
 
     def push_many(self, vals):
         self.push_back_many(vals)
@@ -138,22 +136,22 @@ cdef class PRawQueue(object):
     cpdef transform_values(self, unary_funct):
         #cdef PyObject* obj = <PyObject*> unary_funct
         with nogil:
-            self.ptr.transform_values(make_unary_functor(unary_funct))
+            self.ptr.get().transform_values(make_unary_functor(unary_funct))
 
     cpdef remove_if(self, unary_pred):
         #cdef PyObject* obj = <PyObject*> unary_pred
         with nogil:
-            self.ptr.remove_if(make_unary_predicate(unary_pred))
+            self.ptr.get().remove_if(make_unary_predicate(unary_pred))
 
     cpdef move_to(self, other, ssize_t chunk_size=-1):
         if not isinstance(other, PRawQueue):
             raise TypeError()
         with nogil:
-            self.ptr.move_to(deref((<PRawQueue> other).ptr), chunk_size)
+            self.ptr.get().move_to(deref((<PRawQueue> other).ptr), chunk_size)
 
     cpdef remove_duplicates(self):
         with nogil:
-            self.ptr.remove_duplicates()
+            self.ptr.get().remove_duplicates()
 
 
 cdef class PQueue(PRawQueue):
@@ -171,30 +169,30 @@ cdef class PQueue(PRawQueue):
     cpdef push_front(self, val):
         cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
         with nogil:
-            self.ptr.push_front(view.get_mdb_val())
+            self.ptr.get().push_front(view.get_mdb_val())
 
     cpdef push_back(self, val):
         cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
         with nogil:
-            self.ptr.push_back(view.get_mdb_val())
+            self.ptr.get().push_back(view.get_mdb_val())
 
     cpdef pop_back(self):
         cdef CBString v
         with nogil:
-            v = self.ptr.pop_back()
+            v = self.ptr.get().pop_back()
         return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_front(self):
         cdef CBString v
         with nogil:
-            v = self.ptr.pop_front()
+            v = self.ptr.get().pop_front()
         return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_all(self):
         l = []
         append = _adapt_append_pqueue_pop_all(self, l)
         with nogil:
-            self.ptr.pop_all(PyFunctionOutputIterator(append))
+            self.ptr.get().pop_all(PyFunctionOutputIterator(append))
         return l
 
     def push_front_many(self, vals):
@@ -209,19 +207,19 @@ cdef class PQueue(PRawQueue):
         unary_funct = _adapt_unary_functor(unary_funct, self.secret_key)
         #cdef PyObject* obj = <PyObject*> unary_funct
         with nogil:
-            self.ptr.transform_values(make_unary_functor(unary_funct))
+            self.ptr.get().transform_values(make_unary_functor(unary_funct))
 
     cpdef remove_if(self, unary_pred):
         unary_pred = _adapt_unary_predicate(unary_pred, self.secret_key)
         #cdef PyObject* obj = <PyObject*> unary_pred
         with nogil:
-            self.ptr.remove_if(make_unary_predicate(unary_pred))
+            self.ptr.get().remove_if(make_unary_predicate(unary_pred))
 
     cpdef move_to(self, other, ssize_t chunk_size=-1):
         if not isinstance(other, PQueue):
             raise TypeError()
         with nogil:
-            self.ptr.move_to(deref((<PQueue> other).ptr), chunk_size)
+            self.ptr.get().move_to(deref((<PQueue> other).ptr), chunk_size)
 
 
 def _adapt_append_pqueue_pop_all(PQueue q, list l):

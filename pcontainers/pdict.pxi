@@ -32,7 +32,7 @@ cdef class DirectAccess(object):
     cpdef read(self, ssize_t n=?)
 
 cdef class PRawDict(object):
-    cdef cppPersistentDict* ptr
+    cdef shared_ptr[cppPersistentDict] ptr
     cdef bint rmrf_at_delete
 
     cpdef noiterkeys(self)

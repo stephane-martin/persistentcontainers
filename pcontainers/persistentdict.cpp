@@ -46,10 +46,10 @@ void PersistentDict::copy_to(PersistentDict& other, const CBString& first_key, c
     if (chunk_size <= 0) {
         chunk_size = SSIZE_MAX;
     }
-    const_iterator src_it(const_iterator::range(*this, first_key));
+    const_iterator src_it(const_iterator::range(shared_from_this(), first_key));
     bool key_in_range = !src_it.has_reached_end();
     while (key_in_range) {
-        insert_iterator dest_it(&other);
+        insert_iterator dest_it(other.insertiterator());
         for(ssize_t copied = 0; copied < chunk_size; ++copied) {
             if (src_it.has_reached_end()) {
                 key_in_range = false;
@@ -84,8 +84,8 @@ void PersistentDict::move_to(PersistentDict& other, const CBString& first_key, c
 
     bool key_in_range = true;
     while (key_in_range) {
-        iterator src_it(iterator::range(*this, first_key, false));
-        insert_iterator dest_it(&other);
+        iterator src_it(iterator::range(shared_from_this(), first_key, false));
+        insert_iterator dest_it(other.insertiterator());
         for(ssize_t copied = 0; copied < chunk_size; ++copied) {
             if (src_it.has_reached_end()) {
                 key_in_range = false;
@@ -124,7 +124,7 @@ vector<CBString> PersistentDict::erase_interval(const CBString& first_key, const
         while (key_in_range) {
             vector<CBString> tmp_removed_keys;
             {
-                iterator it(iterator::range(*this, first_key, false));
+                iterator it(iterator::range(shared_from_this(), first_key, false));
                 for(ssize_t i=0; i < chunk_size; i++) {
                     if (it.has_reached_end()) {
                         key_in_range = false;
@@ -165,7 +165,7 @@ void PersistentDict::transform_values(binary_scalar_functor binary_funct, const 
     }
     bool key_in_range = true;
     while (key_in_range) {
-        iterator it(iterator::range(*this, first_key, false));
+        iterator it(iterator::range(shared_from_this(), first_key, false));
         for(ssize_t i=0; i < chunk_size; i++) {
             if (it.has_reached_end()) {
                 key_in_range = false;
@@ -199,7 +199,7 @@ void PersistentDict::remove_if(binary_predicate binary_pred, const CBString& fir
     }
     bool key_in_range = true;
     while (key_in_range) {
-        iterator it(iterator::range(*this, first_key, false));
+        iterator it(iterator::range(shared_from_this(), first_key, false));
         for(ssize_t i=0; i < chunk_size; i++) {
             if (it.has_reached_end()) {
                 key_in_range = false;
@@ -239,7 +239,7 @@ void PersistentDict::remove_duplicates(const CBString& first_key, const CBString
         PersistentDict tmp_dict(tmpdir->get_path(), "", opts);
 
         {
-            const_iterator it = const_iterator::range(*this, first_key);
+            const_iterator it = const_iterator::range(shared_from_this(), first_key);
             bool key_in_range = true;
             while (key_in_range) {
                 insert_iterator tmp_it = tmp_dict.insertiterator();
@@ -260,7 +260,7 @@ void PersistentDict::remove_duplicates(const CBString& first_key, const CBString
         }
 
         {
-            iterator it = iterator::range(*this, first_key, false);
+            iterator it = iterator::range(shared_from_this(), first_key, false);
             for(; !it.has_reached_end(); ++it) {
                 pair<const CBString, CBString> current(it.get_item());
                 if (!key_is_in_interval(current.first, first_key, last_key)) {
@@ -279,7 +279,7 @@ size_t PersistentDict::count_interval_if(binary_predicate predicate, const CBStr
     if (!*this) {
         return 0;
     }
-    const_iterator it(const_iterator::range(*this, first_key));
+    const_iterator it(const_iterator::range(shared_from_this(), first_key));
     size_t n = 0;
     for(; !it.has_reached_end(); ++it) {
         pair<const CBString, CBString> p(it.get_item());
@@ -301,7 +301,7 @@ CBString PersistentDict::operator[] (const CBString& key) const {
     if (!*this) {
         return "";
     }
-    const_iterator it(this, key);
+    const_iterator it(shared_from_this(), key);
     if (it.has_reached_end()) {
         return "";
     }
@@ -316,7 +316,7 @@ CBString PersistentDict::at(MDB_val k) const {
     if (!*this) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
-    const_iterator it(this, k);
+    const_iterator it(shared_from_this(), k);
     if (it.has_reached_end()) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -330,7 +330,7 @@ CBString PersistentDict::pop(MDB_val k) {
     if (!*this) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
-    iterator it(this, k, false);
+    iterator it(shared_from_this(), k, false);
     if (it.has_reached_end()) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -345,7 +345,7 @@ CBString PersistentDict::setdefault(MDB_val k, MDB_val dflt) {
     if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
-    iterator it(this, k, 0);
+    iterator it(shared_from_this(), k, 0);
     if (it.has_reached_end()) {
         it.set_key_value(k, dflt);
         return make_string(dflt);
@@ -358,7 +358,7 @@ pair<CBString, CBString> PersistentDict::popitem() {
     if (!*this) {
         BOOST_THROW_EXCEPTION(empty_database());
     }
-    iterator it(this, 0, false);
+    iterator it(shared_from_this(), 0, false);
     if (it.has_reached_end()) {
         BOOST_THROW_EXCEPTION(empty_database());
     }
@@ -372,7 +372,7 @@ void PersistentDict::erase(const CBString& key) {
     if (!*this) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
-    iterator it(this, key, false);
+    iterator it(shared_from_this(), key, false);
     if (it.has_reached_end()) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -383,7 +383,7 @@ void PersistentDict::erase(MDB_val key) {
     if (!*this) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
-    iterator it(this, key, false);
+    iterator it(shared_from_this(), key, false);
     if (it.has_reached_end()) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -395,7 +395,7 @@ bool PersistentDict::empty_interval(const CBString& first_key, const CBString& l
     if (!*this) {
         return true;
     }
-    const_iterator it(const_iterator::range(*this, first_key));
+    const_iterator it(const_iterator::range(shared_from_this(), first_key));
     if (it.has_reached_end()) {
         return true;
     }

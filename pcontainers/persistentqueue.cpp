@@ -27,7 +27,7 @@ void PersistentQueue::push_front(size_t n, const CBString& val) {
     if (n <= 0) {
         return;
     }
-    front_insert_iterator it(this);
+    front_insert_iterator it(shared_from_this());
     for(size_t i=0; i<n; i++) {
         it = val;
     }
@@ -37,7 +37,7 @@ void PersistentQueue::push_back(size_t n, const CBString& val) {
     if (n <= 0) {
         return;
     }
-    back_insert_iterator it(this);
+    back_insert_iterator it(shared_from_this());
     for(size_t i=0; i<n; i++) {
         it = val;
     }
@@ -63,8 +63,8 @@ void PersistentQueue::move_to(PersistentQueue& other, ssize_t chunk_size) {
 
     iiterator end;
     while (src_not_empty) {
-        back_insert_iterator dest_it(&other);
-        iiterator src_it(this);
+        back_insert_iterator dest_it(other.back_inserter());
+        iiterator src_it(shared_from_this());
         for(ssize_t i=0; i < chunk_size; i++) {
             if (src_it == end) {
                 src_not_empty = false;

@@ -24,7 +24,7 @@ cdef class PRawDictAbstractIterator(object):
         self.cpp_iterator_ptr.get().abs_decr()
 
     cdef get_key(self):
-        cdef int keysize = self.dict.ptr.get_maxkeysize()
+        cdef int keysize = self.dict.ptr.get().get_maxkeysize()
         cdef MDB_val k
         cdef bytearray obj = bytearray(keysize)
         cdef PyBufferWrap view = move(PyBufferWrap(obj))
@@ -74,7 +74,7 @@ cdef class PRawDictAbstractIterator(object):
         return self.dict.value_chain.loads(make_mbufferio(ptr, v.mv_size, 1))
 
     cdef get_item(self):
-        cdef int keysize = self.dict.ptr.get_maxkeysize()
+        cdef int keysize = self.dict.ptr.get().get_maxkeysize()
         cdef pair[MDB_val, MDB_val] kv
         cdef cpp_bool done = 0
         cdef bytearray key_obj = bytearray(keysize)
@@ -188,7 +188,7 @@ cdef class PRawDict(object):
     def __cinit__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
         if opts is None:
             opts = LmdbOptions()
-        self.ptr = new cppPersistentDict(tocbstring(dirname), tocbstring(dbname), (<LmdbOptions> opts).opts)
+        self.ptr = dict_factory(tocbstring(dirname), tocbstring(dbname), (<LmdbOptions> opts).opts)
         self.rmrf_at_delete = 0
         self.key_chain = NoneChain()
         self.value_chain = NoneChain()
@@ -201,13 +201,12 @@ cdef class PRawDict(object):
             self.update(e=kwarg)
 
     def __dealloc__(self):
-        if self.ptr is not NULL:
+        if self.ptr.get():
             if self.rmrf_at_delete:
                 shutil.rmtree(self.dirname)
                 self.rmrf_at_delete = 0
 
-            del self.ptr
-            self.ptr = NULL
+            self.ptr.reset()
 
     def __repr__(self):
         return u"PRawDict(dbname='{}', dirname='{}')".format(
@@ -241,11 +240,11 @@ cdef class PRawDict(object):
 
     property dirname:
         def __get__(self):
-            return topy(self.ptr.get_dirname())
+            return topy(self.ptr.get().get_dirname())
 
     property dbname:
         def __get__(self):
-            return topy(self.ptr.get_dbname())
+            return topy(self.ptr.get().get_dbname())
 
     def __getitem__(self, item):
         if not item:
@@ -274,7 +273,7 @@ cdef class PRawDict(object):
         cdef PyBufferWrap default_view = move(PyBufferWrap(self.value_chain.dumps(default)))
         cdef CBString ret
         with nogil:
-            ret = self.ptr.setdefault(key_view.get_mdb_val(), default_view.get_mdb_val())
+            ret = self.ptr.get().setdefault(key_view.get_mdb_val(), default_view.get_mdb_val())
         return self.value_chain.loads(topy(ret))
 
     def __setitem__(self, key, value):
@@ -289,13 +288,13 @@ cdef class PRawDict(object):
             raise EmptyKey()
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.dumps(key)))
         with nogil:
-            self.ptr.erase(key_view.get_mdb_val())
+            self.ptr.get().erase(key_view.get_mdb_val())
 
     cpdef erase(self, first, last):
         cdef CBString f = tocbstring(first)
         cdef CBString l = tocbstring(last)
         with nogil:
-            self.ptr.erase_interval(f, l)
+            self.ptr.get().erase_interval(f, l)
 
     cpdef noiterkeys(self):
         return list(self.keys())
@@ -311,7 +310,7 @@ cdef class PRawDict(object):
         cdef CBString v
         try:
             with nogil:
-                v = self.ptr.pop(key_view.get_mdb_val())
+                v = self.ptr.get().pop(key_view.get_mdb_val())
         except NotFound:
             if default is None:
                 raise
@@ -321,7 +320,7 @@ cdef class PRawDict(object):
     cpdef popitem(self):
         cdef pair[CBString, CBString] p
         with nogil:
-            p = self.ptr.popitem()
+            p = self.ptr.get().popitem()
         return self.key_chain.loads(make_mbufferio_from_cbstring(p.first)), self.value_chain.loads(make_mbufferio_from_cbstring(p.second))
 
     def __iter__(self):
@@ -385,19 +384,19 @@ cdef class PRawDict(object):
         return self.items(reverse)
 
     def __nonzero__(self):
-        return self.ptr.is_initialized()
+        return self.ptr.get().is_initialized()
 
     def __len__(self):
-        return self.ptr.size()
+        return self.ptr.get().size()
 
     cpdef clear(self):
-        self.ptr.clear()
+        self.ptr.get().clear()
 
     def __contains__(self, key):
         if not key:
             return False
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.loads(key)))
-        return self.ptr.contains(key_view.get_mdb_val())
+        return self.ptr.get().contains(key_view.get_mdb_val())
 
     cpdef has_key(self, key):
         return key in self
@@ -433,24 +432,24 @@ cdef class PRawDict(object):
 
     cpdef transform_values(self, binary_funct):
         with nogil:
-            self.ptr.transform_values(make_binary_scalar_functor(binary_funct))
+            self.ptr.get().transform_values(make_binary_scalar_functor(binary_funct))
 
     cpdef remove_if(self, binary_pred):
         with nogil:
-            self.ptr.remove_if(make_binary_predicate(binary_pred))
+            self.ptr.get().remove_if(make_binary_predicate(binary_pred))
 
     cpdef move_to(self, other, ssize_t chunk_size=-1):
         if not isinstance(other, PRawDict):
             raise TypeError()
         cdef CBString empt
         with nogil:
-            self.ptr.move_to(deref((<PRawDict> other).ptr), empt, empt, chunk_size)
+            self.ptr.get().move_to(deref((<PRawDict> other).ptr), empt, empt, chunk_size)
 
     cpdef remove_duplicates(self, first="", last=""):
         cdef CBString firstkey = tocbstring(first)
         cdef CBString lastkey = tocbstring(last)
         with nogil:
-            self.ptr.remove_duplicates(firstkey, lastkey)
+            self.ptr.get().remove_duplicates(firstkey, lastkey)
 
 
 cdef class PDict(PRawDict):
@@ -482,23 +481,23 @@ cdef class PDict(PRawDict):
     cpdef transform_values(self, binary_funct):
         binary_funct = _adapt_binary_scalar_functor(binary_funct, self.key_chain, self.value_chain)
         with nogil:
-            self.ptr.transform_values(make_binary_scalar_functor(binary_funct))
+            self.ptr.get().transform_values(make_binary_scalar_functor(binary_funct))
 
     cpdef remove_if(self, binary_pred):
         binary_pred = _adapt_binary_predicate(binary_pred, self.key_chain, self.value_chain)
         with nogil:
-            self.ptr.remove_if(make_binary_predicate(binary_pred))
+            self.ptr.get().remove_if(make_binary_predicate(binary_pred))
 
     cpdef move_to(self, other, ssize_t chunk_size=-1):
         if not isinstance(other, PDict):
             raise TypeError()
         cdef CBString empt
         with nogil:
-            self.ptr.move_to(deref((<PDict> other).ptr), empt, empt, chunk_size)
+            self.ptr.get().move_to(deref((<PDict> other).ptr), empt, empt, chunk_size)
 
     cpdef remove_duplicates(self, first="", last=""):
         with nogil:
-            self.ptr.remove_duplicates()
+            self.ptr.get().remove_duplicates()
 
 
 collections.MutableMapping.register(PRawDict)

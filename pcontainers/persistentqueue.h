@@ -6,6 +6,7 @@
 #include <boost/atomic.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <bstrlib/bstrwrap.h>
 
 #include "persistentdict.h"
@@ -15,34 +16,36 @@ namespace quiet {
 
 using boost::mutex;
 using boost::lock_guard;
+using boost::shared_ptr;
+using boost::enable_shared_from_this;
 using Bstrlib::CBString;
 
-class PersistentQueue {
+class PersistentQueue: public enable_shared_from_this<PersistentQueue> {
 private:
+    PersistentQueue(const PersistentQueue& other);
     PersistentQueue& operator=(const PersistentQueue&);
+    PersistentQueue(const CBString& directory_name, const CBString& database_name, const lmdb_options& options):
+            the_dict(directory_name, database_name, options) { }
+    void close() { the_dict.close(); }
 protected:
     PersistentDict the_dict;        // PersistentDict is a member: implemented in terms of
     static const long long MIDDLE = 4611686018427387903;
     static const int NDIGITS = 19;
 
+
 public:
-    typedef std::allocator<CBString> A;
-    typedef A allocator_type;
-    typedef A::value_type value_type;
-    typedef A::reference reference;
-    typedef A::const_reference const_reference;
-    typedef A::difference_type difference_type;
-    typedef A::size_type size_type;
+    typedef CBString value_type;
+    typedef CBString& reference;
+    typedef const CBString& const_reference;
 
     BOOST_EXPLICIT_OPERATOR_BOOL()
     bool operator!() const { return !the_dict; }
 
-    PersistentQueue(): the_dict() { }
-    PersistentQueue(const CBString& directory_name, const CBString& database_name="", const lmdb_options& options=lmdb_options()):
-    the_dict(directory_name, database_name, options) { }
-    void close() { the_dict.close(); }
     ~PersistentQueue() { close(); }
-    PersistentQueue(const PersistentQueue& other): the_dict(other.the_dict) { }
+
+    static inline shared_ptr<PersistentQueue> factory(const CBString& directory_name, const CBString& database_name="", const lmdb_options& options=lmdb_options()) {
+        return shared_ptr<PersistentQueue>(new PersistentQueue(directory_name, database_name, options));
+    }
 
     bool operator==(const PersistentQueue& other) {
         return the_dict == other.the_dict;
@@ -74,30 +77,29 @@ public:
     protected:
         boost::atomic_bool initialized;
         int direction;
-        PersistentQueue* the_queue;
-        boost::shared_ptr<environment::transaction> txn;
-        boost::shared_ptr<environment::transaction::cursor> cursor;
+        shared_ptr<PersistentQueue> the_queue;
+        shared_ptr<environment::transaction> txn;
+        shared_ptr<environment::transaction::cursor> cursor;
 
         void swap(back_insert_iterator& other) {
             using std::swap;
-            swap(the_queue, other.the_queue);
+            the_queue.swap(other.the_queue);
             cursor.swap(other.cursor);
             txn.swap(other.txn);
         }
 
     public:
-        typedef A::difference_type difference_type;
-        typedef A::value_type value_type;
-        typedef A::reference reference;
-        typedef A::pointer pointer;
+        typedef CBString value_type;
+        typedef CBString& reference;
+        typedef CBString* pointer;
         typedef std::output_iterator_tag iterator_category;
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
         bool operator!() const { return !initialized.load(); }
 
-        back_insert_iterator(): initialized(false), direction(1), the_queue(NULL), txn(), cursor() { }
+        back_insert_iterator(): initialized(false), direction(1), the_queue(), txn(), cursor() { }
 
-        back_insert_iterator(PersistentQueue* q): initialized(false), direction(1), the_queue(NULL), txn(), cursor() {
+        back_insert_iterator(shared_ptr<PersistentQueue> q): initialized(false), direction(1), the_queue(), txn(), cursor() {
             if (bool(q) && bool(*q)) {
                 the_queue = q;
                 txn = the_queue->the_dict.env->start_transaction(false);
@@ -109,10 +111,11 @@ public:
         ~back_insert_iterator() {
             cursor.reset();
             txn.reset();
+            the_queue.reset();
         }
 
         // move constructor
-        back_insert_iterator(BOOST_RV_REF(back_insert_iterator) other): initialized(false), direction(1), the_queue(NULL),
+        back_insert_iterator(BOOST_RV_REF(back_insert_iterator) other): initialized(false), direction(1), the_queue(),
                                                                         txn(), cursor() {
             if (other) {
                 other.initialized.store(false);
@@ -125,7 +128,7 @@ public:
         back_insert_iterator& operator=(BOOST_RV_REF(back_insert_iterator) other) {
             initialized.store(false);
             direction = 1;
-            the_queue = NULL;
+            the_queue.reset();
             cursor.reset();
             txn.reset();
             if (other) {
@@ -173,7 +176,7 @@ public:
         void set_rollback(bool val=true) { back_insert_iterator::set_rollback(val); }
 
         front_insert_iterator(): back_insert_iterator() { direction = -1;}
-        front_insert_iterator(PersistentQueue* q): back_insert_iterator(q) { direction = -1; }
+        front_insert_iterator(shared_ptr<PersistentQueue> q): back_insert_iterator(q) { direction = -1; }
 
         ~front_insert_iterator() {
             cursor.reset();
@@ -215,9 +218,9 @@ public:
         mutex current_value_lock;
         boost::scoped_ptr<CBString> current_value;
 
-        PersistentQueue* the_queue;
-        boost::shared_ptr<environment::transaction> txn;
-        boost::shared_ptr<environment::transaction::cursor> cursor;
+        shared_ptr<PersistentQueue> the_queue;
+        shared_ptr<environment::transaction> txn;
+        shared_ptr<environment::transaction::cursor> cursor;
 
         inline bool empty() const {
             if (cursor) {
@@ -232,24 +235,23 @@ public:
         void swap(iiterator& other) {
             using std::swap;
             current_value.swap(other.current_value);
-            swap(the_queue, other.the_queue);
+            the_queue.swap(other.the_queue);
             cursor.swap(other.cursor);
             txn.swap(other.txn);
         }
 
     public:
-        typedef A::difference_type difference_type;
-        typedef A::value_type value_type;
-        typedef A::reference reference;
-        typedef A::pointer pointer;
+        typedef CBString value_type;
+        typedef CBString& reference;
+        typedef CBString* pointer;
         typedef std::input_iterator_tag iterator_category;
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
         bool operator!() const { return !initialized.load(); }
 
-        iiterator(): initialized(false), current_value(), the_queue(NULL), txn(), cursor() { }
+        iiterator(): initialized(false), current_value(), the_queue(), txn(), cursor() { }
 
-        iiterator(PersistentQueue* q, int pos=0): initialized(false), current_value(), the_queue(NULL), txn(), cursor() {
+        iiterator(shared_ptr<PersistentQueue> q, int pos=0): initialized(false), current_value(), the_queue(), txn(), cursor() {
             if (bool(q) && bool(*q)) {
                 the_queue = q;
                 txn = the_queue->the_dict.env->start_transaction(false);
@@ -269,11 +271,12 @@ public:
             current_value.reset();
             cursor.reset();
             txn.reset();
+            the_queue.reset();
         }
 
 
         // move constructor
-        iiterator(BOOST_RV_REF(iiterator) other): initialized(false), current_value(), the_queue(NULL), txn(), cursor() {
+        iiterator(BOOST_RV_REF(iiterator) other): initialized(false), current_value(), the_queue(), txn(), cursor() {
             if (other) {
                 other.initialized.store(false);
                 swap(other);
@@ -285,7 +288,7 @@ public:
         iiterator& operator=(BOOST_RV_REF(iiterator) other) {
             initialized.store(false);
             current_value.reset();
-            the_queue = NULL;
+            the_queue.reset();
             cursor.reset();
             txn.reset();
             if (other) {
@@ -366,49 +369,55 @@ public:
     void move_to(PersistentQueue& other, ssize_t chunk_size=-1);
     void push_back(size_t n, const CBString& val);
 
+    back_insert_iterator back_inserter() {
+        return back_insert_iterator(shared_from_this());
+    }
+
     void push_back(const CBString& val) {
-        back_insert_iterator it(this);
+        back_insert_iterator it(shared_from_this());
         it = val;
     }
 
+
+
     void push_back(MDB_val val) {
-        back_insert_iterator it(this);
+        back_insert_iterator it(shared_from_this());
         it = val;
     }
 
     template <class InputIterator>
     void push_back(InputIterator first, InputIterator last) {
-        back_insert_iterator it(this);
+        back_insert_iterator it(shared_from_this());
         for (; first != last; ++first) {
             it = *first;
         }
     }
 
     void push_front(const CBString& val) {
-        front_insert_iterator it(this);
+        front_insert_iterator it(shared_from_this());
         it = val;
     }
 
     void push_front(MDB_val val) {
-        front_insert_iterator it(this);
+        front_insert_iterator it(shared_from_this());
         it = val;
     }
 
     template <class InputIterator>
     void push_front(InputIterator first, InputIterator last) {
-        front_insert_iterator it(this);
+        front_insert_iterator it(shared_from_this());
         for (; first != last; ++first) {
             it = *first;
         }
     }
 
     void push_front(size_t n, const CBString& val);
-    CBString pop_back() { return CBString(*iiterator(this, 1)); }
-    CBString pop_front() { return CBString(*iiterator(this)); }
+    CBString pop_back() { return CBString(*iiterator(shared_from_this(), 1)); }
+    CBString pop_front() { return CBString(*iiterator(shared_from_this())); }
 
     template <class OutputIterator>
     void pop_all(OutputIterator oit) {
-        iiterator it(this);
+        iiterator it(shared_from_this());
         iiterator end;
         for(; it != end; ++it) {
             oit = *it;

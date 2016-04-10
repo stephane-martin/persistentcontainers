@@ -2,13 +2,6 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
 
     # noinspection PyPep8Naming
     cppclass cppPersistentDict "quiet::PersistentDict":
-        cppPersistentDict() except +custom_handler
-        cppPersistentDict(const CBString& directory_name) except +custom_handler
-        cppPersistentDict(const CBString& directory_name, const CBString& database_name) except +custom_handler
-        cppPersistentDict(const CBString& directory_name, const CBString& database_name, const lmdb_options& options) except +custom_handler
-        cppPersistentDict(const cppPersistentDict& other) except +custom_handler
-        (cppPersistentDict&) operator=(cppPersistentDict other) except +custom_handler
-
         cpp_bool is_initialized()
         int get_maxkeysize()
         CBString get_dirname()
@@ -105,6 +98,11 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
     cpp_bool operator==(const cppPersistentDict& one, const cppPersistentDict& other)
     cpp_bool operator!=(const cppPersistentDict& one, const cppPersistentDict& other)
 
+    shared_ptr[cppPersistentDict] dict_factory "quiet::PersistentDict::factory"(const CBString& directory_name) except +custom_handler
+    shared_ptr[cppPersistentDict] dict_factory "quiet::PersistentDict::factory"(const CBString& directory_name, const CBString& database_name) except +custom_handler
+    shared_ptr[cppPersistentDict] dict_factory "quiet::PersistentDict::factory"(const CBString& directory_name, const CBString& database_name, const lmdb_options& options) except +custom_handler
+
+
     cdef cppclass abstract_iterator "quiet::PersistentDict::abstract_iterator":
         CBString get_key() except +custom_handler
         MDB_val get_key_buffer() except +custom_handler
@@ -126,16 +124,15 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
     # noinspection PyPep8Naming
     cdef cppclass cppIterator "quiet::PersistentDict::iterator" (abstract_iterator):
         cppIterator() except +custom_handler
-        cppIterator(cppPersistentDict* d) except +custom_handler
-        cppIterator(cppPersistentDict* d, int pos) except +custom_handler
-        cppIterator(cppPersistentDict* d, int pos, cpp_bool readonly) except +custom_handler
-        cppIterator(cppPersistentDict* d, const CBString& key) except +custom_handler
-        cppIterator(cppPersistentDict* d, MDB_val key) except +custom_handler
-        cppIterator(cppPersistentDict* d, const CBString& key, cpp_bool readonly) except +custom_handler
-        cppIterator(cppPersistentDict* d, MDB_val key, cpp_bool readonly) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, int pos) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, int pos, cpp_bool ro) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, const CBString& key) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, const CBString& key, cpp_bool ro) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, MDB_val key) except +custom_handler
+        cppIterator(shared_ptr[cppPersistentDict] d, MDB_val key, cpp_bool ro) except +custom_handler
 
         cppIterator(const cppIterator& other) except +custom_handler
-        cppIterator(const cppConstIterator& other) except +custom_handler
 
         (cppIterator&) incr "quiet::PersistentDict::iterator::operator++"() except +custom_handler
         (cppIterator&) decr "quiet::PersistentDict::iterator::operator--"() except +custom_handler
@@ -154,10 +151,10 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
     # noinspection PyPep8Naming
     cdef cppclass cppConstIterator "quiet::PersistentDict::const_iterator" (abstract_iterator):
         cppConstIterator() except +custom_handler
-        cppConstIterator(cppPersistentDict* d) except +custom_handler
-        cppConstIterator(cppPersistentDict* d, int pos) except +custom_handler
-        cppConstIterator(cppPersistentDict* d, const CBString& key) except +custom_handler
-        cppConstIterator(cppPersistentDict* d, MDB_val key) except +custom_handler
+        cppConstIterator(shared_ptr[cppPersistentDict] d) except +custom_handler
+        cppConstIterator(shared_ptr[cppPersistentDict] d, int pos) except +custom_handler
+        cppConstIterator(shared_ptr[cppPersistentDict] d, const CBString& key) except +custom_handler
+        cppConstIterator(shared_ptr[cppPersistentDict] d, MDB_val key) except +custom_handler
 
         cppConstIterator(const cppConstIterator& other) except +custom_handler
 

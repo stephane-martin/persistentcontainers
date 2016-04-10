@@ -13,6 +13,7 @@
 #include <boost/type_traits/conditional.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
@@ -39,28 +40,32 @@ using std::exception;
 using boost::conditional;
 using boost::mutex;
 using boost::lock_guard;
-
+using boost::shared_ptr;
+using boost::enable_shared_from_this;
 using Bstrlib::CBString;
 using namespace lmdb;
 using namespace utils;
 
 
-class PersistentDict {
-
+class PersistentDict: public enable_shared_from_this<PersistentDict> {
 friend class PersistentQueue;
 
 private:
     PersistentDict& operator=(const PersistentDict&);
+    PersistentDict(const CBString& directory_name, const CBString& database_name, const lmdb_options& options):
+            dirname(directory_name), dbname(database_name), env(), dbi(), opts(options) { init(); }
+    PersistentDict(const PersistentDict& other);
 
+    void init();
+    void close() { env.reset(); }
 
 protected:
     CBString dirname;
     CBString dbname;
-    boost::shared_ptr<environment> env;
+    shared_ptr<environment> env;
     MDB_dbi dbi;
     const lmdb_options opts;
 
-    void init();
 
 public:
     typedef CBString key_type;
@@ -72,23 +77,8 @@ public:
         return !env;
     }
 
-    inline bool is_initialized() const {
+    bool is_initialized() const {
         return bool(*this);
-    }
-
-    PersistentDict(): dirname(), dbname(), env(), dbi(), opts() {
-        _LOG_DEBUG << "New trivial PersistentDict object";
-    }
-
-    PersistentDict(const CBString& directory_name, const CBString& database_name=CBString(), const lmdb_options& options=lmdb_options()):
-    dirname(directory_name), dbname(database_name), env(), dbi(), opts(options) {
-        init();
-    }
-
-    PersistentDict(const PersistentDict& other): dirname(other.dirname), dbname(other.dbname), env(), dbi(), opts(other.opts) {
-        if (other) {
-            init();
-        }
     }
 
     int get_maxkeysize() const {
@@ -98,7 +88,11 @@ public:
         return 0;
     }
 
-    void close() { env.reset(); }
+    static inline shared_ptr<PersistentDict> factory(const CBString& directory_name, const CBString& database_name=CBString(),
+                                                     const lmdb_options& options=lmdb_options()) {
+        return shared_ptr<PersistentDict>(new PersistentDict(directory_name, database_name, options));
+    }
+
     ~PersistentDict() { close(); }
 
     void copy_to(PersistentDict& other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
@@ -119,7 +113,7 @@ public:
         }
         InputIterator it(first);
         while (it != last) {
-            insert_iterator output(this);
+            insert_iterator output(shared_from_this());
             for(ssize_t i = 0; i < chunk_size; i++) {
                 if (it == last) {
                     break;
@@ -140,7 +134,7 @@ public:
         if (k.mv_size == 0 || k.mv_data == NULL) {
             BOOST_THROW_EXCEPTION(empty_key());
         }
-        insert_iterator output(this);
+        insert_iterator output(shared_from_this());
         output = make_pair(k, v);
     }
 
@@ -221,7 +215,7 @@ public:
         if (key.mv_size == 0 || key.mv_data == NULL || (!*this)) {
             return false;
         }
-        return !const_iterator(this, key).has_reached_end();
+        return !const_iterator(shared_from_this(), key).has_reached_end();
     }
 
     class insert_iterator {
@@ -230,8 +224,9 @@ public:
 
     protected:
         boost::atomic_bool initialized;
-        boost::shared_ptr<environment::transaction> txn;
-        boost::shared_ptr<environment::transaction::cursor> cursor;
+        shared_ptr<PersistentDict> dict;
+        shared_ptr<environment::transaction> txn;
+        shared_ptr<environment::transaction::cursor> cursor;
 
     public:
         typedef void difference_type;
@@ -245,6 +240,7 @@ public:
         bool operator!() const { return !initialized.load(); }
 
         ~insert_iterator() {
+            dict.reset();
             cursor.reset();
             txn.reset();
         }
@@ -255,17 +251,18 @@ public:
             }
         }
 
-        insert_iterator(PersistentDict* d): initialized(false), txn(), cursor() {
-            if (bool(d) && bool(*d)) {
-                txn = d->env->start_transaction(false);
+        insert_iterator(shared_ptr<PersistentDict> d): initialized(false), dict(d), txn(), cursor() {
+            if (bool(dict) && bool(*dict)) {
+                txn = dict->env->start_transaction(false);
                 cursor = txn->make_cursor(d->dbi);
                 initialized.store(true);
             }
         }
 
-        insert_iterator(BOOST_RV_REF(insert_iterator) other): initialized(false), txn(), cursor() {
+        insert_iterator(BOOST_RV_REF(insert_iterator) other): initialized(false), dict(), txn(), cursor() {
             if (other) {
                 other.initialized.store(false);
+                dict.swap(other.dict);
                 cursor.swap(other.cursor);
                 txn.swap(other.txn);
                 initialized.store(true);
@@ -274,10 +271,12 @@ public:
 
         insert_iterator& operator=(BOOST_RV_REF(insert_iterator) other) {
             initialized.store(false);
+            dict.reset();
             cursor.reset();
             txn.reset();
             if (other) {
                 other.initialized.store(false);
+                dict.swap(other.dict);
                 cursor.swap(other.cursor);
                 txn.swap(other.txn);
                 initialized.store(true);
@@ -313,8 +312,8 @@ public:
 
     class abstract_iterator {
     protected:
-        boost::shared_ptr<environment::transaction::cursor> cursor;
-        boost::shared_ptr<environment::transaction> txn;
+        shared_ptr<environment::transaction::cursor> cursor;
+        shared_ptr<environment::transaction> txn;
         bool reached_end;
         bool reached_beginning;
         mutex lock;
@@ -379,39 +378,50 @@ public:
 
     template<bool B>
     class tmpl_iterator: public abstract_iterator {
+    public:
+        typedef typename boost::conditional< B, shared_ptr<const PersistentDict>, shared_ptr<PersistentDict> >::type dict_ptr_type;
+        typedef pair<const CBString, CBString> value_type;
+        typedef std::input_iterator_tag iterator_category;
+
     private:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(tmpl_iterator)
 
     protected:
         boost::atomic_bool initialized;
         bool ro;
+        dict_ptr_type dict;
         MDB_dbi dbi;
+
+        virtual void swap(tmpl_iterator& other) {
+            using std::swap;
+            swap(ro, other.ro);
+            swap(reached_end, other.reached_end);
+            swap(reached_beginning, other.reached_beginning);
+            swap(dbi, other.dbi);
+            dict.swap(other.dict);
+            cursor.swap(other.cursor);
+            txn.swap(other.txn);
+        }
 
     public:
         virtual ~tmpl_iterator() = 0;
 
-        typedef typename boost::conditional<B, const PersistentDict*, PersistentDict*>::type dict_ptr_type;
-        typedef pair<const CBString, CBString> value_type;
-        typedef std::input_iterator_tag iterator_category;      // can't really be a forward iterator as operator* does not return a ref
 
-        tmpl_iterator(): abstract_iterator(), initialized(false), ro(true) { }
+        tmpl_iterator(): abstract_iterator(), initialized(false), ro(true), dict(), dbi() { }
 
         BOOST_EXPLICIT_OPERATOR_BOOL()
         bool operator!() const { return !initialized.load(); }
 
-        tmpl_iterator(dict_ptr_type d, int pos):
-            abstract_iterator(), initialized(false), ro(true) {
-            init(d, pos);
+        tmpl_iterator(dict_ptr_type d, int pos): abstract_iterator(), initialized(false), ro(true), dict(d), dbi(d->dbi) {
+            init(pos);
         }
 
-        tmpl_iterator(dict_ptr_type d, const CBString& key):
-            abstract_iterator(), initialized(false), ro(true) {
-            init(d, key);
+        tmpl_iterator(dict_ptr_type d, const CBString& key): abstract_iterator(), initialized(false), ro(true), dict(d), dbi(d->dbi) {
+            init(key);
         }
 
-        tmpl_iterator(dict_ptr_type d, MDB_val key):
-            abstract_iterator(), initialized(false), ro(true) {
-            init(d, key);
+        tmpl_iterator(dict_ptr_type d, MDB_val key): abstract_iterator(), initialized(false), ro(true), dict(d), dbi(d->dbi) {
+            init(key);
         }
 
         // move constructor
@@ -431,6 +441,7 @@ public:
             reached_end = false;
             reached_beginning = false;
             dbi = MDB_dbi();
+            dict.reset();
             cursor.reset();
             txn.reset();
             if (other) {
@@ -456,12 +467,14 @@ public:
                 return true;
             }
 
-            if (    (reached_end != other.reached_end) ||
-                    (reached_beginning != other.reached_beginning) ||
-                    (ro != other.ro) ||
-                    (dbi != other.dbi)  ) {
-                        return false;
-            }
+            if (
+                (reached_end != other.reached_end) ||
+                (reached_beginning != other.reached_beginning) ||
+                (ro != other.ro) ||
+                (dbi != other.dbi) ||
+                ((*dict) != (*(other.dict)))
+               )   { return false; }
+
             if (reached_end || reached_beginning) {
                 return true;
             }
@@ -558,23 +571,12 @@ public:
         }
 
     protected:
-        void swap(tmpl_iterator& other) {
-            using std::swap;
-            swap(ro, other.ro);
-            swap(reached_end, other.reached_end);
-            swap(reached_beginning, other.reached_beginning);
-            swap(dbi, other.dbi);
-            cursor.swap(other.cursor);
-            txn.swap(other.txn);
-        }
-
-        void init(dict_ptr_type d, int pos) {
-            if (!d || !(*d)) {
+        void init(int pos) {
+            if (!dict || !(*dict)) {
                 return;
             }
-            dbi = d->dbi;
             ro = true;
-            txn = d->env->start_transaction();
+            txn = dict->env->start_transaction();
             cursor = txn->make_cursor(dbi);
             if (pos > 0) {
                 reached_end = true;
@@ -586,13 +588,12 @@ public:
             initialized.store(true);
         }
 
-        void init(dict_ptr_type d, int pos, bool readonly) {
-            if (!d || !(*d)) {
+        void init(int pos, bool readonly) {
+            if (!dict || !(*dict)) {
                 return;
             }
-            dbi = d->dbi;
             ro = readonly;
-            txn = d->env->start_transaction(ro);
+            txn = dict->env->start_transaction(ro);
             cursor = txn->make_cursor(dbi);
             if (pos > 0) {
                 reached_end = true;
@@ -604,34 +605,32 @@ public:
             initialized.store(true);
         }
 
-        void init(dict_ptr_type d, const CBString& key) {
-            init(d, make_mdb_val(key));
+        void init(const CBString& key) {
+            init(make_mdb_val(key));
         }
 
-        void init(dict_ptr_type d, const CBString& key, bool readonly) {
-            init(d, make_mdb_val(key), readonly);
+        void init(const CBString& key, bool readonly) {
+            init(make_mdb_val(key), readonly);
         }
 
-        void init(dict_ptr_type d, MDB_val key) {
-            if (!d || !(*d)) {
+        void init(MDB_val key) {
+            if (!dict || !(*dict)) {
                 return;
             }
-            dbi = d->dbi;
             ro = true;
-            txn = d->env->start_transaction();
-            cursor = txn->make_cursor(d->dbi);
+            txn = dict->env->start_transaction();
+            cursor = txn->make_cursor(dbi);
             _set_position(key, true);
             initialized.store(true);
         }
 
-        void init(dict_ptr_type d, MDB_val key, bool readonly) {
-            if (!d || !(*d)) {
+        void init(MDB_val key, bool readonly) {
+            if (!dict || !(*dict)) {
                 return;
             }
-            dbi = d->dbi;
             ro = readonly;
-            txn = d->env->start_transaction(ro);
-            cursor = txn->make_cursor(d->dbi);
+            txn = dict->env->start_transaction(ro);
+            cursor = txn->make_cursor(dbi);
             _set_position(key, readonly);
             initialized.store(true);
         }
@@ -663,9 +662,9 @@ public:
         BOOST_MOVABLE_BUT_NOT_COPYABLE(const_iterator)
     public:
         const_iterator(): _const_iterator() { }
-        const_iterator(dict_ptr_type d, int pos): _const_iterator(d, pos) { }
-        const_iterator(dict_ptr_type d, const CBString& key): _const_iterator(d, key) { }
-        const_iterator(dict_ptr_type d, MDB_val key): _const_iterator(d, key) { }
+        const_iterator(shared_ptr<const PersistentDict> d, int pos): _const_iterator(d, pos) { }
+        const_iterator(shared_ptr<const PersistentDict> d, const CBString& key): _const_iterator(d, key) { }
+        const_iterator(shared_ptr<const PersistentDict> d, MDB_val key): _const_iterator(d, key) { }
         const_iterator(BOOST_RV_REF(const_iterator) other): _const_iterator(BOOST_MOVE_BASE(_const_iterator, other)) { }
 
         virtual const_iterator& operator++() {
@@ -685,14 +684,13 @@ public:
             return *this;
         }
 
-        static inline const_iterator range(const PersistentDict& d, const CBString& key) {
-            if (!d) {
+        static inline const_iterator range(shared_ptr<const PersistentDict> d, const CBString& key) {
+            if (!d || !*d) {
                 BOOST_THROW_EXCEPTION( not_initialized() );
             }
-            const_iterator it(&d, 0);
+            const_iterator it(d, 0);
             it._set_range(make_mdb_val(key), true);
             return it;
-
         }
 
         pair<const CBString, CBString> operator*() const { return get_item(); }
@@ -775,9 +773,21 @@ public:
         PairProxy pproxy;
 
         iterator(): _iterator(), pproxy(*this) { }
-        iterator(PersistentDict* d, int pos, bool readonly): _iterator(), pproxy(*this) { init(d, pos, readonly); }
-        iterator(PersistentDict* d, const CBString& key, bool readonly): _iterator(), pproxy(*this) { init(d, key, readonly); }
-        iterator(PersistentDict* d, MDB_val key, bool readonly): _iterator(), pproxy(*this) { init(d, key, readonly); }
+        iterator(shared_ptr<PersistentDict> d, int pos, bool readonly): _iterator(), pproxy(*this) {
+            dict = d;
+            dbi = d->dbi;
+            init(pos, readonly);
+        }
+        iterator(shared_ptr<PersistentDict> d, const CBString& key, bool readonly): _iterator(), pproxy(*this) {
+            dict = d;
+            dbi = d->dbi;
+            init(key, readonly);
+        }
+        iterator(shared_ptr<PersistentDict> d, MDB_val key, bool readonly): _iterator(), pproxy(*this) {
+            dict = d;
+            dbi = d->dbi;
+            init(key, readonly);
+        }
         iterator(BOOST_RV_REF(iterator) other): _iterator(BOOST_MOVE_BASE(_iterator, other)), pproxy(*this) { }
 
         virtual iterator& operator++() {
@@ -798,11 +808,11 @@ public:
             return *this;
         }
 
-        static inline iterator range(PersistentDict& d, const CBString& key, bool readonly=true) {
-            if (!d) {
+        static inline iterator range(shared_ptr<PersistentDict> d, const CBString& key, bool readonly=true) {
+            if (!d || !*d) {
                 BOOST_THROW_EXCEPTION( not_initialized() );
             }
-            iterator it(&d, 0, readonly);
+            iterator it(d, 0, readonly);
             it._set_range(make_mdb_val(key), readonly);
             return it;
         }
@@ -826,9 +836,9 @@ public:
     void map_keys(OutputIterator oit,
                     const CBString& first="", const CBString& last="",
                     unary_functor f=unary_identity_functor,
-                    unary_predicate unary_pred=unary_true_pred) {
+                    unary_predicate unary_pred=unary_true_pred) const {
 
-        const_iterator iit(const_iterator::range(*this, first));
+        const_iterator iit(const_iterator::range(shared_from_this(), first));
         CBString k;
         for(; !iit.has_reached_end(); ++iit) {
             k = iit.get_key();
@@ -845,9 +855,9 @@ public:
     void map_values(OutputIterator oit,
                     const CBString& first="", const CBString& last="",
                     unary_functor f=unary_identity_functor,
-                    unary_predicate unary_pred=unary_true_pred) {
+                    unary_predicate unary_pred=unary_true_pred) const {
 
-        const_iterator iit(const_iterator::range(*this, first));
+        const_iterator iit(const_iterator::range(shared_from_this(), first));
         CBString v;
         for(; !iit.has_reached_end(); ++iit) {
             pair<const CBString, CBString> p(iit.get_item());
@@ -862,11 +872,11 @@ public:
 
     template <typename OutputIterator>
     void map_keys_values(OutputIterator oit,
-                    const CBString& first="", const CBString& last="",
-                    binary_functor f=binary_identity_functor,
-                    binary_predicate binary_pred=binary_true_pred) {
+                         const CBString& first="", const CBString& last="",
+                         binary_functor f=binary_identity_functor,
+                         binary_predicate binary_pred=binary_true_pred) const {
 
-        const_iterator iit(const_iterator::range(*this, first));
+        const_iterator iit(const_iterator::range(shared_from_this(), first));
         CBString v;
         for(; !iit.has_reached_end(); ++iit) {
             pair<const CBString, CBString> p(iit.get_item());
@@ -879,28 +889,28 @@ public:
         }
     }
 
-    iterator before(bool readonly=true) { return iterator(this, -1, readonly); }
-    const_iterator cbefore() { return const_iterator(this, -1); }
-    iterator begin(bool readonly=true) { return iterator(this, 0, readonly); }
-    const_iterator cbegin() const { return const_iterator(this, 0); }
+    iterator before(bool readonly=true) { return iterator(shared_from_this(), -1, readonly); }
+    const_iterator cbefore() { return const_iterator(shared_from_this(), -1); }
+    iterator begin(bool readonly=true) { return iterator(shared_from_this(), 0, readonly); }
+    const_iterator cbegin() const { return const_iterator(shared_from_this(), 0); }
 
     iterator last(bool readonly=true) {
-        iterator it(this, 1, readonly);
+        iterator it(shared_from_this(), 1, readonly);
         --it;
         return BOOST_MOVE_RET(iterator, it);
     }
 
     const_iterator clast() const {
-        const_iterator it(this, 1);
+        const_iterator it(shared_from_this(), 1);
         --it;
         return BOOST_MOVE_RET(const_iterator, it);
     }
 
-    iterator end(bool readonly=true) { return iterator(this, 1, readonly); }
-    iterator find(const CBString& key, bool readonly=true) { return iterator(this, key, readonly); }
-    const_iterator cend() const { return const_iterator(this, 1); }
-    const_iterator cfind(const CBString& key) const { return const_iterator(this, key); }
-    insert_iterator insertiterator() { return insert_iterator(this); }
+    iterator end(bool readonly=true) { return iterator(shared_from_this(), 1, readonly); }
+    iterator find(const CBString& key, bool readonly=true) { return iterator(shared_from_this(), key, readonly); }
+    const_iterator cend() const { return const_iterator(shared_from_this(), 1); }
+    const_iterator cfind(const CBString& key) const { return const_iterator(shared_from_this(), key); }
+    insert_iterator insertiterator() { return insert_iterator(shared_from_this()); }
 
 };  // END CLASS PersistentDict
 

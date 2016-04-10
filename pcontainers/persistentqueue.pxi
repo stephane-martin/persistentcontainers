@@ -2,13 +2,6 @@
 cdef extern from "persistentqueue.h" namespace "quiet" nogil:
     # noinspection PyPep8Naming
     cdef cppclass cppPersistentQueue "quiet::PersistentQueue":
-        cppPersistentQueue() except +custom_handler
-        cppPersistentQueue(const CBString& directory_name) except +custom_handler
-        cppPersistentQueue(const CBString& directory_name, const CBString& database_name) except +custom_handler
-        cppPersistentQueue(const CBString& directory_name, const CBString& database_name, const lmdb_options& options) except +custom_handler
-        cppPersistentQueue(const cppPersistentQueue& other)
-        (cppPersistentQueue&) operator=(cppPersistentQueue other)
-
         CBString get_dirname()
         CBString get_dbname()
 
@@ -37,11 +30,15 @@ cdef extern from "persistentqueue.h" namespace "quiet" nogil:
         void transform_values(unary_functor unary_funct) except +custom_handler
         void remove_duplicates() except +custom_handler
 
+    shared_ptr[cppPersistentQueue] queue_factory "quiet::PersistentQueue::factory"(const CBString& directory_name) except +custom_handler
+    shared_ptr[cppPersistentQueue] queue_factory "quiet::PersistentQueue::factory"(const CBString& directory_name, const CBString& database_name) except +custom_handler
+    shared_ptr[cppPersistentQueue] queue_factory "quiet::PersistentQueue::factory"(const CBString& directory_name, const CBString& database_name, const lmdb_options& options) except +custom_handler
+
     # noinspection PyPep8Naming
     cdef cppclass QueueIterator "quiet::PersistentQueue::iiterator":
         QueueIterator()
-        QueueIterator(cppPersistentQueue* q)
-        QueueIterator(cppPersistentQueue* q, int pos)
+        QueueIterator(shared_ptr[cppPersistentQueue] q)
+        QueueIterator(shared_ptr[cppPersistentQueue], int pos)
         void set_rollback()
         void set_rollback(cpp_bool val)
         size_t size()

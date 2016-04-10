@@ -1,5 +1,5 @@
 cdef class PRawQueue(object):
-    cdef cppPersistentQueue* ptr
+    cdef shared_ptr[cppPersistentQueue] ptr
 
     cpdef push_front(self, val)
     cpdef push_back(self, val)
