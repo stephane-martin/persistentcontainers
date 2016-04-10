@@ -13,6 +13,7 @@ from pcontainers import PRawDict, NotFound, EmptyKey, set_logger, BadValSize, Em
 
 set_logger()
 
+
 @pytest.fixture
 def temp_raw_dict():
     return PRawDict.make_temp()
@@ -301,3 +302,28 @@ class TestPRawDict(object):
         init_temp_raw_dict.transform_values(f)
         assert(dict(init_temp_raw_dict) == transformed_content)
 
+    def test_empty_remove_duplicates(self, temp_raw_dict):
+        pass
+
+    def test_remove_duplicates(self, init_temp_raw_dict):
+        l = len(init_temp_raw_dict)
+        init_vals = set(init_temp_raw_dict.noitervalues())
+        k, v = init_temp_raw_dict.popitem()
+        init_temp_raw_dict[b'foo'] = v
+        init_temp_raw_dict[b'zog'] = v
+        init_temp_raw_dict[b'bla'] = v
+        init_temp_raw_dict.remove_duplicates()
+        assert(len(init_temp_raw_dict) == l)
+        assert(set(init_temp_raw_dict.noitervalues()) == init_vals)
+
+
+    def test_write_batch(self, init_temp_raw_dict):
+        l = len(init_temp_raw_dict)
+        with init_temp_raw_dict.write_batch():
+            init_temp_raw_dict[b'foo'] = b'bar'
+            with pytest.raises(NotFound):
+                init_temp_raw_dict[b'foo']
+            init_temp_raw_dict[b'foo2'] = b'bar2'
+        assert(len(init_temp_raw_dict) == (l + 2))
+        assert(init_temp_raw_dict[b'foo'] == b'bar')
+        assert (init_temp_raw_dict[b'foo2'] == b'bar2')

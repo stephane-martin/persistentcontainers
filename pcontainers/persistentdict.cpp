@@ -236,13 +236,13 @@ void PersistentDict::remove_duplicates(const CBString& first_key, const CBString
     opts.write_map = true;
     opts.map_async = true;
     {
-        PersistentDict tmp_dict(tmpdir->get_path(), "", opts);
+        shared_ptr<PersistentDict> tmp_dict = PersistentDict::factory(tmpdir->get_path(), "", opts);
 
         {
             const_iterator it = const_iterator::range(shared_from_this(), first_key);
             bool key_in_range = true;
             while (key_in_range) {
-                insert_iterator tmp_it = tmp_dict.insertiterator();
+                insert_iterator tmp_it = tmp_dict->insertiterator();
                 for(ssize_t i=0; i < chunk_size; i++) {
                     if (it.has_reached_end()) {
                         key_in_range = false;
@@ -266,7 +266,7 @@ void PersistentDict::remove_duplicates(const CBString& first_key, const CBString
                 if (!key_is_in_interval(current.first, first_key, last_key)) {
                     break;
                 }
-                CBString unique_key = tmp_dict.at(current.second);
+                CBString unique_key = tmp_dict->at(current.second);
                 if (current.first != unique_key) {
                     it.del();
                 }
