@@ -67,15 +67,10 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
         void remove_if(binary_predicate binary_pred, const CBString& first_key, const CBString& last_key) except +custom_handler
         void remove_if(binary_predicate binary_pred, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
 
-        void copy_to(cppPersistentDict& other) except +custom_handler
-        void copy_to(cppPersistentDict& other, const CBString& first_key) except +custom_handler
-        void copy_to(cppPersistentDict& other, const CBString& first_key, const CBString& last_key) except +custom_handler
-        void copy_to(cppPersistentDict& other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
-
-        void move_to(cppPersistentDict& other) except +custom_handler
-        void move_to(cppPersistentDict& other, const CBString& first_key) except +custom_handler
-        void move_to(cppPersistentDict& other, const CBString& first_key, const CBString& last_key) except +custom_handler
-        void move_to(cppPersistentDict& other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
+        void move_to(shared_ptr[cppPersistentDict] other) except +custom_handler
+        void move_to(shared_ptr[cppPersistentDict] other, const CBString& first_key) except +custom_handler
+        void move_to(shared_ptr[cppPersistentDict] other, const CBString& first_key, const CBString& last_key) except +custom_handler
+        void move_to(shared_ptr[cppPersistentDict], const CBString& first_key, const CBString& last_key, ssize_t chunk_size) except +custom_handler
 
 
         void remove_duplicates() except +custom_handler

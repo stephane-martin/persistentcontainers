@@ -51,7 +51,7 @@ cdef class PRawDict(object):
     cpdef iterkeys(self, reverse=?)
     cpdef itervalues(self, reverse=?)
     cpdef iteritems(self, reverse=?)
-    cpdef move_to(self, other, ssize_t chunk_size=?)
+    cpdef move_to(self, PRawDict other, ssize_t chunk_size=?)
     cpdef remove_duplicates(self, first=?, last=?)
 
     cdef Chain key_chain

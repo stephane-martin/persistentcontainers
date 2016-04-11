@@ -31,17 +31,17 @@ void PersistentDict::init() {
     dbi = env->get_dbi(dbname);
 }
 
-void PersistentDict::copy_to(PersistentDict& other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) const {
+void PersistentDict::copy_to(shared_ptr<PersistentDict> other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) const {
     if (!*this) {
         _LOG_DEBUG << "copy_to cancelled: source dict is not initialized";
         return;
     }
-    if (*this == other) {
+    if (!other || !*other) {
+        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("copy_to: the other dict is not initialized"));
+    }
+    if (*this == *other) {
         _LOG_DEBUG << "copy_to cancelled: source and dest are the same dict";
         return;
-    }
-    if (!other) {
-        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("copy_to: the other dict is not initialized"));
     }
     if (chunk_size <= 0) {
         chunk_size = SSIZE_MAX;
@@ -49,7 +49,7 @@ void PersistentDict::copy_to(PersistentDict& other, const CBString& first_key, c
     const_iterator src_it(const_iterator::range(shared_from_this(), first_key));
     bool key_in_range = !src_it.has_reached_end();
     while (key_in_range) {
-        insert_iterator dest_it(other.insertiterator());
+        insert_iterator dest_it(other->insertiterator());
         for(ssize_t copied = 0; copied < chunk_size; ++copied) {
             if (src_it.has_reached_end()) {
                 key_in_range = false;
@@ -66,17 +66,17 @@ void PersistentDict::copy_to(PersistentDict& other, const CBString& first_key, c
     }
 }
 
-void PersistentDict::move_to(PersistentDict& other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) {
+void PersistentDict::move_to(shared_ptr<PersistentDict> other, const CBString& first_key, const CBString& last_key, ssize_t chunk_size) {
     if (!*this) {
         _LOG_DEBUG << "move_to: cancelled: source dict is not initialized";
         return;
     }
-    if (*this == other) {
+    if (!other || !*other) {
+        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("move_to: the other dict is not initialized"));
+    }
+    if (*this == *other) {
         _LOG_DEBUG << "move_to: cancelled: source and dest are the same dict";
         return;
-    }
-    if (!other) {
-        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("move_to: the other dict is not initialized"));
     }
     if (chunk_size <= 0) {
         chunk_size = SSIZE_MAX;
@@ -85,7 +85,7 @@ void PersistentDict::move_to(PersistentDict& other, const CBString& first_key, c
     bool key_in_range = true;
     while (key_in_range) {
         iterator src_it(iterator::range(shared_from_this(), first_key, false));
-        insert_iterator dest_it(other.insertiterator());
+        insert_iterator dest_it(other->insertiterator());
         for(ssize_t copied = 0; copied < chunk_size; ++copied) {
             if (src_it.has_reached_end()) {
                 key_in_range = false;

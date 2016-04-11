@@ -53,10 +53,10 @@ cdef class PickleSerializer(Serializer):
         if op == 2:
             if not isinstance(other, PickleSerializer):
                 return False
-            return self.protocol == (<PickleSerializer> other).protocol
+            return (<PickleSerializer> self).protocol == (<PickleSerializer> other).protocol
         elif op == 3:
             if isinstance(other, PickleSerializer):
-                return self.protocol != (<PickleSerializer> other).protocol
+                return (<PickleSerializer> self).protocol != (<PickleSerializer> other).protocol
             return True
         else:
             raise ValueError("unsupported operation")
@@ -93,14 +93,14 @@ cdef class MessagePackSerializer(Serializer):
         if op == 2:
             if not isinstance(other, MessagePackSerializer):
                 return False
-            return self.mpack_args == (<MessagePackSerializer> other).mpack_args and \
-                self.use_list == (<MessagePackSerializer> other).use_list and \
-                self.ext_hook == (<MessagePackSerializer> other).ext_hook
+            return (<MessagePackSerializer> self).mpack_args == (<MessagePackSerializer> other).mpack_args and \
+                (<MessagePackSerializer> self).use_list == (<MessagePackSerializer> other).use_list and \
+                (<MessagePackSerializer> self).ext_hook == (<MessagePackSerializer> other).ext_hook
         elif op == 3:
             if isinstance(other, MessagePackSerializer):
-                return self.mpack_args != (<MessagePackSerializer> other).mpack_args or \
-                    self.use_list != (<MessagePackSerializer> other).use_list or \
-                    self.ext_hook != (<MessagePackSerializer> other).ext_hook
+                return (<MessagePackSerializer> self).mpack_args != (<MessagePackSerializer> other).mpack_args or \
+                    (<MessagePackSerializer> self).use_list != (<MessagePackSerializer> other).use_list or \
+                    (<MessagePackSerializer> self).ext_hook != (<MessagePackSerializer> other).ext_hook
             return True
         else:
             raise ValueError("unsupported operation")
@@ -134,10 +134,10 @@ cdef class JsonSerializer(Serializer):
         if op == 2:
             if not isinstance(other, JsonSerializer):
                 return False
-            return self.default == (<JsonSerializer> other).default
+            return (<JsonSerializer> self).default == (<JsonSerializer> other).default
         elif op == 3:
             if isinstance(other, JsonSerializer):
-                return self.default != (<JsonSerializer> other).default
+                return (<JsonSerializer> self).default != (<JsonSerializer> other).default
             return True
         else:
             raise ValueError("unsupported operation")
@@ -204,10 +204,10 @@ cdef class HMACSigner(Signer):
         if op == 2:
             if not isinstance(other, HMACSigner):
                 return False
-            return self.secret == (<HMACSigner> other).secret
+            return (<HMACSigner> self).secret == (<HMACSigner> other).secret
         elif op == 3:
             if isinstance(other, HMACSigner):
-                return self.secret != (<HMACSigner> other).secret
+                return (<HMACSigner> self).secret != (<HMACSigner> other).secret
             return True
         else:
             raise ValueError("unsupported operation")
@@ -289,16 +289,16 @@ cdef class LZ4Compresser(Compresser):
         if op == 2:
             if not isinstance(other, LZ4Compresser):
                 return False
-            return self.level == (<LZ4Compresser> other).level and \
-                self.block_size_id == (<LZ4Compresser> other).block_size_id and \
-                self.block_mode_linked == (<LZ4Compresser> other).block_mode_linked and \
-                self.checksum == (<LZ4Compresser> other).checksum
+            return (<LZ4Compresser> self).level == (<LZ4Compresser> other).level and \
+                (<LZ4Compresser> self).block_size_id == (<LZ4Compresser> other).block_size_id and \
+                (<LZ4Compresser> self).block_mode_linked == (<LZ4Compresser> other).block_mode_linked and \
+                (<LZ4Compresser> self).checksum == (<LZ4Compresser> other).checksum
         elif op == 3:
             if isinstance(other, LZ4Compresser):
-                return self.level != (<LZ4Compresser> other).level or \
-                    self.block_size_id != (<LZ4Compresser> other).block_size_id or \
-                    self.block_mode_linked != (<LZ4Compresser> other).block_mode_linked or \
-                    self.checksum != (<LZ4Compresser> other).checksum
+                return (<LZ4Compresser> self).level != (<LZ4Compresser> other).level or \
+                    (<LZ4Compresser> self).block_size_id != (<LZ4Compresser> other).block_size_id or \
+                    (<LZ4Compresser> self).block_mode_linked != (<LZ4Compresser> other).block_mode_linked or \
+                    (<LZ4Compresser> self).checksum != (<LZ4Compresser> other).checksum
             return True
         else:
             raise ValueError("unsupported operation")

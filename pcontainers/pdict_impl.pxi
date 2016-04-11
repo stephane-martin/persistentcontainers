@@ -122,6 +122,7 @@ cdef class PRawDictConstIterator(PRawDictAbstractIterator):
             self.cpp_iterator_ptr.reset(new cppConstIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val()))
         return self
 
+
 # noinspection PyPep8Naming
 cdef class PRawDictIterator(PRawDictAbstractIterator):
     def __enter__(self):
@@ -404,9 +405,6 @@ cdef class PRawDict(object):
     def write_batch(self):
         return PRawDictIterator(self)
 
-    def read_transaction(self):
-        return PRawDictConstIterator(self)
-
     def update(self, e=None, **kwds):
         cdef PRawDictIterator it = PRawDictIterator(self)
         with it:
@@ -438,12 +436,10 @@ cdef class PRawDict(object):
         with nogil:
             self.ptr.get().remove_if(make_binary_predicate(binary_pred))
 
-    cpdef move_to(self, other, ssize_t chunk_size=-1):
-        if not isinstance(other, PRawDict):
-            raise TypeError()
+    cpdef move_to(self, PRawDict other, ssize_t chunk_size=-1):
         cdef CBString empt
         with nogil:
-            self.ptr.get().move_to(deref((<PRawDict> other).ptr), empt, empt, chunk_size)
+            self.ptr.get().move_to(other.ptr, empt, empt, chunk_size)
 
     cpdef remove_duplicates(self, first="", last=""):
         cdef CBString firstkey = tocbstring(first)
@@ -454,7 +450,7 @@ cdef class PRawDict(object):
 
 cdef class PDict(PRawDict):
     def __cinit__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
-        self.key_chain = key_chain if key_chain else NoneChain
+        self.key_chain = key_chain if key_chain else NoneChain()
         self.value_chain = value_chain if value_chain else Chain(PickleSerializer(), None, None)
 
     def __init__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
@@ -487,13 +483,6 @@ cdef class PDict(PRawDict):
         binary_pred = _adapt_binary_predicate(binary_pred, self.key_chain, self.value_chain)
         with nogil:
             self.ptr.get().remove_if(make_binary_predicate(binary_pred))
-
-    cpdef move_to(self, other, ssize_t chunk_size=-1):
-        if not isinstance(other, PDict):
-            raise TypeError()
-        cdef CBString empt
-        with nogil:
-            self.ptr.get().move_to(deref((<PDict> other).ptr), empt, empt, chunk_size)
 
     cpdef remove_duplicates(self, first="", last=""):
         with nogil:

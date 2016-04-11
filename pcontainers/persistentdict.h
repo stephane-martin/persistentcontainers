@@ -95,8 +95,8 @@ public:
 
     ~PersistentDict() { close(); }
 
-    void copy_to(PersistentDict& other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
-    void move_to(PersistentDict& other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1);
+    void copy_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
+    void move_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1);
 
     void erase(const CBString& key);
     void erase(MDB_val key);
@@ -667,6 +667,8 @@ public:
         const_iterator(shared_ptr<const PersistentDict> d, MDB_val key): _const_iterator(d, key) { }
         const_iterator(BOOST_RV_REF(const_iterator) other): _const_iterator(BOOST_MOVE_BASE(_const_iterator, other)) { }
 
+        virtual ~const_iterator() { }
+
         virtual const_iterator& operator++() {
             _const_iterator::operator++();
             return *this;
@@ -773,22 +775,28 @@ public:
         PairProxy pproxy;
 
         iterator(): _iterator(), pproxy(*this) { }
+
         iterator(shared_ptr<PersistentDict> d, int pos, bool readonly): _iterator(), pproxy(*this) {
             dict = d;
             dbi = d->dbi;
             init(pos, readonly);
         }
+
         iterator(shared_ptr<PersistentDict> d, const CBString& key, bool readonly): _iterator(), pproxy(*this) {
             dict = d;
             dbi = d->dbi;
             init(key, readonly);
         }
+
         iterator(shared_ptr<PersistentDict> d, MDB_val key, bool readonly): _iterator(), pproxy(*this) {
             dict = d;
             dbi = d->dbi;
             init(key, readonly);
         }
+
         iterator(BOOST_RV_REF(iterator) other): _iterator(BOOST_MOVE_BASE(_iterator, other)), pproxy(*this) { }
+
+        virtual ~iterator() { }
 
         virtual iterator& operator++() {
             _iterator::operator++();

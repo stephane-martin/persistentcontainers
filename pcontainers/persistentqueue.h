@@ -108,7 +108,7 @@ public:
             }
         }
 
-        ~back_insert_iterator() {
+        virtual ~back_insert_iterator() {
             cursor.reset();
             txn.reset();
             the_queue.reset();
@@ -139,25 +139,25 @@ public:
             return *this;
         }
 
-        back_insert_iterator& operator=(const CBString& new_value) {
+        virtual back_insert_iterator& operator=(const CBString& new_value) {
             return operator=(make_mdb_val(new_value));
         }
 
-        back_insert_iterator& operator=(MDB_val v);
+        virtual back_insert_iterator& operator=(MDB_val v);
 
-        void set_rollback(bool val=true) {
+        virtual void set_rollback(bool val=true) {
             if (*this) {
                 txn->set_rollback(val);
             }
         }
 
-        size_t size() const { return bool(*this) ? cursor->size() : 0; }
+        virtual size_t size() const { return bool(*this) ? cursor->size() : 0; }
 
         back_insert_iterator& operator*() { return *this; }
-        back_insert_iterator& operator++() { return *this; }
-        back_insert_iterator& operator++(int) { return *this; }
-        back_insert_iterator& operator--() { return *this; }
-        back_insert_iterator& operator--(int) { return *this; }
+        virtual back_insert_iterator& operator++() { return *this; }
+        virtual back_insert_iterator& operator++(int) { return *this; }
+        virtual back_insert_iterator& operator--() { return *this; }
+        virtual back_insert_iterator& operator--(int) { return *this; }
     }; // end class back_insert_iterator
 
 
@@ -172,39 +172,39 @@ public:
         BOOST_EXPLICIT_OPERATOR_BOOL()
         bool operator!() const { return back_insert_iterator::operator!(); }
 
-        size_t size() const { return back_insert_iterator::size(); }
-        void set_rollback(bool val=true) { back_insert_iterator::set_rollback(val); }
+        virtual size_t size() const { return back_insert_iterator::size(); }
+        virtual void set_rollback(bool val=true) { back_insert_iterator::set_rollback(val); }
 
         front_insert_iterator(): back_insert_iterator() { direction = -1;}
         front_insert_iterator(shared_ptr<PersistentQueue> q): back_insert_iterator(q) { direction = -1; }
 
-        ~front_insert_iterator() {
-            cursor.reset();
-            txn.reset();
-        }
+        virtual ~front_insert_iterator() { }
 
         front_insert_iterator(BOOST_RV_REF(front_insert_iterator) other): back_insert_iterator(BOOST_MOVE_BASE(back_insert_iterator, other)) {
             direction = -1;
         }
+
         front_insert_iterator& operator=(BOOST_RV_REF(front_insert_iterator) other) {
             back_insert_iterator::operator=(BOOST_MOVE_BASE(back_insert_iterator, other));
             direction = -1;
             return *this;
         }
-        front_insert_iterator& operator=(const CBString& new_value) {
-            back_insert_iterator::operator=(new_value);
-            return *this;
-        }
-        front_insert_iterator& operator=(MDB_val new_value) {
+
+        virtual front_insert_iterator& operator=(const CBString& new_value) {
             back_insert_iterator::operator=(new_value);
             return *this;
         }
 
-        front_insert_iterator& operator*() { return *this; }
-        front_insert_iterator& operator++() { return *this; }
-        front_insert_iterator& operator++(int) { return *this; }
-        front_insert_iterator& operator--() { return *this; }
-        front_insert_iterator& operator--(int) { return *this; }
+        virtual front_insert_iterator& operator=(MDB_val new_value) {
+            back_insert_iterator::operator=(new_value);
+            return *this;
+        }
+
+        virtual front_insert_iterator& operator*() { return *this; }
+        virtual front_insert_iterator& operator++() { return *this; }
+        virtual front_insert_iterator& operator++(int) { return *this; }
+        virtual front_insert_iterator& operator--() { return *this; }
+        virtual front_insert_iterator& operator--(int) { return *this; }
 
     };      // END CLASS front_insert_iterator
 
@@ -221,13 +221,6 @@ public:
         shared_ptr<PersistentQueue> the_queue;
         shared_ptr<environment::transaction> txn;
         shared_ptr<environment::transaction::cursor> cursor;
-
-        inline bool empty() const {
-            if (cursor) {
-                return cursor->first() == MDB_NOTFOUND;
-            }
-            return true;
-        }
 
         void _next_value();
         void _last_value();
@@ -297,6 +290,13 @@ public:
                 initialized.store(true);
             }
             return *this;
+        }
+
+        bool empty() const {
+            if (cursor) {
+                return cursor->first() == MDB_NOTFOUND;
+            }
+            return true;
         }
 
         void set_rollback(bool val=true) {
