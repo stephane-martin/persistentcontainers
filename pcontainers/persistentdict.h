@@ -77,6 +77,13 @@ public:
         return !env;
     }
 
+    static inline shared_ptr<PersistentDict> factory(const CBString& directory_name, const CBString& database_name=CBString(),
+                                                     const lmdb_options& options=lmdb_options()) {
+        return shared_ptr<PersistentDict>(new PersistentDict(directory_name, database_name, options));
+    }
+
+    ~PersistentDict() { close(); }
+
     bool is_initialized() const {
         return bool(*this);
     }
@@ -88,12 +95,7 @@ public:
         return 0;
     }
 
-    static inline shared_ptr<PersistentDict> factory(const CBString& directory_name, const CBString& database_name=CBString(),
-                                                     const lmdb_options& options=lmdb_options()) {
-        return shared_ptr<PersistentDict>(new PersistentDict(directory_name, database_name, options));
-    }
-
-    ~PersistentDict() { close(); }
+    lmdb_options get_options() const { return opts; }
 
     void copy_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
     void move_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1);
@@ -374,6 +376,22 @@ public:
         virtual abstract_iterator& operator++(int) { return this->operator++(); }
         virtual abstract_iterator& operator--(int) { return this->operator--(); }
 
+        virtual void set_position(MDB_val key) {
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                reached_end = cursor->first() == MDB_NOTFOUND;
+            } else {
+                reached_end = cursor->position(key) == MDB_NOTFOUND;
+            }
+        }
+
+        virtual void set_range(MDB_val key) {
+            if (key.mv_size == 0 || key.mv_data == NULL) {
+                reached_end = cursor->first() == MDB_NOTFOUND;
+            } else {
+                reached_end = cursor->after(key) == MDB_NOTFOUND;
+            }
+        }
+
     };
 
     template<bool B>
@@ -620,7 +638,7 @@ public:
             ro = true;
             txn = dict->env->start_transaction();
             cursor = txn->make_cursor(dbi);
-            _set_position(key, true);
+            set_position(key);
             initialized.store(true);
         }
 
@@ -631,26 +649,9 @@ public:
             ro = readonly;
             txn = dict->env->start_transaction(ro);
             cursor = txn->make_cursor(dbi);
-            _set_position(key, readonly);
+            set_position(key);
             initialized.store(true);
         }
-
-        void _set_position(MDB_val key, bool readonly) {
-            if (key.mv_size == 0 || key.mv_data == NULL) {
-                reached_end = cursor->first() == MDB_NOTFOUND;
-            } else {
-                reached_end = cursor->position(key) == MDB_NOTFOUND;
-            }
-        }
-
-        void _set_range(MDB_val key, bool readonly) {
-            if (key.mv_size == 0 || key.mv_data == NULL) {
-                reached_end = cursor->first() == MDB_NOTFOUND;
-            } else {
-                reached_end = cursor->after(key) == MDB_NOTFOUND;
-            }
-        }
-
 
     }; // end class tmpl_iterator
 
@@ -691,7 +692,7 @@ public:
                 BOOST_THROW_EXCEPTION( not_initialized() );
             }
             const_iterator it(d, 0);
-            it._set_range(make_mdb_val(key), true);
+            it.set_range(make_mdb_val(key));
             return it;
         }
 
@@ -821,7 +822,7 @@ public:
                 BOOST_THROW_EXCEPTION( not_initialized() );
             }
             iterator it(d, 0, readonly);
-            it._set_range(make_mdb_val(key), readonly);
+            it.set_range(make_mdb_val(key));
             return it;
         }
 

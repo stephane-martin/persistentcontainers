@@ -19,6 +19,12 @@ cdef class LmdbOptions(object):
         self.max_readers = max_readers
         self.max_dbs = max_dbs
 
+    @staticmethod
+    cdef from_cpp(lmdb_options opts):
+        return LmdbOptions(opts.fixed_map, opts.no_subdir, opts.read_only, opts.write_map, opts.no_meta_sync,
+                           opts.no_sync, opts.map_async, opts.no_tls, opts.no_lock, opts.no_read_ahead, opts.no_mem_init,
+                           opts.map_size, opts.max_readers, opts.max_dbs)
+
     property fixed_map:
         def __get__(self):
             return self.opts.fixed_map

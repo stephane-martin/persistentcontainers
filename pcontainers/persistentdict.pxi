@@ -4,6 +4,7 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
     cppclass cppPersistentDict "quiet::PersistentDict":
         cpp_bool is_initialized()
         int get_maxkeysize()
+        lmdb_options get_options()
         CBString get_dirname()
         CBString get_dbname()
 
@@ -108,6 +109,8 @@ cdef extern from "persistentdict.h" namespace "quiet" nogil:
 
         cpp_bool has_reached_end() except +custom_handler
         cpp_bool has_reached_beginning() except +custom_handler
+        void set_position(MDB_val key) except +custom_handler
+        void set_range(MDB_val key) except +custom_handler
 
         void set_rollback(cpp_bool val)
 

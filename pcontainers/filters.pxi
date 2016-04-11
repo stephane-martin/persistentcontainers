@@ -53,9 +53,9 @@ cdef class LZ4Compresser(Compresser):
     cdef int block_size_id
 
 cdef class Chain(Filter):
-    cdef Serializer serializer
-    cdef Signer signer
-    cdef Compresser compresser
+    cdef readonly Serializer serializer
+    cdef readonly Signer signer
+    cdef readonly Compresser compresser
 
 cdef class NoneChain(Chain):
     cdef inline dumps(self, obj):

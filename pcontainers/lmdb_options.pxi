@@ -20,3 +20,6 @@ cdef extern from "lmdb_options.h" namespace "lmdb" nogil:
 
 cdef class LmdbOptions(object):
     cdef lmdb_options opts
+
+    @staticmethod
+    cdef from_cpp(lmdb_options opts)

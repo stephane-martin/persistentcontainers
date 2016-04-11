@@ -113,6 +113,15 @@ cdef class PRawDictAbstractIterator(object):
             value_ptr = copy_mdb_val(kv.second)
         return self.dict.key_chain.loads(make_mbufferio(key_ptr, kv.first.mv_size, 1)), self.dict.value_chain.loads(make_mbufferio(value_ptr, kv.second.mv_size, 1))
 
+    def __getitem__(self, item):
+        if not item:
+            raise EmptyKey()
+        cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(item)))
+        if key_view.length() > 511:
+            raise BadValSize("key is too long")
+        self.cpp_iterator_ptr.get().set_position(key_view.get_mdb_val())
+        return self.get_value_buf()
+
 # noinspection PyPep8Naming
 cdef class PRawDictConstIterator(PRawDictAbstractIterator):
     def __enter__(self):
@@ -194,7 +203,6 @@ cdef class PRawDict(object):
         self.key_chain = NoneChain()
         self.value_chain = NoneChain()
 
-
     def __init__(self, bytes dirname, bytes dbname, LmdbOptions opts=None, mapping=None, Chain key_chain=None, Chain value_chain=None, **kwarg):
         if mapping is not None:
             self.update(e=mapping)
@@ -213,6 +221,10 @@ cdef class PRawDict(object):
         return u"PRawDict(dbname='{}', dirname='{}')".format(
             make_unicode(self.dbname), make_unicode(self.dirname)
         )
+
+    @property
+    def options(self):
+        return LmdbOptions.from_cpp(self.ptr.get().get_options())
 
     @classmethod
     def make_temp(cls, destroy=True, LmdbOptions opts=None, Chain key_chain=None, Chain value_chain=None):
@@ -404,6 +416,9 @@ cdef class PRawDict(object):
 
     def write_batch(self):
         return PRawDictIterator(self)
+
+    def read_transaction(self):
+        return PRawDictConstIterator(self)
 
     def update(self, e=None, **kwds):
         cdef PRawDictIterator it = PRawDictIterator(self)

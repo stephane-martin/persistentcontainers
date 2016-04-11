@@ -54,8 +54,8 @@ cdef class PRawDict(object):
     cpdef move_to(self, PRawDict other, ssize_t chunk_size=?)
     cpdef remove_duplicates(self, first=?, last=?)
 
-    cdef Chain key_chain
-    cdef Chain value_chain
+    cdef readonly Chain key_chain
+    cdef readonly Chain value_chain
 
 cdef class PDict(PRawDict):
     pass

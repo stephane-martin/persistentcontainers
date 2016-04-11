@@ -10,17 +10,74 @@ import shutil
 import pytest
 
 from pcontainers import PRawDict, NotFound, EmptyKey, set_logger, BadValSize, EmptyDatabase, LmdbError, PDict
+from pcontainers import LmdbOptions
+from pcontainers import Chain
+from pcontainers import PickleSerializer, JsonSerializer, MessagePackSerializer
+from pcontainers import HMACSigner, NoneSigner
+from pcontainers import SnappyCompresser, LZ4Compresser, NoneCompresser
+
 
 set_logger()
 
 
-@pytest.fixture
-def temp_raw_dict():
-    return PRawDict.make_temp()
+@pytest.fixture(params=['json', 'pickle', 'messagepack'])
+def value_serializer(request):
+    if request.param == "json":
+        return JsonSerializer()
+    if request.param == "pickle":
+        return PickleSerializer()
+    if request.param == 'messagepack':
+        return MessagePackSerializer()
+
+
+@pytest.fixture(params=['none_signer', 'hmac_signer'])
+def value_signer(request):
+    if request.param == 'none_signer':
+        return NoneSigner()
+    if request.param == "hmac_signer":
+        return HMACSigner(b'my secret signing key')
+
+
+@pytest.fixture(params=['none_compresser', 'snappy_compresser', 'lz4_compresser'])
+def value_compresser(request):
+    if request.param == 'none_compresser':
+        return NoneCompresser()
+    if request.param == 'snappy_compresser':
+        return SnappyCompresser()
+    if request.param == 'lz4_compresser':
+        return LZ4Compresser()
+
 
 @pytest.fixture
-def temp_dict():
-    return PDict.make_temp()
+def key_chain(value_serializer, value_signer, value_compresser):
+    return Chain(serializer=value_serializer, signer=value_signer, compresser=value_compresser)
+
+
+@pytest.fixture
+def value_chain(value_serializer, value_signer, value_compresser):
+    return Chain(serializer=value_serializer, signer=value_signer, compresser=value_compresser)
+
+
+@pytest.fixture(params=["default_lmdb_opts", "map_async_write_map", "no_meta_sync", "no_sync"])
+def lmdb_options(request):
+    if request.param == "map_async_write_map":
+        return LmdbOptions(map_async=True, write_map=True)
+    if request.param == "no_meta_sync":
+        return LmdbOptions(no_meta_sync=True)
+    if request.param == "no_sync":
+        return LmdbOptions(no_sync=True)
+    return LmdbOptions()
+
+
+@pytest.fixture
+def temp_raw_dict(lmdb_options):
+    return PRawDict.make_temp(opts=lmdb_options)
+
+
+@pytest.fixture
+def temp_dict(lmdb_options, value_chain):
+    return PDict.make_temp(opts=lmdb_options, value_chain=value_chain)
+
 
 @pytest.fixture
 def init_temp_raw_dict(temp_raw_dict):
@@ -31,6 +88,7 @@ def init_temp_raw_dict(temp_raw_dict):
     temp_raw_dict['8'] = b'bar8'
     temp_raw_dict['9'] = b'bar9'
     return temp_raw_dict
+
 
 @pytest.fixture
 def init_temp_dict(temp_dict):
@@ -388,7 +446,8 @@ class TestPDict(object):
         assert (not os.path.exists(dirname))
 
     def test_equality(self, temp_dict):
-        copy = PDict(temp_dict.dirname, temp_dict.dbname)
+        copy = PDict(dirname=temp_dict.dirname, dbname=temp_dict.dbname, opts=temp_dict.options,
+                     value_chain=temp_dict.value_chain)
         assert (temp_dict == copy)
         another = PDict.make_temp()
         assert (temp_dict != another)
@@ -550,6 +609,7 @@ class TestPDict(object):
     def test_items(self, init_temp_dict):
         assert (list(init_temp_dict.items()) == [(b'1', u'bar1'), (b'2', u'bar2'), (b'4', u'bar4'), (b'7', u'bar7'),
                                                  (b'8', u'bar8'), (b'9', u'bar9')])
+
         assert (list(init_temp_dict.items(True)) == [(b'9', u'bar9'), (b'8', u'bar8'), (b'7', u'bar7'), (b'4', u'bar4'),
                                                      (b'2', u'bar2'), (b'1', u'bar1')])
 
