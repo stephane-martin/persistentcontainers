@@ -46,7 +46,7 @@ def _adapt_binary_scalar_functor(binary_funct, Chain key_chain, Chain value_chai
         return value_chain.dumps(
             binary_funct(
                 key_chain.loads(x),
-                key_chain.loads(y)
+                value_chain.loads(y)
             )
         ).tobytes()
     return functor

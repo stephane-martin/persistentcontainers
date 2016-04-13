@@ -3,7 +3,14 @@ cdef class PRawDictAbstractIterator(object):
     def __init__(self, PRawDict d, int pos=0, key=None):
         self.dict = d
         self.pos = pos
-        self.key = d.key_chain.dumps(key) if key is not None else None
+        self.key = None
+        if key is not None:
+            self.key = d.key_chain.dumps(key)
+            if isinstance(self.key, (bytes, unicode, MBufferIO)):
+                if len(self.key) == 0:
+                    raise EmptyKey()
+                if len(self.key) > 511:
+                    raise BadValSize("key is too long")
 
     def __dealloc__(self):
         self.cpp_iterator_ptr.reset()
@@ -114,9 +121,9 @@ cdef class PRawDictAbstractIterator(object):
         return self.dict.key_chain.loads(make_mbufferio(key_ptr, kv.first.mv_size, 1)), self.dict.value_chain.loads(make_mbufferio(value_ptr, kv.second.mv_size, 1))
 
     def __getitem__(self, item):
-        if not item:
-            raise EmptyKey()
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(item)))
+        if key_view.length() == 0:
+            raise EmptyKey()
         if key_view.length() > 511:
             raise BadValSize("key is too long")
         self.cpp_iterator_ptr.get().set_position(key_view.get_mdb_val())
@@ -135,19 +142,24 @@ cdef class PRawDictConstIterator(PRawDictAbstractIterator):
 # noinspection PyPep8Naming
 cdef class PRawDictIterator(PRawDictAbstractIterator):
     def __enter__(self):
+        # generates a LMDB write transaction -> it can block
+        cdef PyBufferWrap key_view
         if self.key is None:
-            self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, self.pos, 0))
+            with nogil:
+                self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, self.pos, 0))
         else:
-            self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, PyBufferWrap(self.key).get_mdb_val(), 0))
+            key_view = move(PyBufferWrap(self.key))
+            with nogil:
+                self.cpp_iterator_ptr.reset(new cppIterator(self.dict.ptr, key_view.get_mdb_val(), 0))
         return self
 
     cdef set_rollback(self):
         self.cpp_iterator_ptr.get().set_rollback(1)
 
     cdef set_item_buf(self, k, v):
-        if not k:
-            raise EmptyKey()
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(k)))
+        if key_view.length() == 0:
+            raise EmptyKey()
         if key_view.length() > 511:
             raise BadValSize("key is too long")
         cdef PyBufferWrap value_view = move(PyBufferWrap(self.dict.value_chain.dumps(v)))
@@ -173,8 +185,11 @@ cdef class PRawDictIterator(PRawDictAbstractIterator):
     def __delitem__(self, key):
         if not self.cpp_iterator_ptr:
             raise NotInitialized()
-        if not key:
+        cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
+        if key_view.length() == 0:
             raise EmptyKey()
+        if key_view.length() > 511:
+            raise BadValSize("key is too long")
         self.dlte(key)
 
 cdef class DirectAccess(object):
@@ -260,8 +275,6 @@ cdef class PRawDict(object):
             return topy(self.ptr.get().get_dbname())
 
     def __getitem__(self, item):
-        if not item:
-            raise EmptyKey()
         cdef PRawDictConstIterator it = PRawDictConstIterator(self, key=item)
         with it:
             if it.has_reached_end():
@@ -280,9 +293,11 @@ cdef class PRawDict(object):
         return DirectAccess(self, item)
 
     cpdef setdefault(self, key, default=b''):
-        if not key:
-            raise EmptyKey()
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.dumps(key)))
+        if key_view.length() == 0:
+            raise EmptyKey()
+        if key_view.length() > 511:
+            raise BadValSize("key is too long")
         cdef PyBufferWrap default_view = move(PyBufferWrap(self.value_chain.dumps(default)))
         cdef CBString ret
         with nogil:
@@ -290,18 +305,14 @@ cdef class PRawDict(object):
         return self.value_chain.loads(topy(ret))
 
     def __setitem__(self, key, value):
-        if not key:
-            raise EmptyKey()
         cdef PRawDictIterator it = PRawDictIterator(self)
         with it:
             it.set_item_buf(key, value)
 
     def __delitem__(self, key):
-        if not key:
-            raise EmptyKey()
-        cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.dumps(key)))
-        with nogil:
-            self.ptr.get().erase(key_view.get_mdb_val())
+        cdef PRawDictIterator it = PRawDictIterator(self, key=key)
+        with it:
+            it.dlte()
 
     cpdef erase(self, first, last):
         cdef CBString f = tocbstring(first)
@@ -320,6 +331,10 @@ cdef class PRawDict(object):
 
     cpdef pop(self, key, default=None):
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.dumps(key)))
+        if key_view.length() == 0:
+            raise EmptyKey()
+        if key_view.length() > 511:
+            raise BadValSize("key is too long")
         cdef CBString v
         try:
             with nogil:
@@ -406,9 +421,11 @@ cdef class PRawDict(object):
         self.ptr.get().clear()
 
     def __contains__(self, key):
-        if not key:
-            return False
-        cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.loads(key)))
+        cdef PyBufferWrap key_view = move(PyBufferWrap(self.key_chain.dumps(key)))
+        if key_view.length() == 0:
+            raise EmptyKey()
+        if key_view.length() > 511:
+            raise BadValSize("key is too long")
         return self.ptr.get().contains(key_view.get_mdb_val())
 
     cpdef has_key(self, key):

@@ -20,37 +20,67 @@ from pcontainers import SnappyCompresser, LZ4Compresser, NoneCompresser
 set_logger()
 
 
-@pytest.fixture(params=['json', 'pickle', 'messagepack'])
-def value_serializer(request):
-    if request.param == "json":
+# todo: none serializer
+@pytest.fixture(params=['key_json', 'key_pickle', 'key_messagepack'])
+def key_serializer(request):
+    if request.param == "key_json":
         return JsonSerializer()
-    if request.param == "pickle":
+    if request.param == "key_pickle":
         return PickleSerializer()
-    if request.param == 'messagepack':
+    if request.param == 'key_messagepack':
         return MessagePackSerializer()
 
 
-@pytest.fixture(params=['none_signer', 'hmac_signer'])
-def value_signer(request):
-    if request.param == 'none_signer':
+# todo: none serializer
+@pytest.fixture(params=['value_json', 'value_pickle', 'value_messagepack'])
+def value_serializer(request):
+    if request.param == "value_json":
+        return JsonSerializer()
+    if request.param == "value_pickle":
+        return PickleSerializer()
+    if request.param == 'value_messagepack':
+        return MessagePackSerializer()
+
+
+@pytest.fixture(params=['key_none_signer', 'key_hmac_signer'])
+def key_signer(request):
+    if request.param == 'key_none_signer':
         return NoneSigner()
-    if request.param == "hmac_signer":
+    if request.param == "key_hmac_signer":
         return HMACSigner(b'my secret signing key')
 
 
-@pytest.fixture(params=['none_compresser', 'snappy_compresser', 'lz4_compresser'])
-def value_compresser(request):
-    if request.param == 'none_compresser':
+@pytest.fixture(params=['value_none_signer', 'value_hmac_signer'])
+def value_signer(request):
+    if request.param == 'value_none_signer':
+        return NoneSigner()
+    if request.param == "value_hmac_signer":
+        return HMACSigner(b'my secret signing key')
+
+
+@pytest.fixture(params=['key_none_compresser', 'key_snappy_compresser', 'key_lz4_compresser'])
+def key_compresser(request):
+    if request.param == 'key_none_compresser':
         return NoneCompresser()
-    if request.param == 'snappy_compresser':
+    if request.param == 'key_snappy_compresser':
         return SnappyCompresser()
-    if request.param == 'lz4_compresser':
+    if request.param == 'key_lz4_compresser':
+        return LZ4Compresser()
+
+
+@pytest.fixture(params=['value_none_compresser', 'value_snappy_compresser', 'value_lz4_compresser'])
+def value_compresser(request):
+    if request.param == 'value_none_compresser':
+        return NoneCompresser()
+    if request.param == 'value_snappy_compresser':
+        return SnappyCompresser()
+    if request.param == 'value_lz4_compresser':
         return LZ4Compresser()
 
 
 @pytest.fixture
-def key_chain(value_serializer, value_signer, value_compresser):
-    return Chain(serializer=value_serializer, signer=value_signer, compresser=value_compresser)
+def key_chain(key_serializer, key_signer, key_compresser):
+    return Chain(serializer=key_serializer, signer=key_signer, compresser=key_compresser)
 
 
 @pytest.fixture
@@ -80,6 +110,11 @@ def temp_dict(lmdb_options, value_chain):
 
 
 @pytest.fixture
+def temp_all_dict(lmdb_options, key_chain, value_chain):
+    return PDict.make_temp(opts=lmdb_options, key_chain=key_chain, value_chain=value_chain)
+
+
+@pytest.fixture
 def init_temp_raw_dict(temp_raw_dict):
     temp_raw_dict['1'] = b'bar1'
     temp_raw_dict['2'] = b'bar2'
@@ -99,6 +134,17 @@ def init_temp_dict(temp_dict):
     temp_dict['8'] = u'bar8'
     temp_dict['9'] = u'bar9'
     return temp_dict
+
+
+@pytest.fixture
+def init_temp_all_dict(temp_all_dict):
+    temp_all_dict[u'1'] = u'bar1'
+    temp_all_dict[u'2'] = u'bar2'
+    temp_all_dict[u'4'] = u'bar4'
+    temp_all_dict[u'7'] = u'bar7'
+    temp_all_dict[u'8'] = u'bar8'
+    temp_all_dict[u'9'] = u'bar9'
+    return temp_all_dict
 
 
 # noinspection PyCompatibility
@@ -410,7 +456,7 @@ class TestPRawDict(object):
 
 
 # noinspection PyCompatibility
-class TestPDict(object):
+class TestSimplePDict(object):
     def test_empty_constructor(self):
         with pytest.raises(LmdbError):
             PDict(b"", b"")
@@ -649,3 +695,321 @@ class TestPDict(object):
         temp_dict.update(g)
         assert (temp_dict.noiterkeys() == sorted([bytes(i) for i in xrange(1000)]))
         assert (temp_dict.noitervalues() == sorted([u'foo' + unicode(i) for i in xrange(1000)]))
+
+    def test_remove_if(self, init_temp_dict):
+        for v in init_temp_dict.values():
+            assert (not v.startswith(u"z"))
+        init_temp_dict[b'10'] = u'zog'
+        init_temp_dict[b'bla'] = u'zogi'
+        init_temp_dict[b'john'] = u'doh'
+        init_temp_dict.remove_if(lambda key, val: val.startswith(u"z"))
+        for v in init_temp_dict.values():
+            assert (not v.startswith(u"z"))
+        assert (b'10' not in init_temp_dict)
+        assert (b'bla' not in init_temp_dict)
+        assert (init_temp_dict[b'john'] == u'doh')
+
+    def test_empty_transform_values(self, temp_dict):
+        assert (len(temp_dict) == 0)
+        temp_dict.transform_values(lambda key, val: val + u"foo")
+        assert (len(temp_dict) == 0)
+
+    def test_transform_values(self, init_temp_dict):
+        f = lambda key, val: val.upper()
+        initial_content = dict(init_temp_dict)
+        transformed_content = {key: f(key, val) for key, val in initial_content.items()}
+        init_temp_dict.transform_values(f)
+        assert (dict(init_temp_dict) == transformed_content)
+
+    def test_empty_remove_duplicates(self, temp_dict):
+        assert (len(temp_dict) == 0)
+        temp_dict.remove_duplicates()
+        assert (len(temp_dict) == 0)
+
+    def test_remove_duplicates(self, init_temp_dict):
+        l = len(init_temp_dict)
+        init_vals = set(init_temp_dict.noitervalues())
+        k, v = init_temp_dict.popitem()
+        init_temp_dict[b'foo'] = v
+        init_temp_dict[b'zog'] = v
+        init_temp_dict[b'bla'] = v
+        assert (len(init_temp_dict) == (l + 2))
+        init_temp_dict.remove_duplicates()
+        assert (len(init_temp_dict) == l)
+        assert (set(init_temp_dict.noitervalues()) == init_vals)
+
+    def test_write_batch(self, init_temp_dict):
+        l = len(init_temp_dict)
+        with init_temp_dict.write_batch():
+            init_temp_dict[b'foo'] = u'bar'
+            with pytest.raises(NotFound):
+                val = init_temp_dict[b'foo']
+            init_temp_dict[b'foo2'] = u'bar2'
+        assert (len(init_temp_dict) == (l + 2))
+        assert (init_temp_dict[b'foo'] == u'bar')
+        assert (init_temp_dict[b'foo2'] == u'bar2')
+
+    def test_move_to(self, init_temp_dict):
+        other = PDict.make_temp(value_chain=init_temp_dict.value_chain)
+        other[b'foo'] = u'bar'
+        l = len(init_temp_dict)
+        init_temp_dict.move_to(other)
+        assert (len(init_temp_dict) == 0)
+        assert (len(other) == (l + 1))
+        assert (other['foo'] == u'bar')
+
+
+# noinspection PyCompatibility
+class TestPDict(object):
+
+    def test_getitem_with_empty_dict(self, temp_all_dict):
+        with pytest.raises(NotFound):
+            val = temp_all_dict[u'foo']
+
+    def test_getitem_empty_key(self, temp_all_dict):
+        with pytest.raises(NotFound):
+            val = temp_all_dict[u'']
+
+    def test_get_with_empty_dict(self, temp_all_dict):
+        assert (temp_all_dict.get(u'foo') is None)
+        assert (temp_all_dict.get(u'foo', u'bar') == u'bar')
+
+    def test_get_empty_key(self, temp_all_dict):
+        val = temp_all_dict.get(u'')
+        val = temp_all_dict.get(u'', u'foo')
+
+    def test_get_set_only_one(self, temp_all_dict):
+        assert (temp_all_dict.get(u'foo') is None)
+        temp_all_dict[u'foo'] = u'bar'
+        assert (temp_all_dict.get(u'foo') == u'bar')
+        temp_all_dict[b'foo2'] = u'bar2'
+        assert (temp_all_dict[b'foo2'] == u'bar2')
+
+    def test_setdefault(self, temp_all_dict):
+        with pytest.raises(NotFound):
+            val = temp_all_dict[u'foo']
+        temp_all_dict[u'foo'] = u'bar'
+        assert (temp_all_dict.setdefault(u'foo', u'zogzog') == u'bar')
+        assert (temp_all_dict.setdefault(u'foo2', u'zogzog') == u'zogzog')
+        assert (temp_all_dict[u'foo'] == u'bar')
+        assert (temp_all_dict[u'foo2'] == u'zogzog')
+
+    # noinspection PyCompatibility
+    def test_setitem(self, temp_all_dict):
+        all_keys = set()
+        all_values = set()
+        for i in range(1000):
+            all_keys.add(unicode(i))
+            all_values.add(u"foo" + unicode(i))
+            temp_all_dict[unicode(i)] = u"foo" + unicode(i)
+        assert (set(temp_all_dict.noiterkeys()) == all_keys)
+        assert (set(temp_all_dict.noitervalues()) == all_values)
+
+    def test_setitem_empty_key_or_value(self, temp_all_dict):
+        temp_all_dict[u''] = u'bla'
+
+    def test_delitem_empty(self, temp_all_dict):
+        with pytest.raises(NotFound):
+            del temp_all_dict[u'']
+        with pytest.raises(NotFound):
+            del temp_all_dict[u'foo']
+
+    def test_delitem(self, temp_all_dict):
+        temp_all_dict[u'foo'] = u'bar'
+        assert (temp_all_dict[u'foo'] == u'bar')
+        del temp_all_dict[u'foo']
+        with pytest.raises(NotFound):
+            del temp_all_dict[u'foo']
+
+    def test_erase(self, init_temp_all_dict):
+        with pytest.raises(NotImplementedError):
+            init_temp_all_dict.erase('2', '8')
+
+    def test_noiterkeys_empty(self, temp_all_dict):
+        assert (temp_all_dict.noiterkeys() == [])
+
+    def test_noitervalues_empty(self, temp_all_dict):
+        assert (temp_all_dict.noitervalues() == [])
+
+    def test_noiteritems_empty(self, temp_all_dict):
+        assert (temp_all_dict.noiteritems() == [])
+
+    def test_noiterkeys(self, init_temp_all_dict):
+        assert (init_temp_all_dict.noiterkeys() == [u"1", u"2", u"4", u"7", u"8", u"9"])
+        del init_temp_all_dict[u'4']
+        assert (init_temp_all_dict.noiterkeys() == [u"1", u"2", u"7", u"8", u"9"])
+
+    def test_noitervalues(self, init_temp_all_dict):
+        assert (init_temp_all_dict.noitervalues() == [u"bar1", u"bar2", u"bar4", u"bar7", u"bar8", u"bar9"])
+        del init_temp_all_dict[u'7']
+        assert (init_temp_all_dict.noitervalues() == [u"bar1", u"bar2", u"bar4", u"bar8", u"bar9"])
+
+    def test_noiteritems(self, init_temp_all_dict):
+        assert (init_temp_all_dict.noiteritems() == [
+            (u'1', u'bar1'),
+            (u'2', u'bar2'),
+            (u'4', u'bar4'),
+            (u'7', u'bar7'),
+            (u'8', u'bar8'),
+            (u'9', u'bar9'),
+        ])
+        del init_temp_all_dict[u'8']
+        assert (init_temp_all_dict.noiteritems() == [
+            (u'1', u'bar1'),
+            (u'2', u'bar2'),
+            (u'4', u'bar4'),
+            (u'7', u'bar7'),
+            (u'9', u'bar9'),
+        ])
+
+    def test_empty_pop(self, temp_all_dict):
+        with pytest.raises(NotFound):
+            temp_all_dict.pop('foo')
+
+    def test_pop(self, init_temp_all_dict):
+        with pytest.raises(NotFound):
+            init_temp_all_dict.pop('foo')
+        assert (init_temp_all_dict.pop(u'4') == u'bar4')
+        with pytest.raises(NotFound):
+            init_temp_all_dict.pop(u'4')
+        assert (init_temp_all_dict.pop(u'7') == u'bar7')
+
+    def test_empty_popitem(self, temp_all_dict):
+        with pytest.raises(EmptyDatabase):
+            temp_all_dict.popitem()
+
+    def test_popitem(self, init_temp_all_dict):
+        assert (init_temp_all_dict.popitem() == (u'1', u'bar1'))
+        assert (init_temp_all_dict.popitem() == (u'2', u'bar2'))
+        assert (init_temp_all_dict.popitem() == (u'4', u'bar4'))
+        assert (init_temp_all_dict.popitem() == (u'7', u'bar7'))
+        assert (init_temp_all_dict.popitem() == (u'8', u'bar8'))
+        assert (init_temp_all_dict.popitem() == (u'9', u'bar9'))
+        with pytest.raises(EmptyDatabase):
+            init_temp_all_dict.popitem()
+
+    def test_empty_iter(self, temp_all_dict):
+        assert (list(iter(temp_all_dict)) == [])
+        assert (list(temp_all_dict.keys(True)) == [])
+
+    def test_iter(self, init_temp_all_dict):
+        assert (list(iter(init_temp_all_dict)) == [u'1', u'2', u'4', u'7', u'8', u'9'])
+        assert (list(init_temp_all_dict.keys(True)) == [u'9', u'8', u'7', u'4', u'2', u'1'])
+
+    def test_empty_values(self, temp_all_dict):
+        assert (list(temp_all_dict.values()) == [])
+        assert (list(temp_all_dict.values(True)) == [])
+
+    def test_values(self, init_temp_all_dict):
+        assert (list(init_temp_all_dict.values()) == [u'bar1', u'bar2', u'bar4', u'bar7', u'bar8', u'bar9'])
+        assert (list(init_temp_all_dict.values(True)) == [u'bar9', u'bar8', u'bar7', u'bar4', u'bar2', u'bar1'])
+
+    def test_empty_items(self, temp_all_dict):
+        assert (list(temp_all_dict.items()) == [])
+        assert (list(temp_all_dict.items(True)) == [])
+
+    def test_items(self, init_temp_all_dict):
+        assert (list(init_temp_all_dict.items()) == [(u'1', u'bar1'), (u'2', u'bar2'), (u'4', u'bar4'), (u'7', u'bar7'),
+                                                     (u'8', u'bar8'), (u'9', u'bar9')])
+
+        assert (list(init_temp_all_dict.items(True)) == [(u'9', u'bar9'), (b'8', u'bar8'), (u'7', u'bar7'), (u'4', u'bar4'),
+                                                         (u'2', u'bar2'), (u'1', u'bar1')])
+
+    def test_empty_bool(self, temp_all_dict):
+        assert (bool(temp_all_dict))
+
+    def test_bool(self, init_temp_all_dict):
+        assert (bool(init_temp_all_dict))
+
+    def test_empty_len(self, temp_all_dict):
+        assert (len(temp_all_dict) == 0)
+
+    def test_len(self, init_temp_all_dict):
+        assert (len(init_temp_all_dict) == 6)
+
+    def test_empty_clear(self, temp_all_dict):
+        assert (len(temp_all_dict) == 0)
+        temp_all_dict.clear()
+        assert (len(temp_all_dict) == 0)
+
+    def test_clear(self, init_temp_all_dict):
+        assert (len(init_temp_all_dict) == 6)
+        init_temp_all_dict.clear()
+        assert (len(init_temp_all_dict) == 0)
+
+    def test_empty_contains(self, temp_all_dict):
+        assert (u"foo" not in temp_all_dict)
+        assert (1 not in temp_all_dict)
+
+    def test_contains(self, init_temp_all_dict):
+        assert ("foo" not in init_temp_all_dict)
+        assert (u"1" in init_temp_all_dict)
+        assert (u"2" in init_temp_all_dict)
+
+    def test_update(self, temp_all_dict):
+        g = ((i, u"foo" + unicode(i)) for i in xrange(1000))
+        temp_all_dict.update(g)
+        assert (sorted(temp_all_dict.noiterkeys()) == sorted(list(xrange(1000))))
+        assert (sorted(temp_all_dict.noitervalues()) == sorted([u'foo' + unicode(i) for i in xrange(1000)]))
+
+    def test_remove_if(self, init_temp_all_dict):
+        for v in init_temp_all_dict.values():
+            assert (not v.startswith(u"z"))
+        init_temp_all_dict[b'10'] = u'zog'
+        init_temp_all_dict[b'bla'] = u'zogi'
+        init_temp_all_dict[3.14] = u'doh'
+        init_temp_all_dict.remove_if(lambda key, val: val.startswith(u"z"))
+        for v in init_temp_all_dict.values():
+            assert (not v.startswith(u"z"))
+        assert (b'10' not in init_temp_all_dict)
+        assert (b'bla' not in init_temp_all_dict)
+        assert (init_temp_all_dict[3.14] == u'doh')
+
+    def test_empty_transform_values(self, temp_all_dict):
+        assert (len(temp_all_dict) == 0)
+        temp_all_dict.transform_values(lambda key, val: val + u"foo")
+        assert (len(temp_all_dict) == 0)
+
+    def test_transform_values(self, init_temp_all_dict):
+        f = lambda key, val: val.upper()
+        initial_content = dict(init_temp_all_dict)
+        transformed_content = {key: f(key, val) for key, val in initial_content.items()}
+        init_temp_all_dict.transform_values(f)
+        assert (dict(init_temp_all_dict) == transformed_content)
+
+    def test_empty_remove_duplicates(self, temp_all_dict):
+        assert (len(temp_all_dict) == 0)
+        temp_all_dict.remove_duplicates()
+        assert (len(temp_all_dict) == 0)
+
+    def test_remove_duplicates(self, init_temp_all_dict):
+        l = len(init_temp_all_dict)
+        init_vals = set(init_temp_all_dict.noitervalues())
+        k, v = init_temp_all_dict.popitem()
+        init_temp_all_dict[b'foo'] = v
+        init_temp_all_dict[b'zog'] = v
+        init_temp_all_dict[b'bla'] = v
+        assert (len(init_temp_all_dict) == (l + 2))
+        init_temp_all_dict.remove_duplicates()
+        assert (len(init_temp_all_dict) == l)
+        assert (set(init_temp_all_dict.noitervalues()) == init_vals)
+
+    def test_write_batch(self, init_temp_all_dict):
+        l = len(init_temp_all_dict)
+        with init_temp_all_dict.write_batch():
+            init_temp_all_dict[b'foo'] = u'bar'
+            with pytest.raises(NotFound):
+                val = init_temp_all_dict[b'foo']
+            init_temp_all_dict[b'foo2'] = u'bar2'
+        assert (len(init_temp_all_dict) == (l + 2))
+        assert (init_temp_all_dict[b'foo'] == u'bar')
+        assert (init_temp_all_dict[b'foo2'] == u'bar2')
+
+    def test_move_to(self, init_temp_all_dict):
+        other = PDict.make_temp(key_chain=init_temp_all_dict.key_chain, value_chain=init_temp_all_dict.value_chain)
+        other[u'foo'] = u'bar'
+        l = len(init_temp_all_dict)
+        init_temp_all_dict.move_to(other)
+        assert (len(init_temp_all_dict) == 0)
+        assert (len(other) == (l + 1))
+        assert (other[u'foo'] == u'bar')

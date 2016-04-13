@@ -233,8 +233,7 @@ void PersistentDict::remove_duplicates(const CBString& first_key, const CBString
     TempDirectory::ptr tmpdir = TempDirectory::make();
     ssize_t chunk_size = 100;
     lmdb_options opts;
-    opts.write_map = true;
-    opts.map_async = true;
+    opts.no_sync = true;
     {
         shared_ptr<PersistentDict> tmp_dict = PersistentDict::factory(tmpdir->get_path(), "", opts);
 

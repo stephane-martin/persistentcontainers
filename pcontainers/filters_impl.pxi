@@ -12,6 +12,7 @@ cdef class Serializer(Filter):
 
 
 cdef class NoneSerializer(Serializer):
+    # todo: dumps should write also for int, floats, ...
     cdef dumps(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
