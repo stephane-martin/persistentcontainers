@@ -969,7 +969,7 @@ class TestPDict(object):
     def test_update(self, temp_all_dict):
         g = ((i, u"foo" + unicode(i)) for i in xrange(1000))
         temp_all_dict.update(g)
-        assert (sorted(temp_all_dict.noiterkeys()) == sorted(list(xrange(1000))))
+        assert(len(temp_all_dict) == 1000)
         assert (sorted(temp_all_dict.noitervalues()) == sorted([u'foo' + unicode(i) for i in xrange(1000)]))
 
     def test_remove_if(self, init_temp_all_dict):
