@@ -1,4 +1,4 @@
-cdef extern from "pyfunctor.h" namespace "quiet" nogil:
+cdef extern from "utils/pyfunctor.h" namespace "quiet" nogil:
     # noinspection PyPep8Naming
     cppclass unary_predicate:
         pass

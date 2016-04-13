@@ -29,9 +29,9 @@ cdef extern from "Python.h":
     # noinspection PyPep8Naming
     object PyMemoryView_FromBuffer(Py_buffer *view)
 
-include "scoped_ptr.pxi"
-include "shared_ptr.pxi"
-include "cbstring.pxi"
+include "pxi_wrappers/scoped_ptr.pxi"
+include "pxi_wrappers/shared_ptr.pxi"
+include "pxi_wrappers/cbstring.pxi"
 
 cdef extern from "lmdb.h" nogil:
     ctypedef struct MDB_txn:
@@ -44,10 +44,10 @@ cdef extern from "lmdb.h" nogil:
     int mdb_txn_commit(MDB_txn *txn)
     void mdb_txn_abort(MDB_txn *txn)
 
-include "pyfunctor.pxi"
-include "logging.pxi"
+include "pxi_wrappers/pyfunctor.pxi"
+include "pxi_wrappers/logging.pxi"
 
-cdef extern from "pyutils.h" namespace "utils":
+cdef extern from "utils/pyutils.h" namespace "utils":
     # noinspection PyPep8Naming
     cppclass PyBufferWrap:
         PyBufferWrap() nogil
@@ -60,12 +60,12 @@ cdef extern from "pyutils.h" namespace "utils":
 
     cdef PyBufferWrap move "boost::move"(PyBufferWrap other)
 
-include "lmdb_options.pxi"
-include "persistentdict.pxi"
-include "persistentqueue.pxi"
+include "pxi_wrappers/lmdb_options.pxi"
+include "pxi_wrappers/persistentdict.pxi"
+include "pxi_wrappers/persistentqueue.pxi"
 
 
-cdef extern from "utils.h" namespace "utils" nogil:
+cdef extern from "utils/utils.h" namespace "utils" nogil:
 
     # noinspection PyPep8Naming
     cppclass TempDirectory:

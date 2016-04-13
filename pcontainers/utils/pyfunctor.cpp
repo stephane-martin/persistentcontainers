@@ -1,8 +1,8 @@
 #include <stdexcept>
 #include <boost/throw_exception.hpp>
-#include "lmdb_exceptions.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
 #include "pyfunctor.h"
-#include "logging.h"
+#include "../logging/logging.h"
 
 namespace quiet {
 using namespace lmdb;

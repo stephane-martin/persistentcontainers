@@ -11,9 +11,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
-#include "lmdb_exceptions.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
 #include "utils.h"
-#include "logging.h"
+#include "../logging/logging.h"
 
 namespace utils {
 

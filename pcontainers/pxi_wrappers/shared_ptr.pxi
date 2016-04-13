@@ -16,7 +16,7 @@ cdef extern from "boost/shared_ptr.hpp" namespace "boost" nogil:
         T* get()
         T& operator*()
         #cpp_bool operator bool()
-        cpp_bool operator!()
+        #cpp_bool operator!()
 
         cpp_bool operator==(const shared_ptr&)
         cpp_bool operator!=(const shared_ptr&)

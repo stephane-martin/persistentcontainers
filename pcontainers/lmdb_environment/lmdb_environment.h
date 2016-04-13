@@ -11,7 +11,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/lockfree/stack.hpp>
 #include <bstrlib/bstrwrap.h>
-#include "lmdb_options.h"
+#include "../utils/lmdb_options.h"
 #include "lmdb.h"
 
 

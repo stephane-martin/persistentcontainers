@@ -23,11 +23,11 @@
 #include <stdio.h>
 
 #include "lmdb.h"
-#include "lmdb_exceptions.h"
-#include "lmdb_options.h"
-#include "lmdb_environment.h"
-#include "utils.h"
-#include "logging.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
+#include "../utils/lmdb_options.h"
+#include "../lmdb_environment/lmdb_environment.h"
+#include "../utils/utils.h"
+#include "../logging/logging.h"
 
 namespace quiet {
 

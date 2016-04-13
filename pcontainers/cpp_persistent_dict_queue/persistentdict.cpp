@@ -7,10 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/function.hpp>
-#include "lmdb_environment.h"
-#include "lmdb_exceptions.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
 #include "persistentdict.h"
-#include "utils.h"
 
 
 namespace quiet {

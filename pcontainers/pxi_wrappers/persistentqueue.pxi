@@ -1,5 +1,5 @@
 
-cdef extern from "persistentqueue.h" namespace "quiet" nogil:
+cdef extern from "cpp_persistent_dict_queue/persistentqueue.h" namespace "quiet" nogil:
     # noinspection PyPep8Naming
     cdef cppclass cppPersistentQueue "quiet::PersistentQueue":
         CBString get_dirname()

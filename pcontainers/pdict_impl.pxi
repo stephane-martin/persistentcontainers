@@ -177,12 +177,12 @@ cdef class PRawDictIterator(PRawDictAbstractIterator):
                 it_ptr.dlte(key_view.get_mdb_val())
 
     def __setitem__(self, key, value):
-        if not self.cpp_iterator_ptr:
+        if not self.cpp_iterator_ptr.get():
             raise NotInitialized()
         self.set_item_buf(key, value)
 
     def __delitem__(self, key):
-        if not self.cpp_iterator_ptr:
+        if not self.cpp_iterator_ptr.get():
             raise NotInitialized()
         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
         if key_view.length() == 0:

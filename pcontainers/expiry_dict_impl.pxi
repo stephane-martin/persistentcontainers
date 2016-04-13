@@ -208,7 +208,7 @@ cdef class ExpiryDict(object):
     def keys(self):
         return self.__iter__(self)
 
-    def values(self):
+    def values(self):       # cpdef not possible because of yield
         cdef time_t expiry
         cdef time_t now = c_time(NULL)
         cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
@@ -226,7 +226,7 @@ cdef class ExpiryDict(object):
                     index_it.incr()
                     values_it.incr()
 
-    def items(self):
+    def items(self):    # cpdef not possible because of yield
         cdef time_t expiry
         cdef time_t now = c_time(NULL)
         cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
@@ -260,10 +260,12 @@ cdef class ExpiryDict(object):
                 return True
             return False
 
-    def update(self, e=None, **kwds):
+    def update(self, e=None, time_t expiry=0, **kwds):
         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
-        s_expiry = bytes(self.default_expiry + c_time(NULL))
+        if expiry == 0:
+            expiry = self.default_expiry
+        s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
 
         with index_it:
             with values_it:

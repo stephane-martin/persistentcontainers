@@ -13,5 +13,5 @@ cdef extern from "boost/scoped_ptr.hpp" namespace "boost" nogil:
         # Observers
         T* get()
         T& operator*()
-        cpp_bool operator bool()
-        cpp_bool operator!()
+        #cpp_bool operator bool()
+        #cpp_bool operator!()

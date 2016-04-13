@@ -4,7 +4,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include "pylogging.h"
-#include "lmdb_exceptions.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
 
 namespace utils {
 

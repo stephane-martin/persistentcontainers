@@ -6,7 +6,7 @@
 #include <boost/core/noncopyable.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
 #include <Python.h>
-#include "logging.h"
+#include "../logging/logging.h"
 #include "lmdb.h"
 
 #if PY_MAJOR_VERSION >= 3

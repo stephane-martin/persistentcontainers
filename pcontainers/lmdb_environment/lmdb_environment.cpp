@@ -2,8 +2,8 @@
 #include <boost/bind.hpp>
 #include <boost/throw_exception.hpp>
 #include "lmdb_environment.h"
-#include "lmdb_exceptions.h"
-#include "utils.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
+#include "../utils/utils.h"
 
 namespace lmdb {
 

@@ -1,4 +1,4 @@
-cdef extern from "lmdb_options.h" namespace "lmdb" nogil:
+cdef extern from "utils/lmdb_options.h" namespace "lmdb" nogil:
     # noinspection PyPep8Naming
     cdef cppclass lmdb_options:
         lmdb_options()

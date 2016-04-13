@@ -5,7 +5,7 @@
 #include <plog/Appenders/IAppender.h>
 #include <Python.h>
 #include "logging.h"
-#include "pyutils.h"
+#include "../utils/pyutils.h"
 
 namespace utils {
 

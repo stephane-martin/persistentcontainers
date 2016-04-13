@@ -5,7 +5,7 @@
 #include <boost/exception/exception.hpp>
 #include "custom_exc.h"
 #include "_py_exceptions.h"
-#include "lmdb_exceptions.h"
+#include "lmdb_exceptions/lmdb_exceptions.h"
 
 namespace quiet {
 

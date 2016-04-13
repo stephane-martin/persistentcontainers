@@ -286,14 +286,14 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "bstrlib/bstrlib.h"
 #include "bstrlib/bstrwrap.h"
 #include "lmdb.h"
-#include "pyfunctor.h"
-#include "logging.h"
-#include "pylogging.h"
-#include "pyutils.h"
-#include "lmdb_options.h"
-#include "persistentdict.h"
-#include "persistentqueue.h"
-#include "utils.h"
+#include "utils/pyfunctor.h"
+#include "logging/logging.h"
+#include "logging/pylogging.h"
+#include "utils/pyutils.h"
+#include "utils/lmdb_options.h"
+#include "cpp_persistent_dict_queue/persistentdict.h"
+#include "cpp_persistent_dict_queue/persistentqueue.h"
+#include "utils/utils.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -830,7 +830,7 @@ struct __pyx_opt_args_11pcontainers_6_pdict_6PQueue_move_to {
   Py_ssize_t chunk_size;
 };
 
-/* "pcontainers/lmdb_options.pxi":21
+/* "pcontainers/pxi_wrappers/lmdb_options.pxi":21
  * 
  * 
  * cdef class LmdbOptions(object):             # <<<<<<<<<<<<<<
@@ -1362,7 +1362,7 @@ struct __pyx_obj_11pcontainers_6_pdict___pyx_scope_struct_10___iter__ {
 /* "pcontainers/expiry_dict_impl.pxi":211
  *         return self.__iter__(self)
  * 
- *     def values(self):             # <<<<<<<<<<<<<<
+ *     def values(self):       # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -1388,7 +1388,7 @@ struct __pyx_obj_11pcontainers_6_pdict___pyx_scope_struct_11_values {
 /* "pcontainers/expiry_dict_impl.pxi":229
  *                     values_it.incr()
  * 
- *     def items(self):             # <<<<<<<<<<<<<<
+ *     def items(self):    # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -3330,7 +3330,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_27keys(struct __pyx
 static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_29values(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_32items(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self); /* proto */
 static int __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_35__contains__(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_key); /* proto */
-static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_e, PyObject *__pyx_v_kwds); /* proto */
+static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_e, time_t __pyx_v_expiry, PyObject *__pyx_v_kwds); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_2set_logger(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_level); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_4set_python_logger(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_name_or_logger_obj); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_6Filter_pydumps(struct __pyx_obj_11pcontainers_6_pdict_Filter *__pyx_v_self, PyObject *__pyx_v_obj); /* proto */
@@ -8768,7 +8768,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_16PRawDictIterator_dlte(struct __
  *                 it_ptr.dlte(key_view.get_mdb_val())
  * 
  *     def __setitem__(self, key, value):             # <<<<<<<<<<<<<<
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  */
 
@@ -8797,16 +8797,16 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_2__setitem__(struct
   /* "pcontainers/pdict_impl.pxi":180
  * 
  *     def __setitem__(self, key, value):
- *         if not self.cpp_iterator_ptr:             # <<<<<<<<<<<<<<
+ *         if not self.cpp_iterator_ptr.get():             # <<<<<<<<<<<<<<
  *             raise NotInitialized()
  *         self.set_item_buf(key, value)
  */
-  __pyx_t_1 = ((!__pyx_v_self->__pyx_base.cpp_iterator_ptr) != 0);
+  __pyx_t_1 = ((!(__pyx_v_self->__pyx_base.cpp_iterator_ptr.get() != 0)) != 0);
   if (__pyx_t_1) {
 
     /* "pcontainers/pdict_impl.pxi":181
  *     def __setitem__(self, key, value):
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()             # <<<<<<<<<<<<<<
  *         self.set_item_buf(key, value)
  * 
@@ -8838,14 +8838,14 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_2__setitem__(struct
     /* "pcontainers/pdict_impl.pxi":180
  * 
  *     def __setitem__(self, key, value):
- *         if not self.cpp_iterator_ptr:             # <<<<<<<<<<<<<<
+ *         if not self.cpp_iterator_ptr.get():             # <<<<<<<<<<<<<<
  *             raise NotInitialized()
  *         self.set_item_buf(key, value)
  */
   }
 
   /* "pcontainers/pdict_impl.pxi":182
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  *         self.set_item_buf(key, value)             # <<<<<<<<<<<<<<
  * 
@@ -8859,7 +8859,7 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_2__setitem__(struct
  *                 it_ptr.dlte(key_view.get_mdb_val())
  * 
  *     def __setitem__(self, key, value):             # <<<<<<<<<<<<<<
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  */
 
@@ -8881,7 +8881,7 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_2__setitem__(struct
  *         self.set_item_buf(key, value)
  * 
  *     def __delitem__(self, key):             # <<<<<<<<<<<<<<
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  */
 
@@ -8913,16 +8913,16 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_4__delitem__(struct
   /* "pcontainers/pdict_impl.pxi":185
  * 
  *     def __delitem__(self, key):
- *         if not self.cpp_iterator_ptr:             # <<<<<<<<<<<<<<
+ *         if not self.cpp_iterator_ptr.get():             # <<<<<<<<<<<<<<
  *             raise NotInitialized()
  *         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
  */
-  __pyx_t_1 = ((!__pyx_v_self->__pyx_base.cpp_iterator_ptr) != 0);
+  __pyx_t_1 = ((!(__pyx_v_self->__pyx_base.cpp_iterator_ptr.get() != 0)) != 0);
   if (__pyx_t_1) {
 
     /* "pcontainers/pdict_impl.pxi":186
  *     def __delitem__(self, key):
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()             # <<<<<<<<<<<<<<
  *         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
  *         if key_view.length() == 0:
@@ -8954,14 +8954,14 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_4__delitem__(struct
     /* "pcontainers/pdict_impl.pxi":185
  * 
  *     def __delitem__(self, key):
- *         if not self.cpp_iterator_ptr:             # <<<<<<<<<<<<<<
+ *         if not self.cpp_iterator_ptr.get():             # <<<<<<<<<<<<<<
  *             raise NotInitialized()
  *         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
  */
   }
 
   /* "pcontainers/pdict_impl.pxi":187
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  *         cdef PyBufferWrap key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))             # <<<<<<<<<<<<<<
  *         if key_view.length() == 0:
@@ -9080,7 +9080,7 @@ static int __pyx_pf_11pcontainers_6_pdict_16PRawDictIterator_4__delitem__(struct
  *         self.set_item_buf(key, value)
  * 
  *     def __delitem__(self, key):             # <<<<<<<<<<<<<<
- *         if not self.cpp_iterator_ptr:
+ *         if not self.cpp_iterator_ptr.get():
  *             raise NotInitialized()
  */
 
@@ -34531,7 +34531,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_27keys(struct __pyx
  *     def keys(self):
  *         return self.__iter__(self)             # <<<<<<<<<<<<<<
  * 
- *     def values(self):
+ *     def values(self):       # cpdef not possible because of yield
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_iter); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 209, __pyx_L1_error)
@@ -34591,7 +34591,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_31generator4(__pyx_
 /* "pcontainers/expiry_dict_impl.pxi":211
  *         return self.__iter__(self)
  * 
- *     def values(self):             # <<<<<<<<<<<<<<
+ *     def values(self):       # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -34674,7 +34674,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_31generator4(__pyx_
   if (unlikely(!__pyx_sent_value)) __PYX_ERR(4, 211, __pyx_L1_error)
 
   /* "pcontainers/expiry_dict_impl.pxi":213
- *     def values(self):
+ *     def values(self):       # cpdef not possible because of yield
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)             # <<<<<<<<<<<<<<
  *         cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
@@ -35018,7 +35018,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_31generator4(__pyx_
  *                     index_it.incr()
  *                     values_it.incr()             # <<<<<<<<<<<<<<
  * 
- *     def items(self):
+ *     def items(self):    # cpdef not possible because of yield
  */
                     __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_cur_scope->__pyx_v_values_it->__pyx_base.__pyx_vtab)->__pyx_base.incr(((struct __pyx_obj_11pcontainers_6_pdict_PRawDictAbstractIterator *)__pyx_cur_scope->__pyx_v_values_it)); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 227, __pyx_L22_error)
                     __Pyx_GOTREF(__pyx_t_1);
@@ -35195,7 +35195,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_31generator4(__pyx_
   /* "pcontainers/expiry_dict_impl.pxi":211
  *         return self.__iter__(self)
  * 
- *     def values(self):             # <<<<<<<<<<<<<<
+ *     def values(self):       # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -35221,7 +35221,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_34generator5(__pyx_
 /* "pcontainers/expiry_dict_impl.pxi":229
  *                     values_it.incr()
  * 
- *     def items(self):             # <<<<<<<<<<<<<<
+ *     def items(self):    # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -35304,7 +35304,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_34generator5(__pyx_
   if (unlikely(!__pyx_sent_value)) __PYX_ERR(4, 229, __pyx_L1_error)
 
   /* "pcontainers/expiry_dict_impl.pxi":231
- *     def items(self):
+ *     def items(self):    # cpdef not possible because of yield
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)             # <<<<<<<<<<<<<<
  *         cdef PRawDictIterator index_it = PRawDictConstIterator(self.index_dict)
@@ -35825,7 +35825,7 @@ static PyObject *__pyx_gb_11pcontainers_6_pdict_10ExpiryDict_34generator5(__pyx_
   /* "pcontainers/expiry_dict_impl.pxi":229
  *                     values_it.incr()
  * 
- *     def items(self):             # <<<<<<<<<<<<<<
+ *     def items(self):    # cpdef not possible because of yield             # <<<<<<<<<<<<<<
  *         cdef time_t expiry
  *         cdef time_t now = c_time(NULL)
  */
@@ -36121,7 +36121,7 @@ static int __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_35__contains__(struct __p
  *                 return True
  *             return False             # <<<<<<<<<<<<<<
  * 
- *     def update(self, e=None, **kwds):
+ *     def update(self, e=None, time_t expiry=0, **kwds):
  */
           __pyx_r = 0;
           goto __pyx_L12_try_return;
@@ -36251,7 +36251,7 @@ static int __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_35__contains__(struct __p
 /* "pcontainers/expiry_dict_impl.pxi":263
  *             return False
  * 
- *     def update(self, e=None, **kwds):             # <<<<<<<<<<<<<<
+ *     def update(self, e=None, time_t expiry=0, **kwds):             # <<<<<<<<<<<<<<
  *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
  *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
  */
@@ -36260,6 +36260,7 @@ static int __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_35__contains__(struct __p
 static PyObject *__pyx_pw_11pcontainers_6_pdict_10ExpiryDict_38update(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_11pcontainers_6_pdict_10ExpiryDict_38update(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_e = 0;
+  time_t __pyx_v_expiry;
   PyObject *__pyx_v_kwds = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -36267,13 +36268,14 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_10ExpiryDict_38update(PyObject *
   __pyx_v_kwds = PyDict_New(); if (unlikely(!__pyx_v_kwds)) return NULL;
   __Pyx_GOTREF(__pyx_v_kwds);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_e,0};
-    PyObject* values[1] = {0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_e,&__pyx_n_s_expiry,0};
+    PyObject* values[2] = {0,0};
     values[0] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
         case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
@@ -36285,29 +36287,40 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_10ExpiryDict_38update(PyObject *
           PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_e);
           if (value) { values[0] = value; kw_args--; }
         }
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_expiry);
+          if (value) { values[1] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwds, values, pos_args, "update") < 0)) __PYX_ERR(4, 263, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
         case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
     }
     __pyx_v_e = values[0];
+    if (values[1]) {
+      __pyx_v_expiry = __Pyx_PyInt_As_time_t(values[1]); if (unlikely((__pyx_v_expiry == (time_t)-1) && PyErr_Occurred())) __PYX_ERR(4, 263, __pyx_L3_error)
+    } else {
+      __pyx_v_expiry = ((time_t)0);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("update", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(4, 263, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("update", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(4, 263, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwds); __pyx_v_kwds = 0;
   __Pyx_AddTraceback("pcontainers._pdict.ExpiryDict.update", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(((struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *)__pyx_v_self), __pyx_v_e, __pyx_v_kwds);
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(((struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *)__pyx_v_self), __pyx_v_e, __pyx_v_expiry, __pyx_v_kwds);
 
   /* function exit code */
   __Pyx_XDECREF(__pyx_v_kwds);
@@ -36315,7 +36328,7 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_10ExpiryDict_38update(PyObject *
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_e, PyObject *__pyx_v_kwds) {
+static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_e, time_t __pyx_v_expiry, PyObject *__pyx_v_kwds) {
   struct __pyx_obj_11pcontainers_6_pdict_PRawDictIterator *__pyx_v_index_it = 0;
   struct __pyx_obj_11pcontainers_6_pdict_PRawDictIterator *__pyx_v_values_it = 0;
   PyObject *__pyx_v_s_expiry = NULL;
@@ -36325,8 +36338,8 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
+  int __pyx_t_3;
+  time_t __pyx_t_4;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
@@ -36337,24 +36350,25 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
-  int __pyx_t_15;
-  int __pyx_t_16;
-  Py_ssize_t __pyx_t_17;
-  PyObject *(*__pyx_t_18)(PyObject *);
-  PyObject *__pyx_t_19 = NULL;
+  PyObject *__pyx_t_15 = NULL;
+  PyObject *__pyx_t_16 = NULL;
+  int __pyx_t_17;
+  Py_ssize_t __pyx_t_18;
+  PyObject *(*__pyx_t_19)(PyObject *);
   PyObject *__pyx_t_20 = NULL;
-  PyObject *(*__pyx_t_21)(PyObject *);
-  Py_ssize_t __pyx_t_22;
-  int __pyx_t_23;
+  PyObject *__pyx_t_21 = NULL;
+  PyObject *(*__pyx_t_22)(PyObject *);
+  Py_ssize_t __pyx_t_23;
   int __pyx_t_24;
+  int __pyx_t_25;
   __Pyx_RefNannySetupContext("update", 0);
 
   /* "pcontainers/expiry_dict_impl.pxi":264
  * 
- *     def update(self, e=None, **kwds):
+ *     def update(self, e=None, time_t expiry=0, **kwds):
  *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)             # <<<<<<<<<<<<<<
  *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))
+ *         if expiry == 0:
  */
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 264, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -36368,11 +36382,11 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
   __pyx_t_2 = 0;
 
   /* "pcontainers/expiry_dict_impl.pxi":265
- *     def update(self, e=None, **kwds):
+ *     def update(self, e=None, time_t expiry=0, **kwds):
  *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
  *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)             # <<<<<<<<<<<<<<
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))
- * 
+ *         if expiry == 0:
+ *             expiry = self.default_expiry
  */
   __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -36388,50 +36402,86 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
   /* "pcontainers/expiry_dict_impl.pxi":266
  *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
  *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))             # <<<<<<<<<<<<<<
+ *         if expiry == 0:             # <<<<<<<<<<<<<<
+ *             expiry = self.default_expiry
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
+ */
+  __pyx_t_3 = ((__pyx_v_expiry == 0) != 0);
+  if (__pyx_t_3) {
+
+    /* "pcontainers/expiry_dict_impl.pxi":267
+ *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
+ *         if expiry == 0:
+ *             expiry = self.default_expiry             # <<<<<<<<<<<<<<
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
+ * 
+ */
+    __pyx_t_4 = __pyx_v_self->default_expiry;
+    __pyx_v_expiry = __pyx_t_4;
+
+    /* "pcontainers/expiry_dict_impl.pxi":266
+ *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
+ *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
+ *         if expiry == 0:             # <<<<<<<<<<<<<<
+ *             expiry = self.default_expiry
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
+ */
+  }
+
+  /* "pcontainers/expiry_dict_impl.pxi":268
+ *         if expiry == 0:
+ *             expiry = self.default_expiry
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))             # <<<<<<<<<<<<<<
  * 
  *         with index_it:
  */
-  __pyx_t_1 = __Pyx_PyInt_From_time_t((__pyx_v_self->default_expiry + time(NULL))); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 266, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 266, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyBytes_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 266, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (((__pyx_v_expiry <= 0) != 0)) {
+    __Pyx_INCREF(__pyx_n_b_none);
+    __pyx_t_1 = __pyx_n_b_none;
+  } else {
+    __pyx_t_2 = __Pyx_PyInt_From_time_t((__pyx_v_expiry + time(NULL))); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 268, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 268, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
+    __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&PyBytes_Type)), __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 268, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_1 = __pyx_t_2;
+    __pyx_t_2 = 0;
+  }
   __pyx_v_s_expiry = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/expiry_dict_impl.pxi":268
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))
+  /* "pcontainers/expiry_dict_impl.pxi":270
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
  * 
  *         with index_it:             # <<<<<<<<<<<<<<
  *             with values_it:
  *                 try:
  */
   /*with:*/ {
-    __pyx_t_3 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_index_it), __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 268, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_index_it), __pyx_n_s_enter); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 268, __pyx_L3_error)
+    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_index_it), __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(4, 270, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_index_it), __pyx_n_s_enter); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 270, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = NULL;
+    __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-      if (likely(__pyx_t_4)) {
+      __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
+      if (likely(__pyx_t_5)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-        __Pyx_INCREF(__pyx_t_4);
+        __Pyx_INCREF(__pyx_t_5);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_2, function);
       }
     }
-    if (__pyx_t_4) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 268, __pyx_L3_error)
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (__pyx_t_5) {
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 270, __pyx_L4_error)
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 268, __pyx_L3_error)
+      __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 270, __pyx_L4_error)
     }
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -36440,13 +36490,13 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
       {
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __Pyx_ExceptionSave(&__pyx_t_5, &__pyx_t_6, &__pyx_t_7);
-        __Pyx_XGOTREF(__pyx_t_5);
-        __Pyx_XGOTREF(__pyx_t_6);
+        __Pyx_ExceptionSave(&__pyx_t_7, &__pyx_t_8, &__pyx_t_9);
         __Pyx_XGOTREF(__pyx_t_7);
+        __Pyx_XGOTREF(__pyx_t_8);
+        __Pyx_XGOTREF(__pyx_t_9);
         /*try:*/ {
 
-          /* "pcontainers/expiry_dict_impl.pxi":269
+          /* "pcontainers/expiry_dict_impl.pxi":271
  * 
  *         with index_it:
  *             with values_it:             # <<<<<<<<<<<<<<
@@ -36454,25 +36504,25 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  *                     if e is not None:
  */
           /*with:*/ {
-            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_values_it), __pyx_n_s_exit); if (unlikely(!__pyx_t_8)) __PYX_ERR(4, 269, __pyx_L7_error)
-            __Pyx_GOTREF(__pyx_t_8);
-            __pyx_t_2 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_values_it), __pyx_n_s_enter); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 269, __pyx_L15_error)
+            __pyx_t_10 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_values_it), __pyx_n_s_exit); if (unlikely(!__pyx_t_10)) __PYX_ERR(4, 271, __pyx_L8_error)
+            __Pyx_GOTREF(__pyx_t_10);
+            __pyx_t_2 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_values_it), __pyx_n_s_enter); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 271, __pyx_L16_error)
             __Pyx_GOTREF(__pyx_t_2);
-            __pyx_t_4 = NULL;
+            __pyx_t_5 = NULL;
             if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
-              __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-              if (likely(__pyx_t_4)) {
+              __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
+              if (likely(__pyx_t_5)) {
                 PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-                __Pyx_INCREF(__pyx_t_4);
+                __Pyx_INCREF(__pyx_t_5);
                 __Pyx_INCREF(function);
                 __Pyx_DECREF_SET(__pyx_t_2, function);
               }
             }
-            if (__pyx_t_4) {
-              __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 269, __pyx_L15_error)
-              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            if (__pyx_t_5) {
+              __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 271, __pyx_L16_error)
+              __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             } else {
-              __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 269, __pyx_L15_error)
+              __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 271, __pyx_L16_error)
             }
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -36481,13 +36531,13 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
               {
                 __Pyx_PyThreadState_declare
                 __Pyx_PyThreadState_assign
-                __Pyx_ExceptionSave(&__pyx_t_9, &__pyx_t_10, &__pyx_t_11);
-                __Pyx_XGOTREF(__pyx_t_9);
-                __Pyx_XGOTREF(__pyx_t_10);
+                __Pyx_ExceptionSave(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
                 __Pyx_XGOTREF(__pyx_t_11);
+                __Pyx_XGOTREF(__pyx_t_12);
+                __Pyx_XGOTREF(__pyx_t_13);
                 /*try:*/ {
 
-                  /* "pcontainers/expiry_dict_impl.pxi":270
+                  /* "pcontainers/expiry_dict_impl.pxi":272
  *         with index_it:
  *             with values_it:
  *                 try:             # <<<<<<<<<<<<<<
@@ -36497,96 +36547,96 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
                   {
                     __Pyx_PyThreadState_declare
                     __Pyx_PyThreadState_assign
-                    __Pyx_ExceptionSave(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-                    __Pyx_XGOTREF(__pyx_t_12);
-                    __Pyx_XGOTREF(__pyx_t_13);
+                    __Pyx_ExceptionSave(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
                     __Pyx_XGOTREF(__pyx_t_14);
+                    __Pyx_XGOTREF(__pyx_t_15);
+                    __Pyx_XGOTREF(__pyx_t_16);
                     /*try:*/ {
 
-                      /* "pcontainers/expiry_dict_impl.pxi":271
+                      /* "pcontainers/expiry_dict_impl.pxi":273
  *             with values_it:
  *                 try:
  *                     if e is not None:             # <<<<<<<<<<<<<<
  *                         if hasattr(e, 'keys'):
  *                             for key in e.keys():
  */
-                      __pyx_t_15 = (__pyx_v_e != Py_None);
-                      __pyx_t_16 = (__pyx_t_15 != 0);
-                      if (__pyx_t_16) {
+                      __pyx_t_3 = (__pyx_v_e != Py_None);
+                      __pyx_t_17 = (__pyx_t_3 != 0);
+                      if (__pyx_t_17) {
 
-                        /* "pcontainers/expiry_dict_impl.pxi":272
+                        /* "pcontainers/expiry_dict_impl.pxi":274
  *                 try:
  *                     if e is not None:
  *                         if hasattr(e, 'keys'):             # <<<<<<<<<<<<<<
  *                             for key in e.keys():
  *                                 index_it.set_item_buf(key, s_expiry)
  */
-                        __pyx_t_16 = PyObject_HasAttr(__pyx_v_e, __pyx_n_s_keys); if (unlikely(__pyx_t_16 == -1)) __PYX_ERR(4, 272, __pyx_L29_error)
-                        __pyx_t_15 = (__pyx_t_16 != 0);
-                        if (__pyx_t_15) {
+                        __pyx_t_17 = PyObject_HasAttr(__pyx_v_e, __pyx_n_s_keys); if (unlikely(__pyx_t_17 == -1)) __PYX_ERR(4, 274, __pyx_L30_error)
+                        __pyx_t_3 = (__pyx_t_17 != 0);
+                        if (__pyx_t_3) {
 
-                          /* "pcontainers/expiry_dict_impl.pxi":273
+                          /* "pcontainers/expiry_dict_impl.pxi":275
  *                     if e is not None:
  *                         if hasattr(e, 'keys'):
  *                             for key in e.keys():             # <<<<<<<<<<<<<<
  *                                 index_it.set_item_buf(key, s_expiry)
  *                                 values_it.set_item_buf(key, e[key])
  */
-                          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_keys); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 273, __pyx_L29_error)
+                          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_keys); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 275, __pyx_L30_error)
                           __Pyx_GOTREF(__pyx_t_2);
-                          __pyx_t_4 = NULL;
+                          __pyx_t_5 = NULL;
                           if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
-                            __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-                            if (likely(__pyx_t_4)) {
+                            __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
+                            if (likely(__pyx_t_5)) {
                               PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-                              __Pyx_INCREF(__pyx_t_4);
+                              __Pyx_INCREF(__pyx_t_5);
                               __Pyx_INCREF(function);
                               __Pyx_DECREF_SET(__pyx_t_2, function);
                             }
                           }
-                          if (__pyx_t_4) {
-                            __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 273, __pyx_L29_error)
-                            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                          if (__pyx_t_5) {
+                            __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 275, __pyx_L30_error)
+                            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                           } else {
-                            __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 273, __pyx_L29_error)
+                            __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 275, __pyx_L30_error)
                           }
                           __Pyx_GOTREF(__pyx_t_1);
                           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
                           if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
-                            __pyx_t_2 = __pyx_t_1; __Pyx_INCREF(__pyx_t_2); __pyx_t_17 = 0;
-                            __pyx_t_18 = NULL;
+                            __pyx_t_2 = __pyx_t_1; __Pyx_INCREF(__pyx_t_2); __pyx_t_18 = 0;
+                            __pyx_t_19 = NULL;
                           } else {
-                            __pyx_t_17 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 273, __pyx_L29_error)
+                            __pyx_t_18 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 275, __pyx_L30_error)
                             __Pyx_GOTREF(__pyx_t_2);
-                            __pyx_t_18 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_18)) __PYX_ERR(4, 273, __pyx_L29_error)
+                            __pyx_t_19 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_19)) __PYX_ERR(4, 275, __pyx_L30_error)
                           }
                           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
                           for (;;) {
-                            if (likely(!__pyx_t_18)) {
+                            if (likely(!__pyx_t_19)) {
                               if (likely(PyList_CheckExact(__pyx_t_2))) {
-                                if (__pyx_t_17 >= PyList_GET_SIZE(__pyx_t_2)) break;
+                                if (__pyx_t_18 >= PyList_GET_SIZE(__pyx_t_2)) break;
                                 #if CYTHON_COMPILING_IN_CPYTHON
-                                __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_17); __Pyx_INCREF(__pyx_t_1); __pyx_t_17++; if (unlikely(0 < 0)) __PYX_ERR(4, 273, __pyx_L29_error)
+                                __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_18); __Pyx_INCREF(__pyx_t_1); __pyx_t_18++; if (unlikely(0 < 0)) __PYX_ERR(4, 275, __pyx_L30_error)
                                 #else
-                                __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_17); __pyx_t_17++; if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 273, __pyx_L29_error)
+                                __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_18); __pyx_t_18++; if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 275, __pyx_L30_error)
                                 __Pyx_GOTREF(__pyx_t_1);
                                 #endif
                               } else {
-                                if (__pyx_t_17 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+                                if (__pyx_t_18 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
                                 #if CYTHON_COMPILING_IN_CPYTHON
-                                __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_17); __Pyx_INCREF(__pyx_t_1); __pyx_t_17++; if (unlikely(0 < 0)) __PYX_ERR(4, 273, __pyx_L29_error)
+                                __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_18); __Pyx_INCREF(__pyx_t_1); __pyx_t_18++; if (unlikely(0 < 0)) __PYX_ERR(4, 275, __pyx_L30_error)
                                 #else
-                                __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_17); __pyx_t_17++; if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 273, __pyx_L29_error)
+                                __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_18); __pyx_t_18++; if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 275, __pyx_L30_error)
                                 __Pyx_GOTREF(__pyx_t_1);
                                 #endif
                               }
                             } else {
-                              __pyx_t_1 = __pyx_t_18(__pyx_t_2);
+                              __pyx_t_1 = __pyx_t_19(__pyx_t_2);
                               if (unlikely(!__pyx_t_1)) {
                                 PyObject* exc_type = PyErr_Occurred();
                                 if (exc_type) {
                                   if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-                                  else __PYX_ERR(4, 273, __pyx_L29_error)
+                                  else __PYX_ERR(4, 275, __pyx_L30_error)
                                 }
                                 break;
                               }
@@ -36595,32 +36645,32 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
                             __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_1);
                             __pyx_t_1 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":274
+                            /* "pcontainers/expiry_dict_impl.pxi":276
  *                         if hasattr(e, 'keys'):
  *                             for key in e.keys():
  *                                 index_it.set_item_buf(key, s_expiry)             # <<<<<<<<<<<<<<
  *                                 values_it.set_item_buf(key, e[key])
  *                         else:
  */
-                            __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 274, __pyx_L29_error)
+                            __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 276, __pyx_L30_error)
                             __Pyx_GOTREF(__pyx_t_1);
                             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":275
+                            /* "pcontainers/expiry_dict_impl.pxi":277
  *                             for key in e.keys():
  *                                 index_it.set_item_buf(key, s_expiry)
  *                                 values_it.set_item_buf(key, e[key])             # <<<<<<<<<<<<<<
  *                         else:
  *                             for (key, value) in e:
  */
-                            __pyx_t_1 = PyObject_GetItem(__pyx_v_e, __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 275, __pyx_L29_error)
+                            __pyx_t_1 = PyObject_GetItem(__pyx_v_e, __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 277, __pyx_L30_error)
                             __Pyx_GOTREF(__pyx_t_1);
-                            __pyx_t_4 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 275, __pyx_L29_error)
-                            __Pyx_GOTREF(__pyx_t_4);
+                            __pyx_t_5 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 277, __pyx_L30_error)
+                            __Pyx_GOTREF(__pyx_t_5);
                             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":273
+                            /* "pcontainers/expiry_dict_impl.pxi":275
  *                     if e is not None:
  *                         if hasattr(e, 'keys'):
  *                             for key in e.keys():             # <<<<<<<<<<<<<<
@@ -36630,17 +36680,17 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
                           }
                           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-                          /* "pcontainers/expiry_dict_impl.pxi":272
+                          /* "pcontainers/expiry_dict_impl.pxi":274
  *                 try:
  *                     if e is not None:
  *                         if hasattr(e, 'keys'):             # <<<<<<<<<<<<<<
  *                             for key in e.keys():
  *                                 index_it.set_item_buf(key, s_expiry)
  */
-                          goto __pyx_L38;
+                          goto __pyx_L39;
                         }
 
-                        /* "pcontainers/expiry_dict_impl.pxi":277
+                        /* "pcontainers/expiry_dict_impl.pxi":279
  *                                 values_it.set_item_buf(key, e[key])
  *                         else:
  *                             for (key, value) in e:             # <<<<<<<<<<<<<<
@@ -36649,46 +36699,46 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  */
                         /*else*/ {
                           if (likely(PyList_CheckExact(__pyx_v_e)) || PyTuple_CheckExact(__pyx_v_e)) {
-                            __pyx_t_2 = __pyx_v_e; __Pyx_INCREF(__pyx_t_2); __pyx_t_17 = 0;
-                            __pyx_t_18 = NULL;
+                            __pyx_t_2 = __pyx_v_e; __Pyx_INCREF(__pyx_t_2); __pyx_t_18 = 0;
+                            __pyx_t_19 = NULL;
                           } else {
-                            __pyx_t_17 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_e); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 277, __pyx_L29_error)
+                            __pyx_t_18 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_e); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 279, __pyx_L30_error)
                             __Pyx_GOTREF(__pyx_t_2);
-                            __pyx_t_18 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_18)) __PYX_ERR(4, 277, __pyx_L29_error)
+                            __pyx_t_19 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_19)) __PYX_ERR(4, 279, __pyx_L30_error)
                           }
                           for (;;) {
-                            if (likely(!__pyx_t_18)) {
+                            if (likely(!__pyx_t_19)) {
                               if (likely(PyList_CheckExact(__pyx_t_2))) {
-                                if (__pyx_t_17 >= PyList_GET_SIZE(__pyx_t_2)) break;
+                                if (__pyx_t_18 >= PyList_GET_SIZE(__pyx_t_2)) break;
                                 #if CYTHON_COMPILING_IN_CPYTHON
-                                __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_17); __Pyx_INCREF(__pyx_t_4); __pyx_t_17++; if (unlikely(0 < 0)) __PYX_ERR(4, 277, __pyx_L29_error)
+                                __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_18); __Pyx_INCREF(__pyx_t_5); __pyx_t_18++; if (unlikely(0 < 0)) __PYX_ERR(4, 279, __pyx_L30_error)
                                 #else
-                                __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_17); __pyx_t_17++; if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 277, __pyx_L29_error)
-                                __Pyx_GOTREF(__pyx_t_4);
+                                __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_18); __pyx_t_18++; if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 279, __pyx_L30_error)
+                                __Pyx_GOTREF(__pyx_t_5);
                                 #endif
                               } else {
-                                if (__pyx_t_17 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+                                if (__pyx_t_18 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
                                 #if CYTHON_COMPILING_IN_CPYTHON
-                                __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_17); __Pyx_INCREF(__pyx_t_4); __pyx_t_17++; if (unlikely(0 < 0)) __PYX_ERR(4, 277, __pyx_L29_error)
+                                __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_18); __Pyx_INCREF(__pyx_t_5); __pyx_t_18++; if (unlikely(0 < 0)) __PYX_ERR(4, 279, __pyx_L30_error)
                                 #else
-                                __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_17); __pyx_t_17++; if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 277, __pyx_L29_error)
-                                __Pyx_GOTREF(__pyx_t_4);
+                                __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_18); __pyx_t_18++; if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 279, __pyx_L30_error)
+                                __Pyx_GOTREF(__pyx_t_5);
                                 #endif
                               }
                             } else {
-                              __pyx_t_4 = __pyx_t_18(__pyx_t_2);
-                              if (unlikely(!__pyx_t_4)) {
+                              __pyx_t_5 = __pyx_t_19(__pyx_t_2);
+                              if (unlikely(!__pyx_t_5)) {
                                 PyObject* exc_type = PyErr_Occurred();
                                 if (exc_type) {
                                   if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-                                  else __PYX_ERR(4, 277, __pyx_L29_error)
+                                  else __PYX_ERR(4, 279, __pyx_L30_error)
                                 }
                                 break;
                               }
-                              __Pyx_GOTREF(__pyx_t_4);
+                              __Pyx_GOTREF(__pyx_t_5);
                             }
-                            if ((likely(PyTuple_CheckExact(__pyx_t_4))) || (PyList_CheckExact(__pyx_t_4))) {
-                              PyObject* sequence = __pyx_t_4;
+                            if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
+                              PyObject* sequence = __pyx_t_5;
                               #if CYTHON_COMPILING_IN_CPYTHON
                               Py_ssize_t size = Py_SIZE(sequence);
                               #else
@@ -36697,74 +36747,74 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
                               if (unlikely(size != 2)) {
                                 if (size > 2) __Pyx_RaiseTooManyValuesError(2);
                                 else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                                __PYX_ERR(4, 277, __pyx_L29_error)
+                                __PYX_ERR(4, 279, __pyx_L30_error)
                               }
                               #if CYTHON_COMPILING_IN_CPYTHON
                               if (likely(PyTuple_CheckExact(sequence))) {
                                 __pyx_t_1 = PyTuple_GET_ITEM(sequence, 0); 
-                                __pyx_t_19 = PyTuple_GET_ITEM(sequence, 1); 
+                                __pyx_t_20 = PyTuple_GET_ITEM(sequence, 1); 
                               } else {
                                 __pyx_t_1 = PyList_GET_ITEM(sequence, 0); 
-                                __pyx_t_19 = PyList_GET_ITEM(sequence, 1); 
+                                __pyx_t_20 = PyList_GET_ITEM(sequence, 1); 
                               }
                               __Pyx_INCREF(__pyx_t_1);
-                              __Pyx_INCREF(__pyx_t_19);
+                              __Pyx_INCREF(__pyx_t_20);
                               #else
-                              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 277, __pyx_L29_error)
+                              __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 279, __pyx_L30_error)
                               __Pyx_GOTREF(__pyx_t_1);
-                              __pyx_t_19 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_19)) __PYX_ERR(4, 277, __pyx_L29_error)
-                              __Pyx_GOTREF(__pyx_t_19);
+                              __pyx_t_20 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_20)) __PYX_ERR(4, 279, __pyx_L30_error)
+                              __Pyx_GOTREF(__pyx_t_20);
                               #endif
-                              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                              __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                             } else {
                               Py_ssize_t index = -1;
-                              __pyx_t_20 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_20)) __PYX_ERR(4, 277, __pyx_L29_error)
-                              __Pyx_GOTREF(__pyx_t_20);
-                              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-                              __pyx_t_21 = Py_TYPE(__pyx_t_20)->tp_iternext;
-                              index = 0; __pyx_t_1 = __pyx_t_21(__pyx_t_20); if (unlikely(!__pyx_t_1)) goto __pyx_L43_unpacking_failed;
+                              __pyx_t_21 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_21)) __PYX_ERR(4, 279, __pyx_L30_error)
+                              __Pyx_GOTREF(__pyx_t_21);
+                              __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                              __pyx_t_22 = Py_TYPE(__pyx_t_21)->tp_iternext;
+                              index = 0; __pyx_t_1 = __pyx_t_22(__pyx_t_21); if (unlikely(!__pyx_t_1)) goto __pyx_L44_unpacking_failed;
                               __Pyx_GOTREF(__pyx_t_1);
-                              index = 1; __pyx_t_19 = __pyx_t_21(__pyx_t_20); if (unlikely(!__pyx_t_19)) goto __pyx_L43_unpacking_failed;
-                              __Pyx_GOTREF(__pyx_t_19);
-                              if (__Pyx_IternextUnpackEndCheck(__pyx_t_21(__pyx_t_20), 2) < 0) __PYX_ERR(4, 277, __pyx_L29_error)
-                              __pyx_t_21 = NULL;
-                              __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
-                              goto __pyx_L44_unpacking_done;
-                              __pyx_L43_unpacking_failed:;
-                              __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
-                              __pyx_t_21 = NULL;
+                              index = 1; __pyx_t_20 = __pyx_t_22(__pyx_t_21); if (unlikely(!__pyx_t_20)) goto __pyx_L44_unpacking_failed;
+                              __Pyx_GOTREF(__pyx_t_20);
+                              if (__Pyx_IternextUnpackEndCheck(__pyx_t_22(__pyx_t_21), 2) < 0) __PYX_ERR(4, 279, __pyx_L30_error)
+                              __pyx_t_22 = NULL;
+                              __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
+                              goto __pyx_L45_unpacking_done;
+                              __pyx_L44_unpacking_failed:;
+                              __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
+                              __pyx_t_22 = NULL;
                               if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-                              __PYX_ERR(4, 277, __pyx_L29_error)
-                              __pyx_L44_unpacking_done:;
+                              __PYX_ERR(4, 279, __pyx_L30_error)
+                              __pyx_L45_unpacking_done:;
                             }
                             __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_1);
                             __pyx_t_1 = 0;
-                            __Pyx_XDECREF_SET(__pyx_v_value, __pyx_t_19);
-                            __pyx_t_19 = 0;
+                            __Pyx_XDECREF_SET(__pyx_v_value, __pyx_t_20);
+                            __pyx_t_20 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":278
+                            /* "pcontainers/expiry_dict_impl.pxi":280
  *                         else:
  *                             for (key, value) in e:
  *                                 index_it.set_item_buf(key, s_expiry)             # <<<<<<<<<<<<<<
  *                                 values_it.set_item_buf(key, value)
  *                     for key in kwds:
  */
-                            __pyx_t_4 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 278, __pyx_L29_error)
-                            __Pyx_GOTREF(__pyx_t_4);
-                            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                            __pyx_t_5 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 280, __pyx_L30_error)
+                            __Pyx_GOTREF(__pyx_t_5);
+                            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":279
+                            /* "pcontainers/expiry_dict_impl.pxi":281
  *                             for (key, value) in e:
  *                                 index_it.set_item_buf(key, s_expiry)
  *                                 values_it.set_item_buf(key, value)             # <<<<<<<<<<<<<<
  *                     for key in kwds:
  *                         index_it.set_item_buf(key, s_expiry)
  */
-                            __pyx_t_4 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_v_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 279, __pyx_L29_error)
-                            __Pyx_GOTREF(__pyx_t_4);
-                            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                            __pyx_t_5 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_v_value); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 281, __pyx_L30_error)
+                            __Pyx_GOTREF(__pyx_t_5);
+                            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-                            /* "pcontainers/expiry_dict_impl.pxi":277
+                            /* "pcontainers/expiry_dict_impl.pxi":279
  *                                 values_it.set_item_buf(key, e[key])
  *                         else:
  *                             for (key, value) in e:             # <<<<<<<<<<<<<<
@@ -36774,9 +36824,9 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
                           }
                           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
                         }
-                        __pyx_L38:;
+                        __pyx_L39:;
 
-                        /* "pcontainers/expiry_dict_impl.pxi":271
+                        /* "pcontainers/expiry_dict_impl.pxi":273
  *             with values_it:
  *                 try:
  *                     if e is not None:             # <<<<<<<<<<<<<<
@@ -36785,55 +36835,55 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  */
                       }
 
-                      /* "pcontainers/expiry_dict_impl.pxi":280
+                      /* "pcontainers/expiry_dict_impl.pxi":282
  *                                 index_it.set_item_buf(key, s_expiry)
  *                                 values_it.set_item_buf(key, value)
  *                     for key in kwds:             # <<<<<<<<<<<<<<
  *                         index_it.set_item_buf(key, s_expiry)
  *                         values_it.set_item_buf(key, kwds[key])
  */
-                      __pyx_t_17 = 0;
-                      __pyx_t_4 = __Pyx_dict_iterator(__pyx_v_kwds, 1, ((PyObject *)NULL), (&__pyx_t_22), (&__pyx_t_23)); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 280, __pyx_L29_error)
-                      __Pyx_GOTREF(__pyx_t_4);
+                      __pyx_t_18 = 0;
+                      __pyx_t_5 = __Pyx_dict_iterator(__pyx_v_kwds, 1, ((PyObject *)NULL), (&__pyx_t_23), (&__pyx_t_24)); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 282, __pyx_L30_error)
+                      __Pyx_GOTREF(__pyx_t_5);
                       __Pyx_XDECREF(__pyx_t_2);
-                      __pyx_t_2 = __pyx_t_4;
-                      __pyx_t_4 = 0;
+                      __pyx_t_2 = __pyx_t_5;
+                      __pyx_t_5 = 0;
                       while (1) {
-                        __pyx_t_24 = __Pyx_dict_iter_next(__pyx_t_2, __pyx_t_22, &__pyx_t_17, &__pyx_t_4, NULL, NULL, __pyx_t_23);
-                        if (unlikely(__pyx_t_24 == 0)) break;
-                        if (unlikely(__pyx_t_24 == -1)) __PYX_ERR(4, 280, __pyx_L29_error)
-                        __Pyx_GOTREF(__pyx_t_4);
-                        __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_4);
-                        __pyx_t_4 = 0;
+                        __pyx_t_25 = __Pyx_dict_iter_next(__pyx_t_2, __pyx_t_23, &__pyx_t_18, &__pyx_t_5, NULL, NULL, __pyx_t_24);
+                        if (unlikely(__pyx_t_25 == 0)) break;
+                        if (unlikely(__pyx_t_25 == -1)) __PYX_ERR(4, 282, __pyx_L30_error)
+                        __Pyx_GOTREF(__pyx_t_5);
+                        __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_5);
+                        __pyx_t_5 = 0;
 
-                        /* "pcontainers/expiry_dict_impl.pxi":281
+                        /* "pcontainers/expiry_dict_impl.pxi":283
  *                                 values_it.set_item_buf(key, value)
  *                     for key in kwds:
  *                         index_it.set_item_buf(key, s_expiry)             # <<<<<<<<<<<<<<
  *                         values_it.set_item_buf(key, kwds[key])
  *                 except:
  */
-                        __pyx_t_4 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 281, __pyx_L29_error)
-                        __Pyx_GOTREF(__pyx_t_4);
-                        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                        __pyx_t_5 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_index_it, __pyx_v_key, __pyx_v_s_expiry); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 283, __pyx_L30_error)
+                        __Pyx_GOTREF(__pyx_t_5);
+                        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-                        /* "pcontainers/expiry_dict_impl.pxi":282
+                        /* "pcontainers/expiry_dict_impl.pxi":284
  *                     for key in kwds:
  *                         index_it.set_item_buf(key, s_expiry)
  *                         values_it.set_item_buf(key, kwds[key])             # <<<<<<<<<<<<<<
  *                 except:
  *                     index_it.set_rollback()
  */
-                        __pyx_t_4 = __Pyx_PyDict_GetItem(__pyx_v_kwds, __pyx_v_key); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 282, __pyx_L29_error)
-                        __Pyx_GOTREF(__pyx_t_4);
-                        __pyx_t_19 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_t_4); if (unlikely(!__pyx_t_19)) __PYX_ERR(4, 282, __pyx_L29_error)
-                        __Pyx_GOTREF(__pyx_t_19);
-                        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-                        __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
+                        __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_kwds, __pyx_v_key); if (unlikely(!__pyx_t_5)) __PYX_ERR(4, 284, __pyx_L30_error)
+                        __Pyx_GOTREF(__pyx_t_5);
+                        __pyx_t_20 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_item_buf(__pyx_v_values_it, __pyx_v_key, __pyx_t_5); if (unlikely(!__pyx_t_20)) __PYX_ERR(4, 284, __pyx_L30_error)
+                        __Pyx_GOTREF(__pyx_t_20);
+                        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                        __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
                       }
                       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-                      /* "pcontainers/expiry_dict_impl.pxi":270
+                      /* "pcontainers/expiry_dict_impl.pxi":272
  *         with index_it:
  *             with values_it:
  *                 try:             # <<<<<<<<<<<<<<
@@ -36841,19 +36891,19 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  *                         if hasattr(e, 'keys'):
  */
                     }
-                    __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-                    __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
                     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
-                    goto __pyx_L36_try_end;
-                    __pyx_L29_error:;
+                    __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
+                    __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
+                    goto __pyx_L37_try_end;
+                    __pyx_L30_error:;
                     __Pyx_PyThreadState_assign
-                    __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
+                    __Pyx_XDECREF(__pyx_t_21); __pyx_t_21 = 0;
                     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-                    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-                    __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+                    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+                    __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
                     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-                    /* "pcontainers/expiry_dict_impl.pxi":283
+                    /* "pcontainers/expiry_dict_impl.pxi":285
  *                         index_it.set_item_buf(key, s_expiry)
  *                         values_it.set_item_buf(key, kwds[key])
  *                 except:             # <<<<<<<<<<<<<<
@@ -36862,49 +36912,49 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  */
                     /*except:*/ {
                       __Pyx_AddTraceback("pcontainers._pdict.ExpiryDict.update", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                      if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_19, &__pyx_t_4) < 0) __PYX_ERR(4, 283, __pyx_L31_except_error)
+                      if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_20, &__pyx_t_5) < 0) __PYX_ERR(4, 285, __pyx_L32_except_error)
                       __Pyx_GOTREF(__pyx_t_2);
-                      __Pyx_GOTREF(__pyx_t_19);
-                      __Pyx_GOTREF(__pyx_t_4);
+                      __Pyx_GOTREF(__pyx_t_20);
+                      __Pyx_GOTREF(__pyx_t_5);
 
-                      /* "pcontainers/expiry_dict_impl.pxi":284
+                      /* "pcontainers/expiry_dict_impl.pxi":286
  *                         values_it.set_item_buf(key, kwds[key])
  *                 except:
  *                     index_it.set_rollback()             # <<<<<<<<<<<<<<
  *                     values_it.set_rollback()
  *                     raise
  */
-                      __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_rollback(__pyx_v_index_it); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 284, __pyx_L31_except_error)
+                      __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_index_it->__pyx_base.__pyx_vtab)->set_rollback(__pyx_v_index_it); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 286, __pyx_L32_except_error)
                       __Pyx_GOTREF(__pyx_t_1);
                       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-                      /* "pcontainers/expiry_dict_impl.pxi":285
+                      /* "pcontainers/expiry_dict_impl.pxi":287
  *                 except:
  *                     index_it.set_rollback()
  *                     values_it.set_rollback()             # <<<<<<<<<<<<<<
  *                     raise
  * 
  */
-                      __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_rollback(__pyx_v_values_it); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 285, __pyx_L31_except_error)
+                      __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_PRawDictIterator *)__pyx_v_values_it->__pyx_base.__pyx_vtab)->set_rollback(__pyx_v_values_it); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 287, __pyx_L32_except_error)
                       __Pyx_GOTREF(__pyx_t_1);
                       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-                      /* "pcontainers/expiry_dict_impl.pxi":286
+                      /* "pcontainers/expiry_dict_impl.pxi":288
  *                     index_it.set_rollback()
  *                     values_it.set_rollback()
  *                     raise             # <<<<<<<<<<<<<<
  * 
  */
                       __Pyx_GIVEREF(__pyx_t_2);
-                      __Pyx_GIVEREF(__pyx_t_19);
-                      __Pyx_XGIVEREF(__pyx_t_4);
-                      __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_19, __pyx_t_4);
-                      __pyx_t_2 = 0; __pyx_t_19 = 0; __pyx_t_4 = 0; 
-                      __PYX_ERR(4, 286, __pyx_L31_except_error)
+                      __Pyx_GIVEREF(__pyx_t_20);
+                      __Pyx_XGIVEREF(__pyx_t_5);
+                      __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_20, __pyx_t_5);
+                      __pyx_t_2 = 0; __pyx_t_20 = 0; __pyx_t_5 = 0; 
+                      __PYX_ERR(4, 288, __pyx_L32_except_error)
                     }
-                    __pyx_L31_except_error:;
+                    __pyx_L32_except_error:;
 
-                    /* "pcontainers/expiry_dict_impl.pxi":270
+                    /* "pcontainers/expiry_dict_impl.pxi":272
  *         with index_it:
  *             with values_it:
  *                 try:             # <<<<<<<<<<<<<<
@@ -36912,15 +36962,15 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  *                         if hasattr(e, 'keys'):
  */
                     __Pyx_PyThreadState_assign
-                    __Pyx_XGIVEREF(__pyx_t_12);
-                    __Pyx_XGIVEREF(__pyx_t_13);
                     __Pyx_XGIVEREF(__pyx_t_14);
-                    __Pyx_ExceptionReset(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-                    goto __pyx_L21_error;
-                    __pyx_L36_try_end:;
+                    __Pyx_XGIVEREF(__pyx_t_15);
+                    __Pyx_XGIVEREF(__pyx_t_16);
+                    __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+                    goto __pyx_L22_error;
+                    __pyx_L37_try_end:;
                   }
 
-                  /* "pcontainers/expiry_dict_impl.pxi":269
+                  /* "pcontainers/expiry_dict_impl.pxi":271
  * 
  *         with index_it:
  *             with values_it:             # <<<<<<<<<<<<<<
@@ -36928,172 +36978,172 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
  *                     if e is not None:
  */
                 }
-                __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-                __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
                 __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
-                goto __pyx_L28_try_end;
-                __pyx_L21_error:;
+                __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
+                __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
+                goto __pyx_L29_try_end;
+                __pyx_L22_error:;
                 __Pyx_PyThreadState_assign
-                __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
+                __Pyx_XDECREF(__pyx_t_21); __pyx_t_21 = 0;
                 __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
                 __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-                __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
-                __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
+                __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("pcontainers._pdict.ExpiryDict.update", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_19, &__pyx_t_2) < 0) __PYX_ERR(4, 269, __pyx_L23_except_error)
-                  __Pyx_GOTREF(__pyx_t_4);
-                  __Pyx_GOTREF(__pyx_t_19);
+                  if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_20, &__pyx_t_2) < 0) __PYX_ERR(4, 271, __pyx_L24_except_error)
+                  __Pyx_GOTREF(__pyx_t_5);
+                  __Pyx_GOTREF(__pyx_t_20);
                   __Pyx_GOTREF(__pyx_t_2);
-                  __pyx_t_1 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_19, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 269, __pyx_L23_except_error)
+                  __pyx_t_1 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_20, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 271, __pyx_L24_except_error)
                   __Pyx_GOTREF(__pyx_t_1);
-                  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_1, NULL);
-                  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+                  __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_1, NULL);
+                  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
                   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                  if (unlikely(!__pyx_t_14)) __PYX_ERR(4, 269, __pyx_L23_except_error)
-                  __Pyx_GOTREF(__pyx_t_14);
-                  __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_14);
-                  __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-                  if (__pyx_t_15 < 0) __PYX_ERR(4, 269, __pyx_L23_except_error)
-                  __pyx_t_16 = ((!(__pyx_t_15 != 0)) != 0);
-                  if (__pyx_t_16) {
-                    __Pyx_GIVEREF(__pyx_t_4);
-                    __Pyx_GIVEREF(__pyx_t_19);
+                  if (unlikely(!__pyx_t_16)) __PYX_ERR(4, 271, __pyx_L24_except_error)
+                  __Pyx_GOTREF(__pyx_t_16);
+                  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_16);
+                  __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
+                  if (__pyx_t_3 < 0) __PYX_ERR(4, 271, __pyx_L24_except_error)
+                  __pyx_t_17 = ((!(__pyx_t_3 != 0)) != 0);
+                  if (__pyx_t_17) {
+                    __Pyx_GIVEREF(__pyx_t_5);
+                    __Pyx_GIVEREF(__pyx_t_20);
                     __Pyx_XGIVEREF(__pyx_t_2);
-                    __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_19, __pyx_t_2);
-                    __pyx_t_4 = 0; __pyx_t_19 = 0; __pyx_t_2 = 0; 
-                    __PYX_ERR(4, 269, __pyx_L23_except_error)
+                    __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_20, __pyx_t_2);
+                    __pyx_t_5 = 0; __pyx_t_20 = 0; __pyx_t_2 = 0; 
+                    __PYX_ERR(4, 271, __pyx_L24_except_error)
                   }
-                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-                  __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
+                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                  __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
                   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-                  goto __pyx_L22_exception_handled;
+                  goto __pyx_L23_exception_handled;
                 }
-                __pyx_L23_except_error:;
+                __pyx_L24_except_error:;
                 __Pyx_PyThreadState_assign
-                __Pyx_XGIVEREF(__pyx_t_9);
-                __Pyx_XGIVEREF(__pyx_t_10);
                 __Pyx_XGIVEREF(__pyx_t_11);
-                __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
-                goto __pyx_L7_error;
-                __pyx_L22_exception_handled:;
+                __Pyx_XGIVEREF(__pyx_t_12);
+                __Pyx_XGIVEREF(__pyx_t_13);
+                __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+                goto __pyx_L8_error;
+                __pyx_L23_exception_handled:;
                 __Pyx_PyThreadState_assign
-                __Pyx_XGIVEREF(__pyx_t_9);
-                __Pyx_XGIVEREF(__pyx_t_10);
                 __Pyx_XGIVEREF(__pyx_t_11);
-                __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
-                __pyx_L28_try_end:;
+                __Pyx_XGIVEREF(__pyx_t_12);
+                __Pyx_XGIVEREF(__pyx_t_13);
+                __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+                __pyx_L29_try_end:;
               }
             }
             /*finally:*/ {
               /*normal exit:*/{
-                if (__pyx_t_8) {
-                  __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_tuple__54, NULL);
-                  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                  if (unlikely(!__pyx_t_11)) __PYX_ERR(4, 269, __pyx_L7_error)
-                  __Pyx_GOTREF(__pyx_t_11);
-                  __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+                if (__pyx_t_10) {
+                  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_tuple__54, NULL);
+                  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+                  if (unlikely(!__pyx_t_13)) __PYX_ERR(4, 271, __pyx_L8_error)
+                  __Pyx_GOTREF(__pyx_t_13);
+                  __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
                 }
-                goto __pyx_L20;
+                goto __pyx_L21;
               }
-              __pyx_L20:;
+              __pyx_L21:;
             }
-            goto __pyx_L52;
-            __pyx_L15_error:;
-            __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-            goto __pyx_L7_error;
-            __pyx_L52:;
+            goto __pyx_L53;
+            __pyx_L16_error:;
+            __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+            goto __pyx_L8_error;
+            __pyx_L53:;
           }
 
-          /* "pcontainers/expiry_dict_impl.pxi":268
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))
+          /* "pcontainers/expiry_dict_impl.pxi":270
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
  * 
  *         with index_it:             # <<<<<<<<<<<<<<
  *             with values_it:
  *                 try:
  */
         }
-        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        goto __pyx_L14_try_end;
-        __pyx_L7_error:;
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+        goto __pyx_L15_try_end;
+        __pyx_L8_error:;
         __Pyx_PyThreadState_assign
-        __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
+        __Pyx_XDECREF(__pyx_t_21); __pyx_t_21 = 0;
         __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("pcontainers._pdict.ExpiryDict.update", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_19, &__pyx_t_4) < 0) __PYX_ERR(4, 268, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_20, &__pyx_t_5) < 0) __PYX_ERR(4, 270, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __Pyx_GOTREF(__pyx_t_19);
-          __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_1 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_19, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 268, __pyx_L9_except_error)
+          __Pyx_GOTREF(__pyx_t_20);
+          __Pyx_GOTREF(__pyx_t_5);
+          __pyx_t_1 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_20, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 270, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, NULL);
-          __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+          __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_1, NULL);
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(4, 268, __pyx_L9_except_error)
-          __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_8);
-          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-          if (__pyx_t_16 < 0) __PYX_ERR(4, 268, __pyx_L9_except_error)
-          __pyx_t_15 = ((!(__pyx_t_16 != 0)) != 0);
-          if (__pyx_t_15) {
+          if (unlikely(!__pyx_t_10)) __PYX_ERR(4, 270, __pyx_L10_except_error)
+          __Pyx_GOTREF(__pyx_t_10);
+          __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_10);
+          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+          if (__pyx_t_17 < 0) __PYX_ERR(4, 270, __pyx_L10_except_error)
+          __pyx_t_3 = ((!(__pyx_t_17 != 0)) != 0);
+          if (__pyx_t_3) {
             __Pyx_GIVEREF(__pyx_t_2);
-            __Pyx_GIVEREF(__pyx_t_19);
-            __Pyx_XGIVEREF(__pyx_t_4);
-            __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_19, __pyx_t_4);
-            __pyx_t_2 = 0; __pyx_t_19 = 0; __pyx_t_4 = 0; 
-            __PYX_ERR(4, 268, __pyx_L9_except_error)
+            __Pyx_GIVEREF(__pyx_t_20);
+            __Pyx_XGIVEREF(__pyx_t_5);
+            __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_20, __pyx_t_5);
+            __pyx_t_2 = 0; __pyx_t_20 = 0; __pyx_t_5 = 0; 
+            __PYX_ERR(4, 270, __pyx_L10_except_error)
           }
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          goto __pyx_L8_exception_handled;
+          __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
+          __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+          goto __pyx_L9_exception_handled;
         }
-        __pyx_L9_except_error:;
+        __pyx_L10_except_error:;
         __Pyx_PyThreadState_assign
-        __Pyx_XGIVEREF(__pyx_t_5);
-        __Pyx_XGIVEREF(__pyx_t_6);
         __Pyx_XGIVEREF(__pyx_t_7);
-        __Pyx_ExceptionReset(__pyx_t_5, __pyx_t_6, __pyx_t_7);
+        __Pyx_XGIVEREF(__pyx_t_8);
+        __Pyx_XGIVEREF(__pyx_t_9);
+        __Pyx_ExceptionReset(__pyx_t_7, __pyx_t_8, __pyx_t_9);
         goto __pyx_L1_error;
-        __pyx_L8_exception_handled:;
+        __pyx_L9_exception_handled:;
         __Pyx_PyThreadState_assign
-        __Pyx_XGIVEREF(__pyx_t_5);
-        __Pyx_XGIVEREF(__pyx_t_6);
         __Pyx_XGIVEREF(__pyx_t_7);
-        __Pyx_ExceptionReset(__pyx_t_5, __pyx_t_6, __pyx_t_7);
-        __pyx_L14_try_end:;
+        __Pyx_XGIVEREF(__pyx_t_8);
+        __Pyx_XGIVEREF(__pyx_t_9);
+        __Pyx_ExceptionReset(__pyx_t_7, __pyx_t_8, __pyx_t_9);
+        __pyx_L15_try_end:;
       }
     }
     /*finally:*/ {
       /*normal exit:*/{
-        if (__pyx_t_3) {
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__55, NULL);
-          __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-          if (unlikely(!__pyx_t_7)) __PYX_ERR(4, 268, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_7);
-          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        if (__pyx_t_6) {
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_tuple__55, NULL);
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(4, 270, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
-        goto __pyx_L6;
+        goto __pyx_L7;
       }
-      __pyx_L6:;
+      __pyx_L7:;
     }
-    goto __pyx_L56;
-    __pyx_L3_error:;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L57;
+    __pyx_L4_error:;
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     goto __pyx_L1_error;
-    __pyx_L56:;
+    __pyx_L57:;
   }
 
   /* "pcontainers/expiry_dict_impl.pxi":263
  *             return False
  * 
- *     def update(self, e=None, **kwds):             # <<<<<<<<<<<<<<
+ *     def update(self, e=None, time_t expiry=0, **kwds):             # <<<<<<<<<<<<<<
  *         cdef PRawDictIterator index_it = PRawDictIterator(self.index_dict)
  *         cdef PRawDictIterator values_it = PRawDictIterator(self.values_dict)
  */
@@ -37104,9 +37154,9 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_37update(struct __p
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_19);
+  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_20);
+  __Pyx_XDECREF(__pyx_t_21);
   __Pyx_AddTraceback("pcontainers._pdict.ExpiryDict.update", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -53859,25 +53909,25 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__53);
   __Pyx_GIVEREF(__pyx_tuple__53);
 
-  /* "pcontainers/expiry_dict_impl.pxi":269
+  /* "pcontainers/expiry_dict_impl.pxi":271
  * 
  *         with index_it:
  *             with values_it:             # <<<<<<<<<<<<<<
  *                 try:
  *                     if e is not None:
  */
-  __pyx_tuple__54 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__54)) __PYX_ERR(4, 269, __pyx_L1_error)
+  __pyx_tuple__54 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__54)) __PYX_ERR(4, 271, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__54);
   __Pyx_GIVEREF(__pyx_tuple__54);
 
-  /* "pcontainers/expiry_dict_impl.pxi":268
- *         s_expiry = bytes(self.default_expiry + c_time(NULL))
+  /* "pcontainers/expiry_dict_impl.pxi":270
+ *         s_expiry = b"none" if expiry <= 0 else bytes(expiry + c_time(NULL))
  * 
  *         with index_it:             # <<<<<<<<<<<<<<
  *             with values_it:
  *                 try:
  */
-  __pyx_tuple__55 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__55)) __PYX_ERR(4, 268, __pyx_L1_error)
+  __pyx_tuple__55 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__55)) __PYX_ERR(4, 270, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__55);
   __Pyx_GIVEREF(__pyx_tuple__55);
 

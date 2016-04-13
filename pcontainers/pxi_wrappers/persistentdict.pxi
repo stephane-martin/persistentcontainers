@@ -1,4 +1,4 @@
-cdef extern from "persistentdict.h" namespace "quiet" nogil:
+cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" nogil:
 
     # noinspection PyPep8Naming
     cppclass cppPersistentDict "quiet::PersistentDict":

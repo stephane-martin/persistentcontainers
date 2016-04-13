@@ -10,5 +10,6 @@ cdef class ExpiryDict(object):
     cpdef pop(self, key, default=?)
     cpdef popitem(self)
     cpdef prune_expired(self)
+
     cdef object stopping
     cdef object pruning_thread
