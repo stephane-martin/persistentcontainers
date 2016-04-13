@@ -6,11 +6,10 @@ cdef class PRawDictAbstractIterator(object):
         self.key = None
         if key is not None:
             self.key = d.key_chain.dumps(key)
-            if isinstance(self.key, (bytes, unicode, MBufferIO)):
-                if len(self.key) == 0:
-                    raise EmptyKey()
-                if len(self.key) > 511:
-                    raise BadValSize("key is too long")
+            if len(self.key) == 0:
+                raise EmptyKey()
+            if len(self.key) > 511:
+                raise BadValSize("key is too long")
 
     def __dealloc__(self):
         self.cpp_iterator_ptr.reset()

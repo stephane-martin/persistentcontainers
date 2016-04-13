@@ -2,6 +2,8 @@
 cdef class Filter(object):
     cdef dumps(self, obj)
     cdef loads(self, obj)
+    cpdef pydumps(self, obj)
+    cpdef pyloads(self, obj)
 
 cdef class Serializer(Filter):
     pass
@@ -57,8 +59,6 @@ cdef class Chain(Filter):
     cdef readonly Signer signer
     cdef readonly Compresser compresser
 
+
 cdef class NoneChain(Chain):
-    cdef inline dumps(self, obj):
-        return obj
-    cdef inline loads(self, obj):
-        return obj.tobytes() if isinstance(obj, MBufferIO) else obj
+    pass

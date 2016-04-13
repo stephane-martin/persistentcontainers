@@ -5,6 +5,11 @@ cdef class Filter(object):
         raise NotImplementedError()
     cdef loads(self, obj):
         raise NotImplementedError()
+    cpdef pydumps(self, obj):
+        return self.dumps(obj)
+    cpdef pyloads(self, obj):
+        return self.loads(obj)
+
 
 # noinspection PyAbstractClass
 cdef class Serializer(Filter):
@@ -12,8 +17,11 @@ cdef class Serializer(Filter):
 
 
 cdef class NoneSerializer(Serializer):
-    # todo: dumps should write also for int, floats, ...
     cdef dumps(self, obj):
+        if isinstance(obj, Number):
+            obj = bytes(obj)
+        if PyUnicode_Check(obj):
+            obj = PyUnicode_AsUTF8String(obj)
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -155,6 +163,7 @@ cdef class NoneSigner(Signer):
             obj = MBufferIO(obj)
         obj.seek(0)
         return obj
+
     cdef loads(self, obj):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
@@ -267,6 +276,8 @@ cdef class LZ4Compresser(Compresser):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         compressed = MBufferIO()
+        if len(obj) == 0:
+            return compressed
         with self.lz4_module.Compressor(compressed, block_size_id=self.block_size_id, block_mode_linked=self.block_mode_linked,
                                         checksum=self.checksum, autoflush=True, level=self.level) as c:
             try:
@@ -281,6 +292,8 @@ cdef class LZ4Compresser(Compresser):
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         decompressed = MBufferIO()
+        if len(obj) == 0:
+            return decompressed
         for chunk in self.lz4_module.Decompressor(obj):
            decompressed.write(chunk)
         decompressed.seek(0)
@@ -329,7 +342,6 @@ cdef class Chain(Filter):
                 (<Chain> self).compresser != (<Chain> other).compresser
         else:
             raise ValueError("unsupported operation")
-
 
 
 cdef class NoneChain(Chain):

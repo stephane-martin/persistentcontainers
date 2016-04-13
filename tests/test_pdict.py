@@ -12,7 +12,7 @@ import pytest
 from pcontainers import PRawDict, NotFound, EmptyKey, set_logger, BadValSize, EmptyDatabase, LmdbError, PDict
 from pcontainers import LmdbOptions
 from pcontainers import Chain
-from pcontainers import PickleSerializer, JsonSerializer, MessagePackSerializer
+from pcontainers import PickleSerializer, JsonSerializer, MessagePackSerializer, NoneSerializer
 from pcontainers import HMACSigner, NoneSigner
 from pcontainers import SnappyCompresser, LZ4Compresser, NoneCompresser
 
@@ -20,9 +20,10 @@ from pcontainers import SnappyCompresser, LZ4Compresser, NoneCompresser
 set_logger()
 
 
-# todo: none serializer
-@pytest.fixture(params=['key_json', 'key_pickle', 'key_messagepack'])
+@pytest.fixture(params=['key_none', 'key_json', 'key_pickle', 'key_messagepack'])
 def key_serializer(request):
+    if request.param == "key_none":
+        return NoneSerializer()
     if request.param == "key_json":
         return JsonSerializer()
     if request.param == "key_pickle":
@@ -31,9 +32,10 @@ def key_serializer(request):
         return MessagePackSerializer()
 
 
-# todo: none serializer
-@pytest.fixture(params=['value_json', 'value_pickle', 'value_messagepack'])
+@pytest.fixture(params=['value_none', 'value_json', 'value_pickle', 'value_messagepack'])
 def value_serializer(request):
+    if request.param == "value_none":
+        return NoneSerializer()
     if request.param == "value_json":
         return JsonSerializer()
     if request.param == "value_pickle":
@@ -767,16 +769,26 @@ class TestPDict(object):
             val = temp_all_dict[u'foo']
 
     def test_getitem_empty_key(self, temp_all_dict):
-        with pytest.raises(NotFound):
-            val = temp_all_dict[u'']
+        if isinstance(temp_all_dict.key_chain.serializer, NoneSerializer) and isinstance(temp_all_dict.key_chain.signer, NoneSigner):
+            with pytest.raises(EmptyKey):
+                val = temp_all_dict[u'']
+        else:
+            with pytest.raises(NotFound):
+                val = temp_all_dict[u'']
 
     def test_get_with_empty_dict(self, temp_all_dict):
         assert (temp_all_dict.get(u'foo') is None)
         assert (temp_all_dict.get(u'foo', u'bar') == u'bar')
 
     def test_get_empty_key(self, temp_all_dict):
-        val = temp_all_dict.get(u'')
-        val = temp_all_dict.get(u'', u'foo')
+        if isinstance(temp_all_dict.key_chain.serializer, NoneSerializer) and isinstance(temp_all_dict.key_chain.signer, NoneSigner):
+            with pytest.raises(EmptyKey):
+                val = temp_all_dict.get(u'')
+            with pytest.raises(EmptyKey):
+                val = temp_all_dict.get(u'', u'foo')
+        else:
+            val = temp_all_dict.get(u'')
+            val = temp_all_dict.get(u'', u'foo')
 
     def test_get_set_only_one(self, temp_all_dict):
         assert (temp_all_dict.get(u'foo') is None)
@@ -806,11 +818,19 @@ class TestPDict(object):
         assert (set(temp_all_dict.noitervalues()) == all_values)
 
     def test_setitem_empty_key_or_value(self, temp_all_dict):
-        temp_all_dict[u''] = u'bla'
+        if isinstance(temp_all_dict.key_chain.serializer, NoneSerializer) and isinstance(temp_all_dict.key_chain.signer, NoneSigner):
+            with pytest.raises(EmptyKey):
+                temp_all_dict[u''] = u'bla'
+        else:
+            temp_all_dict[u''] = u'bla'
 
     def test_delitem_empty(self, temp_all_dict):
-        with pytest.raises(NotFound):
-            del temp_all_dict[u'']
+        if isinstance(temp_all_dict.key_chain.serializer, NoneSerializer) and isinstance(temp_all_dict.key_chain.signer, NoneSigner):
+            with pytest.raises(EmptyKey):
+                del temp_all_dict[u'']
+        else:
+            with pytest.raises(NotFound):
+                del temp_all_dict[u'']
         with pytest.raises(NotFound):
             del temp_all_dict[u'foo']
 

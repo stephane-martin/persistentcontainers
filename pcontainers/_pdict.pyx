@@ -15,7 +15,7 @@ import threading
 from time import sleep
 from queue import Empty
 from os.path import join
-import werkzeug.local
+from numbers import Number
 
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
