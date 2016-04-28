@@ -17,6 +17,8 @@
 #include <boost/atomic.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/lockable_adapter.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -39,7 +41,13 @@ using std::map;
 using std::exception;
 using boost::conditional;
 using boost::mutex;
+using boost::shared_mutex;
+using boost::unique_lock;
+using boost::shared_lock;
+using boost::upgrade_to_unique_lock;
+using boost::upgrade_lock;
 using boost::lock_guard;
+using boost::shared_lockable_adapter;
 using boost::shared_ptr;
 using boost::enable_shared_from_this;
 using Bstrlib::CBString;
@@ -49,6 +57,7 @@ using namespace utils;
 
 class PersistentDict: public enable_shared_from_this<PersistentDict> {
 friend class PersistentQueue;
+friend class BufferedPersistentDict;
 
 private:
     PersistentDict& operator=(const PersistentDict&);
@@ -100,8 +109,8 @@ public:
     void copy_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
     void move_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1);
 
-    void erase(const CBString& key);
-    void erase(MDB_val key);
+    bool erase(const CBString& key);
+    bool erase(MDB_val key);
 
     vector<CBString> erase_interval(const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1);
 
@@ -207,6 +216,7 @@ public:
 
     CBString operator[] (const CBString& key) const;
     CBString at(const CBString& key) const { return at(make_mdb_val(key)); }
+    // todo: at, pop, contains, erase methods with iterator of keys
     CBString at(MDB_val k) const;
     CBString pop(MDB_val k);
     CBString pop(const CBString& key) { return pop(make_mdb_val(key)); }
@@ -312,23 +322,28 @@ public:
         }
     }; // end class insert_iterator
 
-    class abstract_iterator {
+    class abstract_iterator: public shared_lockable_adapter<shared_mutex> {
     protected:
         shared_ptr<environment::transaction::cursor> cursor;
         shared_ptr<environment::transaction> txn;
         bool reached_end;
         bool reached_beginning;
-        mutex lock;
 
     public:
-        abstract_iterator(): cursor(), txn(), reached_end(false), reached_beginning(false), lock() { }
+        abstract_iterator(): cursor(), txn(), reached_end(false), reached_beginning(false) { }
         virtual ~abstract_iterator() {
             cursor.reset();
             txn.reset();
         }
         virtual size_t size() const = 0;
-        virtual bool has_reached_end() const { return reached_end; };
-        virtual bool has_reached_beginning() const { return reached_beginning; }
+        virtual bool has_reached_end() const {
+            shared_lock<shared_mutex> lock(lockable());
+            return reached_end;
+        }
+        virtual bool has_reached_beginning() const {
+            shared_lock<shared_mutex> lock(lockable());
+            return reached_beginning;
+        }
         virtual void set_rollback(bool val=true) { txn->set_rollback(val); }
         virtual CBString get_key() const = 0;
         virtual MDB_val get_key_buffer() const = 0;
@@ -338,11 +353,15 @@ public:
         virtual pair<MDB_val, MDB_val> get_item_buffer() const = 0;
 
         virtual abstract_iterator& operator++() {
-            int res = 0;
-            if (has_reached_end() || !cursor) {
+            if (!cursor) {
                 return *this;
             }
-            lock_guard<mutex> guard(lock);
+            upgrade_lock<shared_mutex> lock(lockable());
+            if (reached_end) {
+                return *this;
+            }
+            upgrade_to_unique_lock<shared_mutex> ulock(lock);
+            int res = 0;
             if (reached_beginning) {
                 res = cursor->first();
             } else {
@@ -356,11 +375,15 @@ public:
         }
 
         virtual abstract_iterator& operator--() {
-            int res = 0;
-            if (has_reached_beginning() || !cursor) {
+            if (!cursor) {
                 return *this;
             }
-            lock_guard<mutex> guard(lock);
+            upgrade_lock<shared_mutex> lock(lockable());
+            if (reached_beginning) {
+                return *this;
+            }
+            upgrade_to_unique_lock<shared_mutex> ulock(lock);
+            int res = 0;
             if (reached_end) {
                 res = cursor->last();
             } else {
@@ -374,9 +397,14 @@ public:
         }
 
         virtual abstract_iterator& operator++(int) { return this->operator++(); }
+
         virtual abstract_iterator& operator--(int) { return this->operator--(); }
 
         virtual void set_position(MDB_val key) {
+            if (!cursor) {
+                return;
+            }
+            unique_lock<shared_mutex> lock(lockable());
             if (key.mv_size == 0 || key.mv_data == NULL) {
                 reached_end = cursor->first() == MDB_NOTFOUND;
             } else {
@@ -385,6 +413,10 @@ public:
         }
 
         virtual void set_range(MDB_val key) {
+            if (!cursor) {
+                return;
+            }
+            unique_lock<shared_mutex> lock(lockable());
             if (key.mv_size == 0 || key.mv_data == NULL) {
                 reached_end = cursor->first() == MDB_NOTFOUND;
             } else {
@@ -446,6 +478,7 @@ public:
         tmpl_iterator(BOOST_RV_REF(tmpl_iterator) other):
             abstract_iterator(), initialized(false), ro(true) {
             if (other) {
+                unique_lock<shared_mutex> lock(other.lockable());
                 other.initialized.store(false);
                 swap(other);
                 initialized.store(true);
@@ -454,6 +487,9 @@ public:
 
         // move assignment
         tmpl_iterator& operator=(BOOST_RV_REF(tmpl_iterator) other) {
+            boost::lock(lockable(), other.lockable());
+            unique_lock<shared_mutex> lock_self(lockable(), boost::adopt_lock);
+            unique_lock<shared_mutex> lock_other(other.lockable(), boost::adopt_lock);
             initialized.store(false);
             ro = true;
             reached_end = false;
@@ -484,7 +520,8 @@ public:
             if (!*this) {
                 return true;
             }
-
+            shared_lock<shared_mutex> lock_self(lockable());
+            shared_lock<shared_mutex> lock_other(other.lockable());
             if (
                 (reached_end != other.reached_end) ||
                 (reached_beginning != other.reached_beginning) ||
@@ -518,6 +555,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -530,6 +568,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -542,6 +581,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -554,6 +594,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -566,6 +607,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -579,6 +621,7 @@ public:
             if (!*this) {
                 BOOST_THROW_EXCEPTION(not_initialized());
             }
+            shared_lock<shared_mutex> lock(lockable());
             if (reached_end || reached_beginning) {
                 BOOST_THROW_EXCEPTION(mdb_notfound());
             }
@@ -836,8 +879,9 @@ public:
         void set_key_value(const CBString& key, const CBString& value) { set_key_value(make_mdb_val(key), make_mdb_val(value)); }
         void append_key_value(MDB_val key, MDB_val value);
         void append_key_value(const CBString& key, const CBString& value) { append_key_value(make_mdb_val(key), make_mdb_val(value)); }
-        void del();
-        void del(MDB_val key);
+        bool del();
+        bool del(MDB_val key);
+        bool del(const CBString& key) { return del(make_mdb_val(key)); }
 
     };
 

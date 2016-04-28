@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 cdef class LmdbOptions(object):
     def __init__(self, fixed_map=False, no_subdir=False, read_only=False, write_map=False, no_meta_sync=False,

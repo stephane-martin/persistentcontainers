@@ -3,7 +3,7 @@
 
 #include <utility>
 #include <boost/move/move.hpp>
-
+#include <boost/thread/future.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
 #include <boost/atomic.hpp>
 #include <bstrlib/bstrwrap.h>
@@ -260,9 +260,76 @@ public:
     PyFunctionOutputIterator& operator=(const CBString& s);
     PyFunctionOutputIterator& operator=(const pair<const CBString, CBString>& p);
 
+};
 
+template <typename T>
+class PyFutureCBCB {
+protected:
+    PyNewRef pyfunction;
+public:
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !bool(pyfunction); }
+
+    PyFutureCBCB(): pyfunction() { }
+
+    explicit PyFutureCBCB(PyObject* obj): pyfunction(obj) {
+        if (obj) {
+            GilWrapper gil;
+            {
+                ++pyfunction;
+            }
+        }
+    }
+
+    ~PyFutureCBCB() {
+        if (pyfunction) {
+            GilWrapper gil;
+            {
+                pyfunction.reset();
+            }
+        }
+    }
+
+    PyFutureCBCB(const PyFutureCBCB& other) {
+        GilWrapper gil;
+        {
+            pyfunction = other.pyfunction;
+        }
+    }
+
+    PyFutureCBCB& operator=(const PyFutureCBCB& other) {
+        GilWrapper gil;
+        {
+            pyfunction = other.pyfunction;
+        }
+        return *this;
+    }
+
+    T operator()(boost::shared_future<T>& f) {
+        _LOG_DEBUG << "PyFutureCBCB: calling the continuation";
+        GilWrapper gil;
+        {
+            PyNewRef obj(PyObject_CallFunctionObjArgs(pyfunction.get(), NULL));
+        }
+        return T();
+    }
 
 };
 
+template <typename T>
+class then_callback {
+public:
+    typedef boost::function < T (boost::shared_future < T > &) > typ;
+};
+
+template <typename T>
+typename then_callback<T>::typ make_then_callback(PyObject* obj) {
+    return PyFutureCBCB<T>(obj);
+}
+
+template <typename T>
+boost::shared_future<T> then_(boost::shared_future<T>& fut, PyObject* obj) {
+    return fut.then(make_then_callback<T>(obj)).share();
+}
 
 } // end namespace quiet

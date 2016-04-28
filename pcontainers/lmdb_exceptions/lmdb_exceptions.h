@@ -25,6 +25,8 @@ struct exception_base: virtual std::exception, virtual boost::exception {
 };
 
 struct runtime_error: virtual exception_base { };
+struct expired: virtual exception_base { };
+struct stopping_ops: virtual exception_base { };
 struct system_error: virtual runtime_error { };
 struct io_error: virtual system_error { };
 struct access_error: virtual io_error { };
@@ -60,6 +62,7 @@ struct empty_key: virtual mdb_bad_valsize { empty_key() { *this << lmdb_error::c
 struct empty_database: virtual mdb_notfound { empty_database() { *this << lmdb_error::code(MDB_NOTFOUND); } };
 
 struct not_initialized: virtual lmdb_error { };
+
 
 struct lmdb_nested_error: virtual lmdb_error { };
 

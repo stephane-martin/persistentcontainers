@@ -8,8 +8,8 @@ cdef extern from "logging/logging.h" namespace "utils" nogil:
         PlogDebug "plog::debug"
         PlogVerbose "plog::verbose"
 
-    void set_console_logger "utils::Logger::set_console_logger"()
-    void set_console_logger "utils::Logger::set_console_logger"(PlogSeverity level)
+    void set_console_logger "utils::Logger::set_console_logger"() except +custom_handler
+    void set_console_logger "utils::Logger::set_console_logger"(PlogSeverity level) except +custom_handler
 
 
 cdef extern from "logging/pylogging.h" namespace "utils":

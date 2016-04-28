@@ -3,7 +3,7 @@ cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" 
     # noinspection PyPep8Naming
     cppclass cppPersistentDict "quiet::PersistentDict":
         cpp_bool is_initialized()
-        int get_maxkeysize()
+        int get_maxkeysize() except +custom_handler
         lmdb_options get_options()
         CBString get_dirname()
         CBString get_dbname()
@@ -16,30 +16,30 @@ cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" 
         CBString pop(MDB_val k) except +custom_handler
         pair[CBString, CBString] popitem() except +custom_handler
 
-        void map_keys[OutputIterator](OutputIterator oit)
-        void map_keys[OutputIterator](OutputIterator oit, const CBString& first)
-        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
-        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f)
-        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred)
+        void map_keys[OutputIterator](OutputIterator oit) except +custom_handler
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first) except +custom_handler
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last) except +custom_handler
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f) except +custom_handler
+        void map_keys[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred) except +custom_handler
 
-        void map_values[OutputIterator](OutputIterator oit)
-        void map_values[OutputIterator](OutputIterator oit, const CBString& first)
-        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
-        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f)
-        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred)
+        void map_values[OutputIterator](OutputIterator oit) except +custom_handler
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first) except +custom_handler
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last) except +custom_handler
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f) except +custom_handler
+        void map_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, unary_functor f, unary_predicate unary_pred) except +custom_handler
 
-        void map_keys_values[OutputIterator](OutputIterator oit)
-        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first)
-        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last)
-        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f)
-        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f, binary_predicate unary_pred)
+        void map_keys_values[OutputIterator](OutputIterator oit) except +custom_handler
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first) except +custom_handler
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last) except +custom_handler
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f) except +custom_handler
+        void map_keys_values[OutputIterator](OutputIterator oit, const CBString& first, const CBString& last, binary_functor f, binary_predicate unary_pred) except +custom_handler
 
         void insert(const CBString& key, const CBString& value) except +custom_handler
         void insert(MDB_val k, MDB_val v) except +custom_handler
 
         void clear() except +custom_handler
-        void erase(const CBString& key) except +custom_handler
-        void erase(MDB_val key) except +custom_handler
+        cpp_bool erase(const CBString& key) except +custom_handler
+        cpp_bool erase(MDB_val key) except +custom_handler
         vector[CBString] erase_interval() except +custom_handler
         vector[CBString] erase_interval(const CBString& first_key) except +custom_handler
         vector[CBString] erase_interval(const CBString& first_key, const CBString& last_key) except +custom_handler
@@ -121,7 +121,7 @@ cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" 
 
     # noinspection PyPep8Naming
     cdef cppclass cppIterator "quiet::PersistentDict::iterator" (abstract_iterator):
-        cppIterator() except +custom_handler
+        cppIterator()
         cppIterator(shared_ptr[cppPersistentDict] d) except +custom_handler
         cppIterator(shared_ptr[cppPersistentDict] d, int pos) except +custom_handler
         cppIterator(shared_ptr[cppPersistentDict] d, int pos, cpp_bool ro) except +custom_handler
@@ -143,12 +143,12 @@ cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" 
         void set_key_value(const CBString& key, const CBString& value) except +custom_handler
         void set_key_value(MDB_val key, MDB_val value) except +custom_handler
 
-        void dlte "quiet::PersistentDict::iterator::del"() except +custom_handler
-        void dlte "quiet::PersistentDict::iterator::del"(MDB_val key) except +custom_handler
+        cpp_bool dlte "quiet::PersistentDict::iterator::del"() except +custom_handler
+        cpp_bool dlte "quiet::PersistentDict::iterator::del"(MDB_val key) except +custom_handler
 
     # noinspection PyPep8Naming
     cdef cppclass cppConstIterator "quiet::PersistentDict::const_iterator" (abstract_iterator):
-        cppConstIterator() except +custom_handler
+        cppConstIterator()
         cppConstIterator(shared_ptr[cppPersistentDict] d) except +custom_handler
         cppConstIterator(shared_ptr[cppPersistentDict] d, int pos) except +custom_handler
         cppConstIterator(shared_ptr[cppPersistentDict] d, const CBString& key) except +custom_handler
@@ -161,8 +161,6 @@ cdef extern from "cpp_persistent_dict_queue/persistentdict.h" namespace "quiet" 
 
         cpp_bool operator==(const cppConstIterator& other) except +custom_handler
         cpp_bool operator!=(const cppConstIterator& other) except +custom_handler
-
-
 
     cdef cppIterator move "boost::move"(cppIterator other)
     cdef cppConstIterator move "boost::move"(cppConstIterator other)

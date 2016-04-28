@@ -20,40 +20,43 @@ using std::map;
 using std::cout;
 using std::endl;
 using std::exception;
+using boost::shared_ptr;
 using Bstrlib::CBString;
 
 
-void PersistentQueue::push_front(size_t n, const CBString& val) {
+bool PersistentQueue::push_front(size_t n, const CBString& val) {
     if (n <= 0) {
-        return;
+        return false;
     }
     front_insert_iterator it(shared_from_this());
     for(size_t i=0; i<n; i++) {
         it = val;
     }
+    return true;
 }
 
-void PersistentQueue::push_back(size_t n, const CBString& val) {
+bool PersistentQueue::push_back(size_t n, const CBString& val) {
     if (n <= 0) {
-        return;
+        return false;
     }
     back_insert_iterator it(shared_from_this());
     for(size_t i=0; i<n; i++) {
         it = val;
     }
+    return true;
 }
 
-void PersistentQueue::move_to(PersistentQueue& other, ssize_t chunk_size) {
+void PersistentQueue::move_to(shared_ptr<PersistentQueue> other, ssize_t chunk_size) {
     if (!*this) {
         _LOG_DEBUG << "move_to: cancelled: source queue is not initialized";
         return;
     }
-    if (*this == other) {
+    if (!other || !*other) {
+        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("move_to: the other queue is not initialized"));
+    }
+    if (*this == *other) {
         _LOG_DEBUG << "move_to: cancelled: source and dest are the same queue";
         return;
-    }
-    if (!other) {
-        BOOST_THROW_EXCEPTION(not_initialized() << lmdb_error::what("move_to: the other queue is not initialized"));
     }
     if (chunk_size <= 0) {
         chunk_size = SSIZE_MAX;
@@ -63,7 +66,7 @@ void PersistentQueue::move_to(PersistentQueue& other, ssize_t chunk_size) {
 
     iiterator end;
     while (src_not_empty) {
-        back_insert_iterator dest_it(other.back_inserter());
+        back_insert_iterator dest_it(other->back_inserter());
         iiterator src_it(shared_from_this());
         for(ssize_t i=0; i < chunk_size; i++) {
             if (src_it == end) {
@@ -102,12 +105,13 @@ PersistentQueue::back_insert_iterator& PersistentQueue::back_insert_iterator::op
     } else {
         cursor->set_key_value(k, v);
     }
+    new_elements = true;
     return *this;
 }
 
 
 void PersistentQueue::iiterator::_next_value() {
-    lock_guard<mutex> guard(current_value_lock);
+    unique_lock<shared_mutex> lock(lockable());
     if (bool(cursor) && cursor->first() != MDB_NOTFOUND) {
         MDB_val v;
         cursor->get_current_value(v);
@@ -120,7 +124,7 @@ void PersistentQueue::iiterator::_next_value() {
 }
 
 void PersistentQueue::iiterator::_last_value() {
-    lock_guard<mutex> guard(current_value_lock);
+    unique_lock<shared_mutex> lock(lockable());
     if (bool(cursor) && cursor->last() != MDB_NOTFOUND) {
         MDB_val v;
         cursor->get_current_value(v);

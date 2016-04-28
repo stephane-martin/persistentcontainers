@@ -59,6 +59,7 @@ lmdb_nested_error lmdb_error::factory(int code) {
     lmdb_nested_error exc;
     io_error io_ex;
     access_error access_ex;
+
     switch (code) {
         case MDB_KEYEXIST:
             exc << errinfo_nested_exception(copy_exception(mdb_keyexist()));

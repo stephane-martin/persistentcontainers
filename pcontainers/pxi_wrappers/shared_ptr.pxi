@@ -20,3 +20,4 @@ cdef extern from "boost/shared_ptr.hpp" namespace "boost" nogil:
 
         cpp_bool operator==(const shared_ptr&)
         cpp_bool operator!=(const shared_ptr&)
+

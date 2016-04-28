@@ -28,6 +28,8 @@ cdef public PyObject* py_bad_rslot
 cdef public PyObject* py_bad_txn
 cdef public PyObject* py_bad_val_size
 cdef public PyObject* py_bad_dbi
+cdef public PyObject* py_expired
+cdef public PyObject* py_stopping
 cdef public void custom_handler()
 
 cdef extern from "custom_exc.h" namespace "quiet":

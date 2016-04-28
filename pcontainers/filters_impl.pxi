@@ -1,13 +1,13 @@
-
+# -*- coding: utf-8 -*-
 
 cdef class Filter(object):
     cdef dumps(self, obj):
         raise NotImplementedError()
     cdef loads(self, obj):
         raise NotImplementedError()
-    cpdef pydumps(self, obj):
+    def pydumps(self, obj):
         return self.dumps(obj)
-    cpdef pyloads(self, obj):
+    def pyloads(self, obj):
         return self.loads(obj)
 
 
@@ -22,6 +22,8 @@ cdef class NoneSerializer(Serializer):
             obj = bytes(obj)
         if PyUnicode_Check(obj):
             obj = PyUnicode_AsUTF8String(obj)
+        if obj is None:
+            obj = MBufferIO()
         if not isinstance(obj, MBufferIO):
             obj = MBufferIO(obj)
         obj.seek(0)
@@ -34,6 +36,7 @@ cdef class NoneSerializer(Serializer):
             return not isinstance(other, NoneSerializer)
         else:
             raise ValueError("unsupported operation")
+
 
 cdef class PickleSerializer(Serializer):
     def __init__(self, int protocol=2):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # noinspection PyUnresolvedReferences
-from cpython.ref cimport PyObject
+from cpython.ref cimport PyObject, Py_DECREF
 # noinspection PyUnresolvedReferences
 from cython.operator cimport dereference as deref
 from libc.string cimport memcpy
@@ -13,9 +13,12 @@ import shutil
 import collections
 import threading
 from time import sleep
-from queue import Empty
+from queue import Empty, Full
 from os.path import join
 from numbers import Number
+from concurrent.futures import Future, ThreadPoolExecutor, CancelledError, TimeoutError
+
+
 
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
@@ -25,7 +28,11 @@ from ._py_exceptions import EmptyDatabase, NotFound, EmptyKey, BadValSize, NotIn
 include "lmdb_options_impl.pxi"
 include "pdict_impl.pxi"
 include "pqueue_impl.pxi"
+include "cpp_future_wrapper_impl.pxi"
+include "buffered_pdict_impl.pxi"
 include "expiry_dict_impl.pxi"
+include "threadsafe_queue_impl.pxi"
+include "monotonic_impl.pxi"
 include "logging_impl.pxi"
 include "filters_impl.pxi"
 
@@ -67,6 +74,4 @@ def _adapt_binary_predicate(binary_pred, Chain key_chain, Chain value_chain):
             )
         )
     return predicate
-
-
 

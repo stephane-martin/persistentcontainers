@@ -10,7 +10,7 @@
 namespace quiet {
 
 using namespace lmdb;
-
+// todo: CBStringException
 void custom_exception_handler() {
     // Catch a handful of different errors here and turn them into the equivalent Python errors.
     try {
@@ -32,6 +32,13 @@ void custom_exception_handler() {
         } else {
             PyErr_SetString(py_lmdb_error, "Unkwown error");
         }
+
+    } catch (const expired& exn) {
+        PyErr_SetCppString(py_expired, "Timeout has expired");
+
+    } catch (const stopping_ops& exn) {
+        PyErr_SetCppString(py_stopping, "Operation was interrupted");
+
     } catch (const not_initialized& exn) {
         PyErr_SetCppString(py_not_initialized, exn.w());
 

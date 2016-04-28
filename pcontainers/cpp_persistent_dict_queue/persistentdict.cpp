@@ -365,26 +365,26 @@ pair<CBString, CBString> PersistentDict::popitem() {
 }
 
 
-void PersistentDict::erase(const CBString& key) {
+bool PersistentDict::erase(const CBString& key) {
     if (!*this) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        return false;
     }
     iterator it(shared_from_this(), key, false);
     if (it.has_reached_end()) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        return false;
     }
-    it.del();
+    return it.del();
 }
 
-void PersistentDict::erase(MDB_val key) {
+bool PersistentDict::erase(MDB_val key) {
     if (!*this) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        return false;
     }
     iterator it(shared_from_this(), key, false);
     if (it.has_reached_end()) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        return false;
     }
-    it.del();
+    return it.del();
 }
 
 
@@ -399,29 +399,33 @@ bool PersistentDict::empty_interval(const CBString& first_key, const CBString& l
     return !key_is_in_interval(it.get_key(), first_key, last_key);
 }
 
-void PersistentDict::iterator::del() {
-    if (!initialized) {
+bool PersistentDict::iterator::del() {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
+    shared_lock<shared_mutex> lock(lockable());
     if (reached_end || reached_beginning) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        return false;
     }
     cursor->del();
+    return true;
 }
 
-void PersistentDict::iterator::del(MDB_val key) {
-    if (!initialized) {
+bool PersistentDict::iterator::del(MDB_val key) {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
+    unique_lock<shared_mutex> lock(lockable());
     if (cursor->position(key) == MDB_NOTFOUND) {
-        BOOST_THROW_EXCEPTION(mdb_notfound());
+        reached_end = true;
+        return false;
     }
     cursor->del();
+    return true;
 }
-
 
 void PersistentDict::iterator::append_key_value(MDB_val key, MDB_val value) {
-    if (!initialized) {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
     if (key.mv_size == 0 || key.mv_data == NULL) {
@@ -430,15 +434,17 @@ void PersistentDict::iterator::append_key_value(MDB_val key, MDB_val value) {
     if (value.mv_data == NULL) {
         BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
     }
+    unique_lock<shared_mutex> lock(lockable());
     cursor->append_key_value(key, value);
     reached_beginning = false;
     reached_end = false;
 }
 
 CBString PersistentDict::iterator::pop() {
-    if (!initialized) {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
+    shared_lock<shared_mutex> lock(lockable());
     if (reached_end || reached_beginning) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -450,9 +456,10 @@ CBString PersistentDict::iterator::pop() {
 }
 
 void PersistentDict::iterator::set_value(const CBString& value) {
-    if (!initialized) {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
+    shared_lock<shared_mutex> lock(lockable());
     if (reached_end || reached_beginning) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -460,12 +467,13 @@ void PersistentDict::iterator::set_value(const CBString& value) {
 }
 
 void PersistentDict::iterator::set_value(MDB_val v) {
-    if (!initialized) {
+    if (!*this) {
         BOOST_THROW_EXCEPTION(not_initialized());
     }
     if (v.mv_data == NULL) {
         BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
     }
+    shared_lock<shared_mutex> lock(lockable());
     if (reached_end || reached_beginning) {
         BOOST_THROW_EXCEPTION(mdb_notfound());
     }
@@ -482,6 +490,7 @@ void PersistentDict::iterator::set_key_value(MDB_val key, MDB_val value) {
     if (value.mv_data == NULL) {
         BOOST_THROW_EXCEPTION(std::invalid_argument("invalid value"));
     }
+    unique_lock<shared_mutex> lock(lockable());
     cursor->set_key_value(key, value);
     reached_beginning = false;
     reached_end = false;

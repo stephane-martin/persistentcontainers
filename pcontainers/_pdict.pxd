@@ -12,10 +12,12 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 # noinspection PyUnresolvedReferences
 from libc.time cimport time_t
+from libc.stdint cimport uint64_t
 from libc.stdlib cimport malloc
 from libc.string cimport memcpy
 from cpython.buffer cimport PyBUF_SIMPLE, PyBuffer_FillInfo
 from cpython.mem cimport PyMem_Malloc
+from cpython.ref cimport Py_INCREF, Py_DECREF, Py_CLEAR
 
 # noinspection PyPackageRequirements
 from mbufferio import MBufferIO
@@ -31,59 +33,29 @@ cdef extern from "Python.h":
 
 include "pxi_wrappers/scoped_ptr.pxi"
 include "pxi_wrappers/shared_ptr.pxi"
+include "pxi_wrappers/shared_future.pxi"
 include "pxi_wrappers/cbstring.pxi"
-
-cdef extern from "lmdb.h" nogil:
-    ctypedef struct MDB_txn:
-        pass
-
-    ctypedef struct MDB_val:
-        size_t mv_size
-        void* mv_data
-
-    int mdb_txn_commit(MDB_txn *txn)
-    void mdb_txn_abort(MDB_txn *txn)
-
+include "pxi_wrappers/lmdb.pxi"
 include "pxi_wrappers/pyfunctor.pxi"
 include "pxi_wrappers/logging.pxi"
-
-cdef extern from "utils/pyutils.h" namespace "utils":
-    # noinspection PyPep8Naming
-    cppclass PyBufferWrap:
-        PyBufferWrap() nogil
-        PyBufferWrap(object o) except +custom_handler
-        Py_buffer* get() nogil
-        MDB_val get_mdb_val() nogil
-        Py_ssize_t length() nogil
-        void* buf() nogil
-        void close()
-
-    cdef PyBufferWrap move "boost::move"(PyBufferWrap other)
-
+include "pxi_wrappers/pyutils.pxi"
 include "pxi_wrappers/lmdb_options.pxi"
 include "pxi_wrappers/persistentdict.pxi"
 include "pxi_wrappers/persistentqueue.pxi"
+include "pxi_wrappers/bufferedpersistentdict.pxi"
+include "pxi_wrappers/utils.pxi"
+include "pxi_wrappers/mutex.pxi"
 
-
-cdef extern from "utils/utils.h" namespace "utils" nogil:
-
-    # noinspection PyPep8Naming
-    cppclass TempDirectory:
-        TempDirectory()
-        TempDirectory(cpp_bool create)
-        TempDirectory(cpp_bool create, cpp_bool destroy)
-        TempDirectory(cpp_bool create, cpp_bool destroy, const CBString& tmpl)
-        CBString get_path()
-
-    shared_ptr[TempDirectory] make_temp_directory "utils::TempDirectory::make"()
-    shared_ptr[TempDirectory] make_temp_directory "utils::TempDirectory::make"(cpp_bool create)
-    shared_ptr[TempDirectory] make_temp_directory "utils::TempDirectory::make"(cpp_bool create, cpp_bool destroy)
 
 cpdef set_logger(int level=?)
 cpdef set_python_logger(name)
 
 include "pdict.pxi"
 include "pqueue.pxi"
-include "expirydict.pxi"
+include "cpp_future_wrapper.pxi"
+include "buffered_pdict.pxi"
+include "expiry_dict.pxi"
+include "threadsafe_queue.pxi"
+include "monotonic.pxi"
 include "helpers.pxi"
 include "filters.pxi"

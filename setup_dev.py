@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup import extensions, runsetup, Extension, setup_requires, IS_LINUX, ROOT, join, pdict_sources
+from setup import extensions, runsetup, Extension, setup_requires, IS_LINUX, ROOT, join, pdict_sources, macros
 
 extensions[:] = [
     Extension(
@@ -16,12 +16,7 @@ extensions[:] = [
         sources=pdict_sources,
         include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++",
-        define_macros=[
-            ('BSTRLIB_CAN_USE_IOSTREAM', None),
-            ('BSTRLIB_CAN_USE_STL', None),
-            ('BSTRLIB_THROWS_EXCEPTIONS', None),
-            ('BOOST_THREAD_USES_ATOMIC', None)
-        ]
+        define_macros=macros
     )
 ]
 

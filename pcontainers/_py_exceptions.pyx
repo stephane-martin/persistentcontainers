@@ -3,7 +3,6 @@
 # noinspection PyUnresolvedReferences
 from cpython.ref cimport PyObject
 
-
 class LmdbError(RuntimeError):
     """
     Base exception class for LMDB errors
@@ -81,6 +80,12 @@ class BadValSize(LmdbError, ValueError):
 class BadDbi(LmdbError, ValueError):
     pass
 
+class Expired(OSError):
+    pass
+
+class Stopping(RuntimeError):
+    pass
+
 cdef public PyObject* py_lmdb_error = <PyObject*>LmdbError
 cdef public PyObject* py_not_initialized = <PyObject*>NotInitialized
 cdef public PyObject* py_access_error = <PyObject*>AccessError
@@ -106,6 +111,8 @@ cdef public PyObject* py_bad_rslot = <PyObject*>BadRslot
 cdef public PyObject* py_bad_txn = <PyObject*>BadTxn
 cdef public PyObject* py_bad_val_size = <PyObject*>BadValSize
 cdef public PyObject* py_bad_dbi = <PyObject*>BadDbi
+cdef public PyObject* py_expired = <PyObject*>Expired
+cdef public PyObject* py_stopping = <PyObject*>Stopping
 
 cdef void custom_handler():
     custom_exception_handler()

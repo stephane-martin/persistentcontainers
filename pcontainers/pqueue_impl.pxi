@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 cdef class PRawQueue(object):
     def __cinit__(self, dirname, dbname, LmdbOptions opts=None, Chain value_chain=None):
@@ -8,12 +9,14 @@ cdef class PRawQueue(object):
         if opts is None:
             opts = LmdbOptions()
         self.ptr = queue_factory(dirn, dbn, (<LmdbOptions> opts).opts)
+        self.value_chain = NoneChain()
 
     def __init__(self, dirname, dbname, LmdbOptions opts=None, Chain value_chain=None):
         pass
 
     def __dealloc__(self):
-        self.ptr.reset()
+        with nogil:
+            self.ptr.reset()
 
     def __repr__(self):
         return u"PRawQueue(dbname='{}', dirname='{}')".format(
@@ -40,37 +43,83 @@ cdef class PRawQueue(object):
     cpdef clear(self):
         self.ptr.get().clear()
 
-    cpdef push_front(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(val))
-        with nogil:
-            self.ptr.get().push_front(view.get_mdb_val())
-
-    cpdef push_back(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(val))
-        with nogil:
-            self.ptr.get().push_back(view.get_mdb_val())
-
     cpdef put(self, item, block=True, timeout=None):
         self.push_back(item)
 
     cpdef put_nowait(self, item):
         self.push_back(item)
 
-    cpdef pop_back(self):
-        cdef QueueIterator it
-        cdef MDB_val v
+    cpdef push_front(self, val):
+        cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
         with nogil:
-            it = QueueIterator(self.ptr, 1)
-            v = it.get_value_buffer()
-        return PyBytes_FromStringAndSize(<char*> v.mv_data, v.mv_size)
+            self.ptr.get().push_front(view.get_mdb_val())
+
+    cpdef push_back(self, val):
+        cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
+        with nogil:
+            self.ptr.get().push_back(view.get_mdb_val())
+
+    cpdef async_push_back(self, val):
+        cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
+        cdef BoolFutureWrapper py_future = BoolFutureWrapper()
+        cdef shared_future[cpp_bool] cpp_fut
+        with nogil:
+            cpp_fut = self.ptr.get().async_push_back(view.get_mdb_val())
+        py_future.set_boost_future(cpp_fut)
+        return py_future
+
+    cpdef pop_back(self):
+        cdef CBString v
+        with nogil:
+            v = self.ptr.get().pop_back()
+        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_front(self):
-        cdef QueueIterator it
-        cdef MDB_val v
+        cdef CBString v
         with nogil:
-            it = QueueIterator(self.ptr)
-            v = it.get_value_buffer()
-        return PyBytes_FromStringAndSize(<char*> v.mv_data, v.mv_size)
+            v = self.ptr.get().pop_front()
+        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
+
+    cpdef async_pop_front(self, timeout=None):
+        timeout = max(0, timeout) if timeout else 0
+        if not isinstance(timeout, Number):
+            raise TypeError()
+        timeout = int(timeout * 1000)
+        if timeout < 0:
+            raise ValueError()
+
+        cdef CBStringFutureWrapper py_future = CBStringFutureWrapper(self.value_chain.pyloads)
+        cdef shared_future[CBString] cpp_future
+        cdef milliseconds ms
+
+        if not timeout:
+            with nogil:
+                cpp_future = self.ptr.get().async_wait_and_pop_front()
+        else:
+            ms = milliseconds(<long> timeout)
+            with nogil:
+                cpp_future = self.ptr.get().async_wait_and_pop_front(ms)
+
+        py_future.set_boost_future(cpp_future)
+        return py_future
+
+    cpdef wait_and_pop_front(self, timeout=None):
+        timeout = max(0, timeout) if timeout else 0
+        if not isinstance(timeout, Number):
+            raise TypeError()
+        timeout = int(timeout * 1000)
+        if timeout < 0:
+            raise ValueError()
+
+        cdef CBString v
+
+        cdef milliseconds ms = milliseconds(<long> timeout)
+        try:
+            with nogil:
+                v = self.ptr.get().wait_and_pop_front(ms)
+        except EmptyDatabase:
+            raise Empty()
+        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_all(self):
         l = []
@@ -80,37 +129,14 @@ cdef class PRawQueue(object):
         return l
 
     cpdef get(self, block=True, timeout=None):
-        cdef double delay
-        cdef double t_out
-        cdef double endtime
         if not block:
             return self.get_nowait()
         elif timeout is None:
-            # wait until there is an available element
-            delay = 0.0005
-            while True:
-                try:
-                    return self.get_nowait()
-                except Empty:
-                    delay = min(delay * 2.0, 0.1)
-                    sleep(delay)
-
+            return self.wait_and_pop_front()
         elif timeout < 0:
             raise ValueError("'timeout' must be a non-negative number")
         else:
-            t_out = timeout
-            # wait at maximum 'timeout' seconds
-            endtime = c_time(NULL) + t_out
-            delay = 0.0005
-            while True:
-                try:
-                    return self.get_nowait()
-                except Empty:
-                    remaining = endtime - c_time(NULL)
-                    if remaining <= 0.0:
-                        raise
-                    delay = min(delay * 2.0, remaining, 0.1)
-                    sleep(delay)
+            return self.wait_and_pop_front(timeout)
 
     cpdef get_nowait(self):
         try:
@@ -120,15 +146,17 @@ cdef class PRawQueue(object):
 
     def push_front_many(self, vals):
         vals = iter(vals)
-        #cdef PyObject* v = <PyObject*> vals
+        cdef PyStringInputIterator _begin = move(PyStringInputIterator(vals))
+        cdef PyStringInputIterator _end
         with nogil:
-            self.ptr.get().push_front(PyStringInputIterator(vals), PyStringInputIterator())
+            self.ptr.get().push_front(_begin, _end)
 
     def push_back_many(self, vals):
         vals = iter(vals)
-        #cdef PyObject* v = <PyObject*> vals
+        cdef PyStringInputIterator _begin = move(PyStringInputIterator(vals))
+        cdef PyStringInputIterator _end
         with nogil:
-            self.ptr.get().push_back(PyStringInputIterator(vals), PyStringInputIterator())
+            self.ptr.get().push_back(_begin, _end)
 
     def push_many(self, vals):
         self.push_back_many(vals)
@@ -147,7 +175,7 @@ cdef class PRawQueue(object):
         if not isinstance(other, PRawQueue):
             raise TypeError()
         with nogil:
-            self.ptr.get().move_to(deref((<PRawQueue> other).ptr), chunk_size)
+            self.ptr.get().move_to((<PRawQueue> other).ptr, chunk_size)
 
     cpdef remove_duplicates(self):
         with nogil:
@@ -165,28 +193,6 @@ cdef class PQueue(PRawQueue):
         return u"PQueue(dbname='{}', dirname='{}')".format(
             make_unicode(self.dbname), make_unicode(self.dirname)
         )
-
-    cpdef push_front(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
-        with nogil:
-            self.ptr.get().push_front(view.get_mdb_val())
-
-    cpdef push_back(self, val):
-        cdef PyBufferWrap view = move(PyBufferWrap(self.value_chain.dumps(val)))
-        with nogil:
-            self.ptr.get().push_back(view.get_mdb_val())
-
-    cpdef pop_back(self):
-        cdef CBString v
-        with nogil:
-            v = self.ptr.get().pop_back()
-        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
-
-    cpdef pop_front(self):
-        cdef CBString v
-        with nogil:
-            v = self.ptr.get().pop_front()
-        return self.value_chain.loads(make_mbufferio_from_cbstring(v))
 
     cpdef pop_all(self):
         l = []
@@ -219,7 +225,7 @@ cdef class PQueue(PRawQueue):
         if not isinstance(other, PQueue):
             raise TypeError()
         with nogil:
-            self.ptr.get().move_to(deref((<PQueue> other).ptr), chunk_size)
+            self.ptr.get().move_to((<PQueue> other).ptr, chunk_size)
 
 
 def _adapt_append_pqueue_pop_all(PQueue q, list l):

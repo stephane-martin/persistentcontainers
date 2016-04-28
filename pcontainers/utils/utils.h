@@ -3,6 +3,7 @@
 #include <utility>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/future.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <ftw.h>
 #include "lmdb.h"
@@ -17,10 +18,11 @@ using Bstrlib::CBString;
 
 typedef boost::function < bool (const CBString& x) > unary_predicate;
 typedef boost::function < bool (const CBString& x, const CBString& y) > binary_predicate;
+typedef boost::function < CBString () > zeronary_functor;
 typedef boost::function < CBString (const CBString& x) > unary_functor;
 typedef boost::function < CBString (const CBString& x, const CBString& y) > binary_scalar_functor;
 typedef boost::function < pair<CBString, CBString> (const CBString& x, const CBString& y) > binary_functor;
-
+//typedef boost::function < CBString (boost::shared_future<CBString>&) > then_callback;
 
 inline bool key_is_in_interval(const CBString& key, const CBString& first, const CBString& last) {
     if (bool(first.length()) && (key < first)) {

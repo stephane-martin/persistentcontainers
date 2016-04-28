@@ -45,6 +45,8 @@ __PYX_EXTERN_C DL_IMPORT(PyObject) *py_bad_rslot;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_bad_txn;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_bad_val_size;
 __PYX_EXTERN_C DL_IMPORT(PyObject) *py_bad_dbi;
+__PYX_EXTERN_C DL_IMPORT(PyObject) *py_expired;
+__PYX_EXTERN_C DL_IMPORT(PyObject) *py_stopping;
 
 #endif /* !__PYX_HAVE_API__pcontainers___py_exceptions */
 

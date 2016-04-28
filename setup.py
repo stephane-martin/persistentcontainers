@@ -24,7 +24,7 @@ def check_libuuid():
     return sp.returncode == 0
 
 
-requirements = ['future', 'mbufferio', 'werkzeug']
+requirements = ['future', 'mbufferio', 'futures']
 
 setup_requires = [
     'setuptools_git', 'setuptools', 'twine', 'wheel', 'pip', 'pytest'
@@ -33,6 +33,7 @@ setup_requires = [
 pdict_sources = [
     'pcontainers/_pdict.pyx',
     'pcontainers/boost/chrono.cpp',
+    'pcontainers/boost/clone_current_exception_non_intrusive.cpp',
     'pcontainers/boost/error_code.cpp',
     'pcontainers/boost/future.cpp',
     'pcontainers/boost/lockpool.cpp',
@@ -45,6 +46,7 @@ pdict_sources = [
     'pcontainers/lmdb/midl.c',
     'pcontainers/cpp_persistent_dict_queue/persistentdict.cpp',
     'pcontainers/cpp_persistent_dict_queue/persistentqueue.cpp',
+    'pcontainers/cpp_persistent_dict_queue/bufferedpersistentdict.cpp',
     'pcontainers/lmdb_environment/lmdb_environment.cpp',
     'pcontainers/logging/logging.cpp',
     'pcontainers/logging/pylogging.cpp',
@@ -55,6 +57,16 @@ pdict_sources = [
     'pcontainers/includes/bstrlib/bstrwrap.cpp',
     'pcontainers/includes/bstrlib/utf8util.c',
     'pcontainers/includes/bstrlib/buniutil.c'
+]
+
+macros = [
+    ('BSTRLIB_CAN_USE_IOSTREAM', None),
+    ('BSTRLIB_CAN_USE_STL', None),
+    ('BSTRLIB_THROWS_EXCEPTIONS', None),
+    ('BOOST_THREAD_USES_ATOMIC', None),
+    ('BOOST_THREAD_VERSION', '4'),
+    ('BOOST_THREAD_CONTINUATION_SYNC', None),
+    ('BOOST_DATE_TIME_NO_LIB', None)
 ]
 
 extensions = [
@@ -72,12 +84,7 @@ extensions = [
         sources=[srcfile.replace(".pyx", ".cpp") for srcfile in pdict_sources],
         include_dirs=[join(ROOT, "pcontainers", "includes")],
         language="c++",
-        define_macros=[
-            ('BSTRLIB_CAN_USE_IOSTREAM', None),
-            ('BSTRLIB_CAN_USE_STL', None),
-            ('BSTRLIB_THROWS_EXCEPTIONS', None),
-            ('BOOST_THREAD_USES_ATOMIC', None)
-        ]
+        define_macros=macros
     )
 ]
 

@@ -1,9 +1,8 @@
+# -*- coding: utf-8 -*-
 
 cdef class Filter(object):
     cdef dumps(self, obj)
     cdef loads(self, obj)
-    cpdef pydumps(self, obj)
-    cpdef pyloads(self, obj)
 
 cdef class Serializer(Filter):
     pass

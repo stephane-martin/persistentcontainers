@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # noinspection PyPep8Naming
 cdef class PRawDictAbstractIterator(object):
     def __init__(self, PRawDict d, int pos=0, key=None):
@@ -11,11 +13,21 @@ cdef class PRawDictAbstractIterator(object):
             if len(self.key) > 511:
                 raise BadValSize("key is too long")
 
+    def start(self):
+        raise NotImplementedError()
+
+    def stop(self):
+        with nogil:
+            self.cpp_iterator_ptr.reset()
+
+    def __enter__(self):
+        return self.start()
+
     def __dealloc__(self):
-        self.cpp_iterator_ptr.reset()
+        self.stop()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.cpp_iterator_ptr.reset()
+        self.stop()
 
     cdef cpp_bool has_reached_end(self):
         return self.cpp_iterator_ptr.get().has_reached_end()
@@ -23,93 +35,37 @@ cdef class PRawDictAbstractIterator(object):
     cdef cpp_bool has_reached_beginning(self):
         return self.cpp_iterator_ptr.get().has_reached_beginning()
 
-    cdef incr(self):
+    cdef incr(self):    # calls lock_guard -> better to call 'incr' in nogil section
         self.cpp_iterator_ptr.get().abs_incr()
 
     cdef decr(self):
         self.cpp_iterator_ptr.get().abs_decr()
 
-    cdef get_key(self):
-        cdef int keysize = self.dict.ptr.get().get_maxkeysize()
-        cdef MDB_val k
-        cdef bytearray obj = bytearray(keysize)
-        cdef PyBufferWrap view = move(PyBufferWrap(obj))
-        with nogil:
-            k = self.cpp_iterator_ptr.get().get_key_buffer()
-            memcpy(view.buf(), k.mv_data, k.mv_size)
-        view.close()
-        PyByteArray_Resize(obj, k.mv_size)
-        return self.dict.key_chain.loads(obj)
-
-    cdef get_key_buf(self):
+    cdef get_key_buf(self, cpp_bool incr=0, cpp_bool decr=0):
         cdef MDB_val k
         cdef void* ptr
         with nogil:
             k = self.cpp_iterator_ptr.get().get_key_buffer()
             ptr = copy_mdb_val(k)
+            if incr:
+                self.cpp_iterator_ptr.get().abs_incr()
+            if decr:
+                self.cpp_iterator_ptr.get().abs_decr()
         return self.dict.key_chain.loads(make_mbufferio(ptr, k.mv_size, 1))
 
-    cdef get_value(self):
-        cdef MDB_val v
-        cdef cpp_bool done = 0
-        cdef bytearray obj = bytearray(4096)
-        cdef PyBufferWrap view = move(PyBufferWrap(obj))
-        with nogil:
-            v = self.cpp_iterator_ptr.get().get_value_buffer()
-            if v.mv_size <= 4096:
-                memcpy(view.buf(), v.mv_data, v.mv_size)
-                done = 1
-        view.close()
-        if done:
-            PyByteArray_Resize(obj, v.mv_size)
-            return self.dict.value_chain.loads(obj)
-
-        obj = bytearray(v.mv_size)
-        view = move(PyBufferWrap(obj))
-        with nogil:
-            memcpy(view.buf(), v.mv_data, v.mv_size)
-        view.close()
-        return self.dict.value_chain.loads(obj)
-
-    cdef get_value_buf(self):
+    cdef get_value_buf(self, cpp_bool incr=0, cpp_bool decr=0):
         cdef MDB_val v
         cdef void* ptr
         with nogil:
             v = self.cpp_iterator_ptr.get().get_value_buffer()
             ptr = copy_mdb_val(v)
+            if incr:
+                self.cpp_iterator_ptr.get().abs_incr()
+            if decr:
+                self.cpp_iterator_ptr.get().abs_decr()
         return self.dict.value_chain.loads(make_mbufferio(ptr, v.mv_size, 1))
 
-    cdef get_item(self):
-        cdef int keysize = self.dict.ptr.get().get_maxkeysize()
-        cdef pair[MDB_val, MDB_val] kv
-        cdef cpp_bool done = 0
-        cdef bytearray key_obj = bytearray(keysize)
-        cdef bytearray value_obj = bytearray(4096)
-
-        cdef PyBufferWrap key_view = move(PyBufferWrap(key_obj))
-        cdef PyBufferWrap value_view = move(PyBufferWrap(value_obj))
-
-        with nogil:
-            kv = self.cpp_iterator_ptr.get().get_item_buffer()
-            memcpy(key_view.buf(), kv.first.mv_data, kv.first.mv_size)
-            if kv.second.mv_size <= 4096:
-                memcpy(value_view.buf(), kv.second.mv_data, kv.second.mv_size)
-                done = 1
-        key_view.close()
-        value_view.close()
-        PyByteArray_Resize(key_obj, kv.first.mv_size)
-        if done:
-            PyByteArray_Resize(value_obj, kv.second.mv_size)
-            return self.dict.key_chain.loads(key_obj), self.dict.value_chain.loads(value_obj)
-
-        value_obj = bytearray(kv.second.mv_size)
-        value_view = move(PyBufferWrap(value_obj))
-        with nogil:
-            memcpy(value_view.buf(), kv.second.mv_data, kv.second.mv_size)
-        value_view.close()
-        return self.dict.key_chain.loads(key_obj), self.dict.value_chain.loads(value_obj)
-
-    cdef get_item_buf(self):
+    cdef get_item_buf(self, cpp_bool incr=0, cpp_bool decr=0):
         cdef pair[MDB_val, MDB_val] kv
         cdef void* key_ptr
         cdef void* value_ptr
@@ -117,6 +73,10 @@ cdef class PRawDictAbstractIterator(object):
             kv = self.cpp_iterator_ptr.get().get_item_buffer()
             key_ptr = copy_mdb_val(kv.first)
             value_ptr = copy_mdb_val(kv.second)
+            if incr:
+                self.cpp_iterator_ptr.get().abs_incr()
+            if decr:
+                self.cpp_iterator_ptr.get().abs_decr()
         return self.dict.key_chain.loads(make_mbufferio(key_ptr, kv.first.mv_size, 1)), self.dict.value_chain.loads(make_mbufferio(value_ptr, kv.second.mv_size, 1))
 
     def __getitem__(self, item):
@@ -130,7 +90,7 @@ cdef class PRawDictAbstractIterator(object):
 
 # noinspection PyPep8Naming
 cdef class PRawDictConstIterator(PRawDictAbstractIterator):
-    def __enter__(self):
+    def start(self):
         if self.key is None:
             self.cpp_iterator_ptr.reset(new cppConstIterator(self.dict.ptr, self.pos))
         else:
@@ -140,7 +100,7 @@ cdef class PRawDictConstIterator(PRawDictAbstractIterator):
 
 # noinspection PyPep8Naming
 cdef class PRawDictIterator(PRawDictAbstractIterator):
-    def __enter__(self):
+    def start(self):
         # generates a LMDB write transaction -> it can block
         cdef PyBufferWrap key_view
         if self.key is None:
@@ -169,12 +129,15 @@ cdef class PRawDictIterator(PRawDictAbstractIterator):
     cdef dlte(self, key=None):
         cdef PyBufferWrap key_view
         cdef cppIterator* it_ptr = <cppIterator*> self.cpp_iterator_ptr.get()
-        if not key:
-            it_ptr.dlte()
+        cdef cpp_bool result
+        if key is None:
+            result = it_ptr.dlte()
         else:
             key_view = move(PyBufferWrap(self.dict.key_chain.dumps(key)))
             with nogil:
-                it_ptr.dlte(key_view.get_mdb_val())
+                result = it_ptr.dlte(key_view.get_mdb_val())
+        if not result:
+            raise NotFound()
 
     def __setitem__(self, key, value):
         if not self.cpp_iterator_ptr.get():
@@ -229,7 +192,8 @@ cdef class PRawDict(object):
                 shutil.rmtree(self.dirname)
                 self.rmrf_at_delete = 0
 
-            self.ptr.reset()
+            with nogil:
+                self.ptr.reset()
 
     def __repr__(self):
         return u"PRawDict(dbname='{}', dirname='{}')".format(
@@ -284,7 +248,7 @@ cdef class PRawDict(object):
         try:
             return self[item]
         except NotFound:
-            return default
+            return default if default else b''
 
     cpdef get_direct(self, item):
         if not item:
@@ -310,6 +274,7 @@ cdef class PRawDict(object):
 
     def __delitem__(self, key):
         cdef PRawDictIterator it = PRawDictIterator(self, key=key)
+        cdef cpp_bool result
         with it:
             it.dlte()
 
@@ -360,14 +325,14 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_key_buf()
-                    it.decr()
+                    yield it.get_key_buf(0, 1)
+                    #it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_key_buf()
-                    it.incr()
+                    yield it.get_key_buf(1)
+                    #it.incr()
 
     cpdef iterkeys(self, reverse=False):
         return self.keys(reverse)
@@ -379,14 +344,14 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_value_buf()
-                    it.decr()
+                    yield it.get_value_buf(0, 1)
+                    #it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_value_buf()
-                    it.incr()
+                    yield it.get_value_buf(1)
+                    #it.incr()
 
     cpdef itervalues(self, reverse=False):
         return self.values(reverse)
@@ -398,14 +363,14 @@ cdef class PRawDict(object):
             with it:
                 it.decr()
                 while not it.has_reached_beginning():
-                    yield it.get_item_buf()
-                    it.decr()
+                    yield it.get_item_buf(0, 1)
+                    #it.decr()
         else:
             it = PRawDictConstIterator(self)
             with it:
                 while not it.has_reached_end():
-                    yield it.get_item_buf()
-                    it.incr()
+                    yield it.get_item_buf(1)
+                    #it.incr()
 
     cpdef iteritems(self, reverse=False):
         return self.items(reverse)
@@ -522,3 +487,282 @@ cdef class PDict(PRawDict):
 
 collections.MutableMapping.register(PRawDict)
 collections.MutableMapping.register(PDict)
+
+# noinspection PyPep8Naming
+cdef class NonBlockingPDictWrapper(object):
+    def __cinit__(self, PRawDict pdict, int how_many_readers=1):
+        pass
+
+    def __init__(self, PRawDict pdict, int how_many_readers=1):
+        if how_many_readers <= 0:
+            raise ValueError()
+        self.d = pdict
+        self.n_readers = how_many_readers
+        self.stopping = threading.Event()
+        self.starting = threading.Event()
+        self.readers_threads = []
+        self.writer_thread = None
+
+    cpdef start(self):
+        if self.writer_thread is not None or self.starting.is_set() or self.stopping.is_set():
+            return
+        self.starting.set()
+
+        for _ in range(self.n_readers):
+            self.readers_threads.append(threading.Thread(target=self._reader_thread_fun))
+
+        self.writer_thread = threading.Thread(target=self._writer_thread_fun)
+
+        for t in self.readers_threads:
+            t.daemon = True
+            t.start()
+
+        self.writer_thread.daemon = True
+        self.writer_thread.start()
+        self.starting.clear()
+
+    cpdef stop(self):
+        if self.writer_thread is None or self.starting.is_set() or self.stopping.is_set():
+            return
+        self.stopping.set()
+        self.write_operations_queue.py_push(b"STOP")
+        for t in self.readers_threads:
+            self.read_operations_queue.py_push(b"STOP")
+        self.writer_thread.join()
+        for t in self.readers_threads:
+            t.join()
+        self.readers_threads = []
+        self.writer_thread = None
+        self.stopping.clear()
+
+    def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
+    def __dealloc__(self):
+        self.stop()
+
+    def _reader_thread_fun(self):
+        cdef PyObject* operation
+        op = None
+        while not self.stopping.is_set():
+            op = self.read_operations_queue.wait_and_pop(1)
+            if op and op != b"STOP":
+                self._do_operation(op)
+        sleep(0.25)
+        while True:
+            op = self.read_operations_queue.try_pop()
+            if not op:
+                break
+            if op != b"STOP":
+              self._do_operation(op)
+
+    def _writer_thread_fun(self):
+        cdef PyObject* operation
+        op = None
+        while not self.stopping.is_set():
+            op = self.write_operations_queue.wait_and_pop(1)
+            if op and op != b"STOP":
+                self._do_operation(op)
+        while True:
+            op = self.write_operations_queue.try_pop()
+            if op is None:
+                break
+            if op != b"STOP":
+                self._do_operation(op)
+
+    cdef _do_operation(self, op):
+        cdef PRawDictConstIterator iterator
+        op_type = op[0]
+        f = op[1]
+        if not f.set_running_or_notify_cancel():
+            return
+
+        if op_type == b"getitem":
+            iterator = op[2]
+            _, _, _, item = op
+            try:
+                f.set_result(iterator[item])
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"setitem":
+            _, _, key, value = op
+            try:
+                self.d[key] = value
+                f.set_result(True)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"get":
+            iterator = op[2]
+            _, _, _, item, default = op
+            try:
+                f.set_result(iterator[item])
+            except NotFound:
+                f.set_result(default)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"keys":
+            iterator = op[2]
+            l = []
+            try:
+                while not iterator.has_reached_end():
+                    l.append(iterator.get_key_buf(1))
+                f.set_result(l)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"values":
+            iterator = op[2]
+            l = []
+            try:
+                while not iterator.has_reached_end():
+                    l.append(iterator.get_value_buf(1))
+                f.set_result(l)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"items":
+            iterator = op[2]
+            l = []
+            try:
+                while not iterator.has_reached_end():
+                    l.append(iterator.get_item_buf(1))
+                f.set_result(l)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"update":
+            _, _, e, kwds = op
+            try:
+                self.d.update(e, **kwds)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"pop":
+            _, _, key, default = op
+            try:
+                f.set_result(self.d.pop(key, default))
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"popitem":
+            try:
+                f.set_result(self.d.popitem())
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"transform_values":
+            _, _, binary_funct = op
+            try:
+                self.d.transform_values(binary_funct)
+                f.set_result(True)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"remove_if":
+            _, _, binary_pred = op
+            try:
+                self.d.remove_if(binary_pred)
+                f.set_result(True)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        elif op_type == b"remove_duplicates":
+            try:
+                self.d.remove_duplicates()
+                f.set_result(True)
+            except Exception as ex:
+                f.set_exception(ex)
+
+        else:
+            f.set_exception(ValueError("unknown operation"))
+
+    cpdef setitem(self, key, value):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"setitem", f, key, value))
+        return f
+
+    cpdef getitem(self, item):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.read_operations_queue.push((b"getitem", f, self.d.read_transaction().start(), item))
+        return f
+
+    cpdef get(self, item, default=None):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.read_operations_queue.push((b"get", f, self.d.read_transaction().start(), item, default))
+        return f
+
+    cpdef keys(self):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.read_operations_queue.push((b"keys", f, self.d.read_transaction().start()))
+        return f
+
+    cpdef values(self):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.read_operations_queue.push((b"values", f, self.d.read_transaction().start()))
+        return f
+
+    cpdef items(self):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.read_operations_queue.push((b"items", f, self.d.read_transaction().start()))
+        return f
+
+    def update(self, e=None, **kwds):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"update", f, e, kwds))
+        return f
+
+    cpdef pop(self, key, default=None):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"pop", f, key, default))
+        return f
+
+    cpdef popitem(self):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"popitem", f))
+        return f
+
+    cpdef transform_values(self, binary_funct):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"transform_values", f))
+        return f
+
+    cpdef remove_if(self, binary_pred):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"remove_if", f, binary_pred))
+        return f
+
+    cpdef remove_duplicates(self):
+        if self.stopping.is_set():
+            raise RuntimeError('cannot schedule new futures after shutdown')
+        f = Future()
+        self.write_operations_queue.push((b"remove_duplicates", f))
+        return f
+

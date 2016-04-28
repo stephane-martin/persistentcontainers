@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 cdef class PRawDictAbstractIterator(object):
     cdef PRawDict dict
@@ -6,12 +7,9 @@ cdef class PRawDictAbstractIterator(object):
     cdef scoped_ptr[abstract_iterator] cpp_iterator_ptr
     cdef cpp_bool has_reached_end(self)
     cdef cpp_bool has_reached_beginning(self)
-    cdef get_key(self)
-    cdef get_key_buf(self)
-    cdef get_value(self)
-    cdef get_value_buf(self)
-    cdef get_item(self)
-    cdef get_item_buf(self)
+    cdef get_key_buf(self, cpp_bool incr=?, cpp_bool decr=?)
+    cdef get_value_buf(self, cpp_bool incr=?, cpp_bool decr=?)
+    cdef get_item_buf(self, cpp_bool incr=?, cpp_bool decr=?)
     cdef incr(self)
     cdef decr(self)
 
@@ -60,4 +58,28 @@ cdef class PRawDict(object):
 cdef class PDict(PRawDict):
     pass
 
+cdef class NonBlockingPDictWrapper(object):
+    cdef PRawDict d
+    cdef int n_readers
+    cdef ThreadsafeQueue read_operations_queue
+    cdef ThreadsafeQueue write_operations_queue
+    cdef object starting
+    cdef object stopping
+    cdef object readers_threads
+    cdef object writer_thread
 
+    cdef _do_operation(self, op)
+    cpdef start(self)
+    cpdef stop(self)
+
+    cpdef setitem(self, key, value)
+    cpdef getitem(self, item)
+    cpdef get(self, item, default=?)
+    cpdef keys(self)
+    cpdef values(self)
+    cpdef items(self)
+    cpdef pop(self, key, default=?)
+    cpdef popitem(self)
+    cpdef transform_values(self, binary_funct)
+    cpdef remove_if(self, binary_pred)
+    cpdef remove_duplicates(self)

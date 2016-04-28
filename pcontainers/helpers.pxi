@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 cdef inline unicode make_unicode(s):
     if s is None:
@@ -58,5 +59,6 @@ cdef inline topy(const CBString& s):
 
 
 cdef inline CBString tocbstring(s):
+    # todo: accept buffer protocol
     s = make_utf8(s)
     return CBString(<char*> s, len(s))
