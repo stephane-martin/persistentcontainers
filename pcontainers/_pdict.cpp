@@ -2667,13 +2667,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_int(unsigned int value)
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
-/* Print.proto */
-static int __Pyx_Print(PyObject*, PyObject *, int);
-#if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
-static PyObject* __pyx_print = 0;
-static PyObject* __pyx_print_kwargs = 0;
-#endif
-
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value);
 
@@ -2701,9 +2694,6 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_As_PY_LONG_LONG(PyObject *);
-
-/* PrintOne.proto */
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o);
 
 /* SwapException.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -3087,7 +3077,6 @@ static const char __pyx_k_y[] = "y";
 static const char __pyx_k__8[] = "";
 static const char __pyx_k__98[] = ",";
 static const char __pyx_k__99[] = ":";
-static const char __pyx_k_end[] = "end";
 static const char __pyx_k_get[] = "get";
 static const char __pyx_k_key[] = "key";
 static const char __pyx_k_new[] = "new";
@@ -3101,7 +3090,6 @@ static const char __pyx_k_STOP[] = "STOP";
 static const char __pyx_k_args[] = "args";
 static const char __pyx_k_dump[] = "dump";
 static const char __pyx_k_exit[] = "__exit__";
-static const char __pyx_k_file[] = "file";
 static const char __pyx_k_full[] = "full";
 static const char __pyx_k_hmac[] = "hmac";
 static const char __pyx_k_init[] = "__init__";
@@ -3145,7 +3133,6 @@ static const char __pyx_k_level[] = "level";
 static const char __pyx_k_loads[] = "loads";
 static const char __pyx_k_other[] = "other";
 static const char __pyx_k_pdict[] = "pdict";
-static const char __pyx_k_print[] = "print";
 static const char __pyx_k_qsize[] = "qsize";
 static const char __pyx_k_queue[] = "queue";
 static const char __pyx_k_range[] = "range";
@@ -3324,7 +3311,6 @@ static const char __pyx_k_unicode_errors[] = "unicode_errors";
 static const char __pyx_k_PRawDict_values[] = "PRawDict.values";
 static const char __pyx_k_async_pop_front[] = "async_pop_front";
 static const char __pyx_k_async_push_back[] = "async_push_back";
-static const char __pyx_k_future_is_ready[] = "future is ready";
 static const char __pyx_k_key_is_too_long[] = "key is too long";
 static const char __pyx_k_push_front_many[] = "push_front_many";
 static const char __pyx_k_ExpiryDict_items[] = "ExpiryDict.items";
@@ -3491,7 +3477,6 @@ static PyObject *__pyx_n_s_e;
 static PyObject *__pyx_n_s_empty;
 static PyObject *__pyx_kp_s_empty_dirname;
 static PyObject *__pyx_n_s_encoding;
-static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_ensure_ascii;
 static PyObject *__pyx_n_s_enter;
 static PyObject *__pyx_n_s_erase;
@@ -3503,7 +3488,6 @@ static PyObject *__pyx_kp_s_exception_calling_callback;
 static PyObject *__pyx_n_s_exit;
 static PyObject *__pyx_n_s_expiry;
 static PyObject *__pyx_n_s_ext_hook;
-static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_first;
 static PyObject *__pyx_n_s_fixed_map;
 static PyObject *__pyx_n_s_flush;
@@ -3513,7 +3497,6 @@ static PyObject *__pyx_n_s_fromkeys;
 static PyObject *__pyx_n_s_fromkeys_locals_genexpr;
 static PyObject *__pyx_n_s_full;
 static PyObject *__pyx_n_s_functor;
-static PyObject *__pyx_kp_s_future_is_ready;
 static PyObject *__pyx_n_s_future_is_ready_callback;
 static PyObject *__pyx_n_s_genexpr;
 static PyObject *__pyx_n_b_get;
@@ -3599,7 +3582,6 @@ static PyObject *__pyx_n_s_popitem;
 static PyObject *__pyx_n_s_popleft;
 static PyObject *__pyx_n_s_pos;
 static PyObject *__pyx_n_s_predicate;
-static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_protocol;
 static PyObject *__pyx_n_s_prune_expired;
 static PyObject *__pyx_n_s_prune_period;
@@ -39657,7 +39639,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21CBStringFutureWrapper_set_boost
  *             self._boost_future_after_then = then_(f, callback)
  * 
  *     def _future_is_ready_callback(self):             # <<<<<<<<<<<<<<
- *         print("future is ready")
+ *         # print("future is ready")
  *         cdef CBString result
  */
 
@@ -39694,18 +39676,9 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_2_future
   int __pyx_t_13;
   __Pyx_RefNannySetupContext("_future_is_ready_callback", 0);
 
-  /* "pcontainers/cpp_future_wrapper_impl.pxi":118
- * 
- *     def _future_is_ready_callback(self):
- *         print("future is ready")             # <<<<<<<<<<<<<<
- *         cdef CBString result
- *         # ready_callback will be called from a foreign C++ thread...
- */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_future_is_ready) < 0) __PYX_ERR(3, 118, __pyx_L1_error)
-
   /* "pcontainers/cpp_future_wrapper_impl.pxi":121
  *         cdef CBString result
- *         # ready_callback will be called from a foreign C++ thread...
+ *         # _future_is_ready_callback will be called from a foreign C++ thread...
  *         try:             # <<<<<<<<<<<<<<
  *             result = self._boost_future.get()
  *         except Exception as ex:
@@ -39720,7 +39693,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_2_future
     /*try:*/ {
 
       /* "pcontainers/cpp_future_wrapper_impl.pxi":122
- *         # ready_callback will be called from a foreign C++ thread...
+ *         # _future_is_ready_callback will be called from a foreign C++ thread...
  *         try:
  *             result = self._boost_future.get()             # <<<<<<<<<<<<<<
  *         except Exception as ex:
@@ -39736,7 +39709,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_2_future
 
       /* "pcontainers/cpp_future_wrapper_impl.pxi":121
  *         cdef CBString result
- *         # ready_callback will be called from a foreign C++ thread...
+ *         # _future_is_ready_callback will be called from a foreign C++ thread...
  *         try:             # <<<<<<<<<<<<<<
  *             result = self._boost_future.get()
  *         except Exception as ex:
@@ -39927,7 +39900,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_2_future
 
     /* "pcontainers/cpp_future_wrapper_impl.pxi":121
  *         cdef CBString result
- *         # ready_callback will be called from a foreign C++ thread...
+ *         # _future_is_ready_callback will be called from a foreign C++ thread...
  *         try:             # <<<<<<<<<<<<<<
  *             result = self._boost_future.get()
  *         except Exception as ex:
@@ -39989,7 +39962,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_2_future
  *             self._boost_future_after_then = then_(f, callback)
  * 
  *     def _future_is_ready_callback(self):             # <<<<<<<<<<<<<<
- *         print("future is ready")
+ *         # print("future is ready")
  *         cdef CBString result
  */
 
@@ -72220,7 +72193,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_empty, __pyx_k_empty, sizeof(__pyx_k_empty), 0, 0, 1, 1},
   {&__pyx_kp_s_empty_dirname, __pyx_k_empty_dirname, sizeof(__pyx_k_empty_dirname), 0, 0, 1, 0},
   {&__pyx_n_s_encoding, __pyx_k_encoding, sizeof(__pyx_k_encoding), 0, 0, 1, 1},
-  {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
   {&__pyx_n_s_ensure_ascii, __pyx_k_ensure_ascii, sizeof(__pyx_k_ensure_ascii), 0, 0, 1, 1},
   {&__pyx_n_s_enter, __pyx_k_enter, sizeof(__pyx_k_enter), 0, 0, 1, 1},
   {&__pyx_n_s_erase, __pyx_k_erase, sizeof(__pyx_k_erase), 0, 0, 1, 1},
@@ -72232,7 +72204,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
   {&__pyx_n_s_expiry, __pyx_k_expiry, sizeof(__pyx_k_expiry), 0, 0, 1, 1},
   {&__pyx_n_s_ext_hook, __pyx_k_ext_hook, sizeof(__pyx_k_ext_hook), 0, 0, 1, 1},
-  {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_first, __pyx_k_first, sizeof(__pyx_k_first), 0, 0, 1, 1},
   {&__pyx_n_s_fixed_map, __pyx_k_fixed_map, sizeof(__pyx_k_fixed_map), 0, 0, 1, 1},
   {&__pyx_n_s_flush, __pyx_k_flush, sizeof(__pyx_k_flush), 0, 0, 1, 1},
@@ -72242,7 +72213,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_fromkeys_locals_genexpr, __pyx_k_fromkeys_locals_genexpr, sizeof(__pyx_k_fromkeys_locals_genexpr), 0, 0, 1, 1},
   {&__pyx_n_s_full, __pyx_k_full, sizeof(__pyx_k_full), 0, 0, 1, 1},
   {&__pyx_n_s_functor, __pyx_k_functor, sizeof(__pyx_k_functor), 0, 0, 1, 1},
-  {&__pyx_kp_s_future_is_ready, __pyx_k_future_is_ready, sizeof(__pyx_k_future_is_ready), 0, 0, 1, 0},
   {&__pyx_n_s_future_is_ready_callback, __pyx_k_future_is_ready_callback, sizeof(__pyx_k_future_is_ready_callback), 0, 0, 1, 1},
   {&__pyx_n_s_genexpr, __pyx_k_genexpr, sizeof(__pyx_k_genexpr), 0, 0, 1, 1},
   {&__pyx_n_b_get, __pyx_k_get, sizeof(__pyx_k_get), 0, 0, 0, 1},
@@ -72328,7 +72298,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_popleft, __pyx_k_popleft, sizeof(__pyx_k_popleft), 0, 0, 1, 1},
   {&__pyx_n_s_pos, __pyx_k_pos, sizeof(__pyx_k_pos), 0, 0, 1, 1},
   {&__pyx_n_s_predicate, __pyx_k_predicate, sizeof(__pyx_k_predicate), 0, 0, 1, 1},
-  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_protocol, __pyx_k_protocol, sizeof(__pyx_k_protocol), 0, 0, 1, 1},
   {&__pyx_n_s_prune_expired, __pyx_k_prune_expired, sizeof(__pyx_k_prune_expired), 0, 0, 1, 1},
   {&__pyx_n_s_prune_period, __pyx_k_prune_period, sizeof(__pyx_k_prune_period), 0, 0, 1, 1},
@@ -77262,112 +77231,6 @@ bad:
     }
 }
 
-/* Print */
-              #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static PyObject *__Pyx_GetStdout(void) {
-    PyObject *f = PySys_GetObject((char *)"stdout");
-    if (!f) {
-        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
-    }
-    return f;
-}
-static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
-    int i;
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
-        PyObject* v;
-        if (PyFile_SoftSpace(f, 1)) {
-            if (PyFile_WriteString(" ", f) < 0)
-                goto error;
-        }
-        v = PyTuple_GET_ITEM(arg_tuple, i);
-        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
-            goto error;
-        if (PyString_Check(v)) {
-            char *s = PyString_AsString(v);
-            Py_ssize_t len = PyString_Size(v);
-            if (len > 0) {
-                switch (s[len-1]) {
-                    case ' ': break;
-                    case '\f': case '\r': case '\n': case '\t': case '\v':
-                        PyFile_SoftSpace(f, 0);
-                        break;
-                    default:  break;
-                }
-            }
-        }
-    }
-    if (newline) {
-        if (PyFile_WriteString("\n", f) < 0)
-            goto error;
-        PyFile_SoftSpace(f, 0);
-    }
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-}
-#else
-static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
-    PyObject* kwargs = 0;
-    PyObject* result = 0;
-    PyObject* end_string;
-    if (unlikely(!__pyx_print)) {
-        __pyx_print = PyObject_GetAttr(__pyx_b, __pyx_n_s_print);
-        if (!__pyx_print)
-            return -1;
-    }
-    if (stream) {
-        kwargs = PyDict_New();
-        if (unlikely(!kwargs))
-            return -1;
-        if (unlikely(PyDict_SetItem(kwargs, __pyx_n_s_file, stream) < 0))
-            goto bad;
-        if (!newline) {
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                goto bad;
-            if (PyDict_SetItem(kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                goto bad;
-            }
-            Py_DECREF(end_string);
-        }
-    } else if (!newline) {
-        if (unlikely(!__pyx_print_kwargs)) {
-            __pyx_print_kwargs = PyDict_New();
-            if (unlikely(!__pyx_print_kwargs))
-                return -1;
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                return -1;
-            if (PyDict_SetItem(__pyx_print_kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                return -1;
-            }
-            Py_DECREF(end_string);
-        }
-        kwargs = __pyx_print_kwargs;
-    }
-    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
-    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
-        Py_DECREF(kwargs);
-    if (!result)
-        return -1;
-    Py_DECREF(result);
-    return 0;
-bad:
-    if (kwargs != __pyx_print_kwargs)
-        Py_XDECREF(kwargs);
-    return -1;
-}
-#endif
-
 /* CIntToPy */
               static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value) {
     const time_t neg_one = (time_t) -1, const_zero = (time_t) 0;
@@ -78730,43 +78593,6 @@ raise_neg_overflow:
         "can't convert negative value to PY_LONG_LONG");
     return (PY_LONG_LONG) -1;
 }
-
-/* PrintOne */
-              #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    if (PyFile_SoftSpace(f, 0)) {
-        if (PyFile_WriteString(" ", f) < 0)
-            goto error;
-    }
-    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
-        goto error;
-    if (PyFile_WriteString("\n", f) < 0)
-        goto error;
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-    /* the line below is just to avoid C compiler
-     * warnings about unused functions */
-    return __Pyx_Print(f, NULL, 0);
-}
-#else
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
-    int res;
-    PyObject* arg_tuple = PyTuple_Pack(1, o);
-    if (unlikely(!arg_tuple))
-        return -1;
-    res = __Pyx_Print(stream, arg_tuple, 1);
-    Py_DECREF(arg_tuple);
-    return res;
-}
-#endif
 
 /* SwapException */
               #if CYTHON_COMPILING_IN_CPYTHON
