@@ -125,7 +125,7 @@ private:
                 if (!reads_queue.empty()) {
                     task_ptr = reads_queue.front();
                     reads_queue.pop_front();
-                    queue_lock.unlock();    // queue_lock is unlocked
+                    queue_lock.unlock();
                     if (task_ptr) {
                         // execute the (potentially blocking) task
                         (task_ptr->operator())();
@@ -207,19 +207,26 @@ private:
         _LOG_DEBUG << "BufferedPersistentDict::flush";
         lock_guard<mutex> flush_lock(flush_mutex);
         {
-            // we lock buffers_lock for a small time (just copy the buffers)
-            // here 'at', 'insert' and 'erase' are blocked
+            /*
+            map < CBString, pair < CBString, PromisePtr > > buffered_inserts;
+            map < CBString, pair < CBString, PromisePtr > > current_inserts;
+            map < CBString, PromisePtr > current_deletes;
+            map < CBString, PromisePtr > buffered_deletes;
+            */
+
+            // we lock buffers_lock for a small time to copy the "top" buffers to the "current" buffers
+            // (here 'at', 'insert' and 'erase' are blocked)
             unique_lock<shared_mutex> buffers_lock(buffers_mutex);
             unique_lock<shared_mutex> current_buffers_lock(current_buffers_mutex);
             current_deletes.swap(buffered_deletes);
             current_inserts.swap(buffered_inserts);
         }
-        // every operation possible here
+        // every operation is possible at this precise point
         {
             upgrade_lock<shared_mutex> current_buffers_lock(current_buffers_mutex);
             // currents buffers are in read mode: every operation is possible while flushing to LMDB
-            // in particular updates can be posted to top buffers
-            {
+            // in particular updates can be posted to the "top" buffers
+            try {
                 DictIterator dict_it(the_dict->begin(false));
                 // we now have a LMDB write transaction
                 // if a client tries to read with 'at', it will not see the changes in LMDB yet (but it can see them in
@@ -230,8 +237,27 @@ private:
                 for(map < CBString, PromisePtr >::iterator it(current_deletes.begin()); it != current_deletes.end(); ++it) {
                     dict_it.del(it->first);
                 }
-            }
-            // end of LMDB transaction: changes were commited. let's confirm it to the client via promises
+            } catch (...) {
+                // ohhh, shit happens: some exceptions occured, and the LMDB transaction was rollbacked
+                // let's notify the client
+                for(map < CBString, pair < CBString, PromisePtr > >::iterator it(current_inserts.begin()); it != current_inserts.end(); ++it) {
+                    ((it->second).second)->set_exception(boost::current_exception());
+                }
+                for(map < CBString, PromisePtr >::iterator it(current_deletes.begin()); it != current_deletes.end(); ++it) {
+                    (it->second)->set_exception(boost::current_exception());
+                }
+                // we clear the current buffers anyway: the client will have to try to deal with the exception
+                // and try insert/delete again if needed... strange behaviour is *going to happen* unfortunately, as
+                // previously deleted values is going to come back alive !!!
+                {
+                    upgrade_to_unique_lock<shared_mutex> ulock(current_buffers_lock);
+                    current_deletes.clear();
+                    current_inserts.clear();
+                }
+                return;
+           }
+
+            // end of LMDB transaction: changes were commited. let's confirm it to the client using the promises
             for(map < CBString, pair < CBString, PromisePtr > >::iterator it(current_inserts.begin()); it != current_inserts.end(); ++it) {
                 ((it->second).second)->set_value(true);
             }
@@ -240,7 +266,7 @@ private:
             }
 
             {
-                // current_buffers_lock is locked for very small time
+                // current buffers are locked for very small time to clear them
                 // here 'at' is blocked
                 upgrade_to_unique_lock<shared_mutex> ulock(current_buffers_lock);
                 current_deletes.clear();
@@ -263,7 +289,7 @@ public:
         flushing_interval(flush_interval)
     {
         if (!the_dict || !*the_dict) {
-            BOOST_THROW_EXCEPTION(not_initialized());
+            BOOST_THROW_EXCEPTION ( not_initialized() );
         }
 
         start();
@@ -277,16 +303,22 @@ public:
     bool operator!() const { return !the_dict || !*the_dict; }
 
     CBString at(MDB_val key) const {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         return at(CBString(key.mv_data, key.mv_size));
     }
 
     CBString at(const CBString& key) const {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         shared_lock<shared_mutex> buffers_lock(buffers_mutex);
         shared_lock<shared_mutex> current_buffers_lock(current_buffers_mutex);
         DictConstIterator it(the_dict->cfind(key));
 
         if (buffered_deletes.count(key)) {
-            BOOST_THROW_EXCEPTION(mdb_notfound());
+            BOOST_THROW_EXCEPTION( mdb_notfound() );
         }
 
         if (buffered_inserts.count(key)) {
@@ -305,11 +337,16 @@ public:
     }
 
     MySharedFuture async_at(MDB_val key) const {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         return async_at(CBString(key.mv_data, key.mv_size));
     }
 
     MySharedFuture async_at(const CBString& key) const {
-
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         if (!reader_thread_is_running.load()) {
             BOOST_THROW_EXCEPTION(not_initialized());
         }
@@ -348,10 +385,16 @@ public:
     }
 
     MySharedBoolFuture erase(MDB_val key) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         return erase(CBString(key.mv_data, key.mv_size));
     }
 
     MySharedBoolFuture erase(const CBString& key) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         unique_lock<shared_mutex> buffers_lock(buffers_mutex);
         PromisePtr prom = make_shared<MyPromise>();
         if (buffered_inserts.count(key)) {
@@ -366,10 +409,16 @@ public:
     }
 
     MySharedBoolFuture insert(MDB_val key, MDB_val value) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         return insert(CBString(key.mv_data, key.mv_size), CBString(value.mv_data, value.mv_size));
     }
 
     MySharedBoolFuture insert(const CBString& key, const CBString& value) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         unique_lock<shared_mutex> buffers_lock(buffers_mutex);
         PromisePtr prom = make_shared<MyPromise>();
         if (buffered_deletes.count(key)) {

@@ -2,9 +2,14 @@
 
 # noinspection PyPep8Naming
 cdef class BufferedPQueueWrapper(object):
-    def __cinit__(self, PRawQueue q, uint64_t ms_interval):
+    def __cinit__(self, PRawQueue q, interval):
         if q is None:
             raise ValueError()
+        if not isinstance(interval, Number):
+            raise TypeError()
+        if interval <= 0:
+            raise ValueError()
+        cdef uint64_t ms_interval = int(interval * 1000)
         self.the_queue = q
         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
 
@@ -12,7 +17,7 @@ cdef class BufferedPQueueWrapper(object):
         with nogil:
             self.ptr.reset()
 
-    def __init__(self, PRawQueue q, uint64_t ms_interval):
+    def __init__(self, PRawQueue q, interval):
         pass
 
     cpdef push_back(self, value):

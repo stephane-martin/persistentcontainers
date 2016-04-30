@@ -1985,7 +1985,7 @@ static struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *__pyx_vt
  * 
  * # noinspection PyPep8Naming
  * cdef class BufferedPDictWrapper(object):             # <<<<<<<<<<<<<<
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):
+ *     def __cinit__(self, PRawDict d, interval):
  *         if d is None:
  */
 
@@ -2002,7 +2002,7 @@ static struct __pyx_vtabstruct_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx
  * 
  * # noinspection PyPep8Naming
  * cdef class BufferedPQueueWrapper(object):             # <<<<<<<<<<<<<<
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):
+ *     def __cinit__(self, PRawQueue q, interval):
  *         if q is None:
  */
 
@@ -2739,9 +2739,6 @@ static PyObject* __Pyx_Method_ClassMethod(PyObject *method);
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntFromPy.proto */
-static CYTHON_INLINE uint64_t __Pyx_PyInt_As_uint64_t(PyObject *);
-
-/* CIntFromPy.proto */
 static CYTHON_INLINE time_t __Pyx_PyInt_As_time_t(PyObject *);
 
 /* CIntFromPy.proto */
@@ -2752,6 +2749,9 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
+
+/* CIntFromPy.proto */
+static CYTHON_INLINE uint64_t __Pyx_PyInt_As_uint64_t(PyObject *);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_As_PY_LONG_LONG(PyObject *);
@@ -3276,6 +3276,7 @@ static const char __pyx_k_encoding[] = "encoding";
 static const char __pyx_k_exc_type[] = "exc_type";
 static const char __pyx_k_ext_hook[] = "ext_hook";
 static const char __pyx_k_fromkeys[] = "fromkeys";
+static const char __pyx_k_interval[] = "interval";
 static const char __pyx_k_iterkeys[] = "iterkeys";
 static const char __pyx_k_map_size[] = "map_size";
 static const char __pyx_k_metadata[] = "metadata";
@@ -3332,7 +3333,6 @@ static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_binary_pred[] = "binary_pred";
 static const char __pyx_k_collections[] = "collections";
 static const char __pyx_k_max_readers[] = "max_readers";
-static const char __pyx_k_ms_interval[] = "ms_interval";
 static const char __pyx_k_no_mem_init[] = "no_mem_init";
 static const char __pyx_k_noiteritems[] = "noiteritems";
 static const char __pyx_k_unary_funct[] = "unary_funct";
@@ -3579,6 +3579,7 @@ static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_indent;
 static PyObject *__pyx_n_s_index;
 static PyObject *__pyx_n_s_init;
+static PyObject *__pyx_n_s_interval;
 static PyObject *__pyx_n_s_invoke_callbacks;
 static PyObject *__pyx_n_s_is_set;
 static PyObject *__pyx_n_s_item;
@@ -3613,7 +3614,6 @@ static PyObject *__pyx_n_s_max_readers;
 static PyObject *__pyx_n_s_mbufferio;
 static PyObject *__pyx_n_s_metadata;
 static PyObject *__pyx_n_s_move_to;
-static PyObject *__pyx_n_s_ms_interval;
 static PyObject *__pyx_n_s_msgpack;
 static PyObject *__pyx_n_s_n;
 static PyObject *__pyx_n_s_new;
@@ -3924,16 +3924,16 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21CBStringFutureWrapper_4_wait(s
 static int __pyx_pf_11pcontainers_6_pdict_17BoolFutureWrapper___init__(struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_17BoolFutureWrapper_2_future_is_ready_callback(struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_17BoolFutureWrapper_4_wait(struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *__pyx_v_self, PyObject *__pyx_v_timeout); /* proto */
-static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, uint64_t __pyx_v_ms_interval); /* proto */
+static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, PyObject *__pyx_v_interval); /* proto */
 static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self); /* proto */
-static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, CYTHON_UNUSED uint64_t __pyx_v_ms_interval); /* proto */
+static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, CYTHON_UNUSED PyObject *__pyx_v_interval); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_6getitem(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, PyObject *__pyx_v_key); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_8async_setitem(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_10async_delitem(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, PyObject *__pyx_v_key); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_12async_getitem(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, PyObject *__pyx_v_key); /* proto */
-static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, uint64_t __pyx_v_ms_interval); /* proto */
+static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, PyObject *__pyx_v_interval); /* proto */
 static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self); /* proto */
-static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, CYTHON_UNUSED uint64_t __pyx_v_ms_interval); /* proto */
+static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, CYTHON_UNUSED PyObject *__pyx_v_interval); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_6push_back(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static int __pyx_pf_11pcontainers_6_pdict_10ExpiryDict___init__(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self, PyObject *__pyx_v_dirname, time_t __pyx_v_default_expiry, time_t __pyx_v_prune_period, struct __pyx_obj_11pcontainers_6_pdict_LmdbOptions *__pyx_v_opts, struct __pyx_obj_11pcontainers_6_pdict_Chain *__pyx_v_key_chain, struct __pyx_obj_11pcontainers_6_pdict_Chain *__pyx_v_value_chain); /* proto */
 static PyObject *__pyx_pf_11pcontainers_6_pdict_10ExpiryDict_2__enter__(struct __pyx_obj_11pcontainers_6_pdict_ExpiryDict *__pyx_v_self); /* proto */
@@ -42039,7 +42039,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_17BoolFutureWrapper_4_wait(struc
 /* "pcontainers/buffered_pdict_impl.pxi":5
  * # noinspection PyPep8Naming
  * cdef class BufferedPDictWrapper(object):
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __cinit__(self, PRawDict d, interval):             # <<<<<<<<<<<<<<
  *         if d is None:
  *             raise ValueError()
  */
@@ -42048,12 +42048,12 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_17BoolFutureWrapper_4_wait(struc
 static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d = 0;
-  uint64_t __pyx_v_ms_interval;
+  PyObject *__pyx_v_interval = 0;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_d,&__pyx_n_s_ms_interval,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_d,&__pyx_n_s_interval,0};
     PyObject* values[2] = {0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -42070,7 +42070,7 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyOb
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_d)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_ms_interval)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_interval)) != 0)) kw_args--;
         else {
           __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, 1); __PYX_ERR(5, 5, __pyx_L3_error)
         }
@@ -42085,7 +42085,7 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyOb
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_d = ((struct __pyx_obj_11pcontainers_6_pdict_PRawDict *)values[0]);
-    __pyx_v_ms_interval = __Pyx_PyInt_As_uint64_t(values[1]); if (unlikely((__pyx_v_ms_interval == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(5, 5, __pyx_L3_error)
+    __pyx_v_interval = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -42096,7 +42096,7 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyOb
   return -1;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_d), __pyx_ptype_11pcontainers_6_pdict_PRawDict, 1, "d", 0))) __PYX_ERR(5, 5, __pyx_L1_error)
-  __pyx_r = __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *)__pyx_v_self), __pyx_v_d, __pyx_v_ms_interval);
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *)__pyx_v_self), __pyx_v_d, __pyx_v_interval);
 
   /* function exit code */
   goto __pyx_L0;
@@ -42107,32 +42107,35 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_1__cinit__(PyOb
   return __pyx_r;
 }
 
-static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, uint64_t __pyx_v_ms_interval) {
+static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, PyObject *__pyx_v_interval) {
+  uint64_t __pyx_v_ms_interval;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
-  quiet::BufferedPersistentDict *__pyx_t_4;
+  PyObject *__pyx_t_4 = NULL;
+  uint64_t __pyx_t_5;
+  quiet::BufferedPersistentDict *__pyx_t_6;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "pcontainers/buffered_pdict_impl.pxi":6
  * cdef class BufferedPDictWrapper(object):
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):
+ *     def __cinit__(self, PRawDict d, interval):
  *         if d is None:             # <<<<<<<<<<<<<<
  *             raise ValueError()
- *         self.the_dict = d
+ *         if not isinstance(interval, Number):
  */
   __pyx_t_1 = (((PyObject *)__pyx_v_d) == Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
     /* "pcontainers/buffered_pdict_impl.pxi":7
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):
+ *     def __cinit__(self, PRawDict d, interval):
  *         if d is None:
  *             raise ValueError()             # <<<<<<<<<<<<<<
- *         self.the_dict = d
- *         self.ptr = shared_ptr[cppBufferedPersistentDict](new cppBufferedPersistentDict(d.ptr, ms_interval))
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
  */
     __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_ValueError); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 7, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -42142,16 +42145,102 @@ static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struc
 
     /* "pcontainers/buffered_pdict_impl.pxi":6
  * cdef class BufferedPDictWrapper(object):
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):
+ *     def __cinit__(self, PRawDict d, interval):
  *         if d is None:             # <<<<<<<<<<<<<<
  *             raise ValueError()
- *         self.the_dict = d
+ *         if not isinstance(interval, Number):
  */
   }
 
   /* "pcontainers/buffered_pdict_impl.pxi":8
  *         if d is None:
  *             raise ValueError()
+ *         if not isinstance(interval, Number):             # <<<<<<<<<<<<<<
+ *             raise TypeError()
+ *         if interval <= 0:
+ */
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_Number); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_interval, __pyx_t_3); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(5, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = ((!(__pyx_t_2 != 0)) != 0);
+  if (__pyx_t_1) {
+
+    /* "pcontainers/buffered_pdict_impl.pxi":9
+ *             raise ValueError()
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()             # <<<<<<<<<<<<<<
+ *         if interval <= 0:
+ *             raise ValueError()
+ */
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_TypeError); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 9, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __PYX_ERR(5, 9, __pyx_L1_error)
+
+    /* "pcontainers/buffered_pdict_impl.pxi":8
+ *         if d is None:
+ *             raise ValueError()
+ *         if not isinstance(interval, Number):             # <<<<<<<<<<<<<<
+ *             raise TypeError()
+ *         if interval <= 0:
+ */
+  }
+
+  /* "pcontainers/buffered_pdict_impl.pxi":10
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
+ *         if interval <= 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ */
+  __pyx_t_3 = PyObject_RichCompare(__pyx_v_interval, __pyx_int_0, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(5, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (__pyx_t_1) {
+
+    /* "pcontainers/buffered_pdict_impl.pxi":11
+ *             raise TypeError()
+ *         if interval <= 0:
+ *             raise ValueError()             # <<<<<<<<<<<<<<
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ * 
+ */
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_ValueError); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __PYX_ERR(5, 11, __pyx_L1_error)
+
+    /* "pcontainers/buffered_pdict_impl.pxi":10
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
+ *         if interval <= 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ */
+  }
+
+  /* "pcontainers/buffered_pdict_impl.pxi":12
+ *         if interval <= 0:
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)             # <<<<<<<<<<<<<<
+ * 
+ *         self.the_dict = d
+ */
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_interval, __pyx_int_1000); if (unlikely(!__pyx_t_3)) __PYX_ERR(5, 12, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(5, 12, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_5 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_5 == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(5, 12, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_ms_interval = __pyx_t_5;
+
+  /* "pcontainers/buffered_pdict_impl.pxi":14
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ * 
  *         self.the_dict = d             # <<<<<<<<<<<<<<
  *         self.ptr = shared_ptr[cppBufferedPersistentDict](new cppBufferedPersistentDict(d.ptr, ms_interval))
  * 
@@ -42162,25 +42251,25 @@ static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struc
   __Pyx_DECREF(((PyObject *)__pyx_v_self->the_dict));
   __pyx_v_self->the_dict = __pyx_v_d;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":9
- *             raise ValueError()
+  /* "pcontainers/buffered_pdict_impl.pxi":15
+ * 
  *         self.the_dict = d
  *         self.ptr = shared_ptr[cppBufferedPersistentDict](new cppBufferedPersistentDict(d.ptr, ms_interval))             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
  */
   try {
-    __pyx_t_4 = new quiet::BufferedPersistentDict(__pyx_v_d->ptr, __pyx_v_ms_interval);
+    __pyx_t_6 = new quiet::BufferedPersistentDict(__pyx_v_d->ptr, __pyx_v_ms_interval);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 9, __pyx_L1_error)
+    __PYX_ERR(5, 15, __pyx_L1_error)
   }
-  __pyx_v_self->ptr = boost::shared_ptr<quiet::BufferedPersistentDict> (__pyx_t_4);
+  __pyx_v_self->ptr = boost::shared_ptr<quiet::BufferedPersistentDict> (__pyx_t_6);
 
   /* "pcontainers/buffered_pdict_impl.pxi":5
  * # noinspection PyPep8Naming
  * cdef class BufferedPDictWrapper(object):
- *     def __cinit__(self, PRawDict d, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __cinit__(self, PRawDict d, interval):             # <<<<<<<<<<<<<<
  *         if d is None:
  *             raise ValueError()
  */
@@ -42190,6 +42279,7 @@ static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struc
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("pcontainers._pdict.BufferedPDictWrapper.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -42197,7 +42287,7 @@ static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper___cinit__(struc
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":11
+/* "pcontainers/buffered_pdict_impl.pxi":17
  *         self.ptr = shared_ptr[cppBufferedPersistentDict](new cppBufferedPersistentDict(d.ptr, ms_interval))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -42220,7 +42310,7 @@ static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(s
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "pcontainers/buffered_pdict_impl.pxi":12
+  /* "pcontainers/buffered_pdict_impl.pxi":18
  * 
  *     def __dealloc__(self):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -42234,17 +42324,17 @@ static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(s
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pdict_impl.pxi":13
+        /* "pcontainers/buffered_pdict_impl.pxi":19
  *     def __dealloc__(self):
  *         with nogil:
  *             self.ptr.reset()             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, PRawDict d, uint64_t ms_interval):
+ *     def __init__(self, PRawDict d, interval):
  */
         __pyx_v_self->ptr.reset();
       }
 
-      /* "pcontainers/buffered_pdict_impl.pxi":12
+      /* "pcontainers/buffered_pdict_impl.pxi":18
  * 
  *     def __dealloc__(self):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -42262,7 +42352,7 @@ static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(s
       }
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":11
+  /* "pcontainers/buffered_pdict_impl.pxi":17
  *         self.ptr = shared_ptr[cppBufferedPersistentDict](new cppBufferedPersistentDict(d.ptr, ms_interval))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -42274,10 +42364,10 @@ static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(s
   __Pyx_RefNannyFinishContext();
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":15
+/* "pcontainers/buffered_pdict_impl.pxi":21
  *             self.ptr.reset()
  * 
- *     def __init__(self, PRawDict d, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __init__(self, PRawDict d, interval):             # <<<<<<<<<<<<<<
  *         pass
  * 
  */
@@ -42286,12 +42376,12 @@ static void __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_2__dealloc__(s
 static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_5__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_5__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d = 0;
-  CYTHON_UNUSED uint64_t __pyx_v_ms_interval;
+  CYTHON_UNUSED PyObject *__pyx_v_interval = 0;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_d,&__pyx_n_s_ms_interval,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_d,&__pyx_n_s_interval,0};
     PyObject* values[2] = {0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -42308,13 +42398,13 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_5__init__(PyObj
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_d)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_ms_interval)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_interval)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(5, 15, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(5, 21, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(5, 15, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(5, 21, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -42323,18 +42413,18 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_5__init__(PyObj
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_d = ((struct __pyx_obj_11pcontainers_6_pdict_PRawDict *)values[0]);
-    __pyx_v_ms_interval = __Pyx_PyInt_As_uint64_t(values[1]); if (unlikely((__pyx_v_ms_interval == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(5, 15, __pyx_L3_error)
+    __pyx_v_interval = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(5, 15, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(5, 21, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pcontainers._pdict.BufferedPDictWrapper.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_d), __pyx_ptype_11pcontainers_6_pdict_PRawDict, 1, "d", 0))) __PYX_ERR(5, 15, __pyx_L1_error)
-  __pyx_r = __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *)__pyx_v_self), __pyx_v_d, __pyx_v_ms_interval);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_d), __pyx_ptype_11pcontainers_6_pdict_PRawDict, 1, "d", 0))) __PYX_ERR(5, 21, __pyx_L1_error)
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *)__pyx_v_self), __pyx_v_d, __pyx_v_interval);
 
   /* function exit code */
   goto __pyx_L0;
@@ -42345,7 +42435,7 @@ static int __pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_5__init__(PyObj
   return __pyx_r;
 }
 
-static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, CYTHON_UNUSED uint64_t __pyx_v_ms_interval) {
+static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPDictWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawDict *__pyx_v_d, CYTHON_UNUSED PyObject *__pyx_v_interval) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
@@ -42356,7 +42446,7 @@ static int __pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_4__init__(CYTHO
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":18
+/* "pcontainers/buffered_pdict_impl.pxi":24
  *         pass
  * 
  *     cpdef getitem(self, key):             # <<<<<<<<<<<<<<
@@ -42382,7 +42472,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_getitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 18, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_getitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 24, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_7getitem)) {
       __Pyx_XDECREF(__pyx_r);
@@ -42398,16 +42488,16 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
         }
       }
       if (!__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 18, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 24, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
       } else {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 18, __pyx_L1_error)
+        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 24, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_INCREF(__pyx_v_key);
         __Pyx_GIVEREF(__pyx_v_key);
         PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_key);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 18, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 24, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
@@ -42420,19 +42510,19 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":19
+  /* "pcontainers/buffered_pdict_impl.pxi":25
  * 
  *     cpdef getitem(self, key):
  *         encoded_key = self.the_dict.key_chain.dumps(key)             # <<<<<<<<<<<<<<
  *         cdef CBString result = self.ptr.get().at(
  *             PyBufferWrap(encoded_key).get_mdb_val()
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 19, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_key = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":21
+  /* "pcontainers/buffered_pdict_impl.pxi":27
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef CBString result = self.ptr.get().at(
  *             PyBufferWrap(encoded_key).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -42443,10 +42533,10 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
     __pyx_t_6 = utils::PyBufferWrap(__pyx_v_encoded_key);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 21, __pyx_L1_error)
+    __PYX_ERR(5, 27, __pyx_L1_error)
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":20
+  /* "pcontainers/buffered_pdict_impl.pxi":26
  *     cpdef getitem(self, key):
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef CBString result = self.ptr.get().at(             # <<<<<<<<<<<<<<
@@ -42457,11 +42547,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
     __pyx_t_7 = __pyx_v_self->ptr.get()->at(__pyx_t_6.get_mdb_val());
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 20, __pyx_L1_error)
+    __PYX_ERR(5, 26, __pyx_L1_error)
   }
   __pyx_v_result = __pyx_t_7;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":23
+  /* "pcontainers/buffered_pdict_impl.pxi":29
  *             PyBufferWrap(encoded_key).get_mdb_val()
  *         )
  *         return self.the_dict.value_chain.loads(make_mbufferio_from_cbstring(result))             # <<<<<<<<<<<<<<
@@ -42469,16 +42559,16 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(st
  *     cpdef async_setitem(self, key, value):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_make_mbufferio_from_cbstring(__pyx_v_result); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 23, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_make_mbufferio_from_cbstring(__pyx_v_result); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->value_chain->__pyx_base.__pyx_vtab)->__pyx_base.loads(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->value_chain), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 23, __pyx_L1_error)
+  __pyx_t_2 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->value_chain->__pyx_base.__pyx_vtab)->__pyx_base.loads(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->value_chain), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":18
+  /* "pcontainers/buffered_pdict_impl.pxi":24
  *         pass
  * 
  *     cpdef getitem(self, key):             # <<<<<<<<<<<<<<
@@ -42521,7 +42611,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_6getitem(
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("getitem", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 18, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_getitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -42538,7 +42628,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_6getitem(
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":25
+/* "pcontainers/buffered_pdict_impl.pxi":31
  *         return self.the_dict.value_chain.loads(make_mbufferio_from_cbstring(result))
  * 
  *     cpdef async_setitem(self, key, value):             # <<<<<<<<<<<<<<
@@ -42569,7 +42659,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_setitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 25, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_setitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 31, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_9async_setitem)) {
       __Pyx_XDECREF(__pyx_r);
@@ -42586,7 +42676,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
           __pyx_t_5 = 1;
         }
       }
-      __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(5, 25, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(5, 31, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       if (__pyx_t_4) {
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -42597,7 +42687,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
       __Pyx_INCREF(__pyx_v_value);
       __Pyx_GIVEREF(__pyx_v_value);
       PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_value);
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 25, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 31, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -42609,43 +42699,43 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":26
+  /* "pcontainers/buffered_pdict_impl.pxi":32
  * 
  *     cpdef async_setitem(self, key, value):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()             # <<<<<<<<<<<<<<
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         encoded_value = self.the_dict.key_chain.dumps(value)
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 26, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_future = ((struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":27
+  /* "pcontainers/buffered_pdict_impl.pxi":33
  *     cpdef async_setitem(self, key, value):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_key = self.the_dict.key_chain.dumps(key)             # <<<<<<<<<<<<<<
  *         encoded_value = self.the_dict.key_chain.dumps(value)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 27, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_key = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":28
+  /* "pcontainers/buffered_pdict_impl.pxi":34
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         encoded_value = self.the_dict.key_chain.dumps(value)             # <<<<<<<<<<<<<<
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 28, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_value = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":29
+  /* "pcontainers/buffered_pdict_impl.pxi":35
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         encoded_value = self.the_dict.key_chain.dumps(value)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -42656,11 +42746,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
     __pyx_t_7 = utils::PyBufferWrap(__pyx_v_encoded_key);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 29, __pyx_L1_error)
+    __PYX_ERR(5, 35, __pyx_L1_error)
   }
   __pyx_v_k = __pyx_t_7.get_mdb_val();
 
-  /* "pcontainers/buffered_pdict_impl.pxi":30
+  /* "pcontainers/buffered_pdict_impl.pxi":36
  *         encoded_value = self.the_dict.key_chain.dumps(value)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -42671,11 +42761,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
     __pyx_t_7 = utils::PyBufferWrap(__pyx_v_encoded_value);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 30, __pyx_L1_error)
+    __PYX_ERR(5, 36, __pyx_L1_error)
   }
   __pyx_v_v = __pyx_t_7.get_mdb_val();
 
-  /* "pcontainers/buffered_pdict_impl.pxi":32
+  /* "pcontainers/buffered_pdict_impl.pxi":38
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -42689,7 +42779,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pdict_impl.pxi":33
+        /* "pcontainers/buffered_pdict_impl.pxi":39
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:
  *             cpp_future = self.ptr.get().insert_key_value(k, v)             # <<<<<<<<<<<<<<
@@ -42706,12 +42796,12 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
           #ifdef WITH_THREAD
           PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(5, 33, __pyx_L4_error)
+          __PYX_ERR(5, 39, __pyx_L4_error)
         }
         __pyx_v_cpp_future = __pyx_t_8;
       }
 
-      /* "pcontainers/buffered_pdict_impl.pxi":32
+      /* "pcontainers/buffered_pdict_impl.pxi":38
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -42735,18 +42825,18 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
       }
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":34
+  /* "pcontainers/buffered_pdict_impl.pxi":40
  *         with nogil:
  *             cpp_future = self.ptr.get().insert_key_value(k, v)
  *         py_future.set_boost_future(cpp_future)             # <<<<<<<<<<<<<<
  *         return py_future
  * 
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 34, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":35
+  /* "pcontainers/buffered_pdict_impl.pxi":41
  *             cpp_future = self.ptr.get().insert_key_value(k, v)
  *         py_future.set_boost_future(cpp_future)
  *         return py_future             # <<<<<<<<<<<<<<
@@ -42758,7 +42848,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_seti
   __pyx_r = ((PyObject *)__pyx_v_py_future);
   goto __pyx_L0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":25
+  /* "pcontainers/buffered_pdict_impl.pxi":31
  *         return self.the_dict.value_chain.loads(make_mbufferio_from_cbstring(result))
  * 
  *     cpdef async_setitem(self, key, value):             # <<<<<<<<<<<<<<
@@ -42812,11 +42902,11 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_9async_se
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("async_setitem", 1, 2, 2, 1); __PYX_ERR(5, 25, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("async_setitem", 1, 2, 2, 1); __PYX_ERR(5, 31, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "async_setitem") < 0)) __PYX_ERR(5, 25, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "async_setitem") < 0)) __PYX_ERR(5, 31, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -42829,7 +42919,7 @@ static PyObject *__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_9async_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("async_setitem", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(5, 25, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("async_setitem", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(5, 31, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pcontainers._pdict.BufferedPDictWrapper.async_setitem", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -42848,7 +42938,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_8async_se
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("async_setitem", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_setitem(__pyx_v_self, __pyx_v_key, __pyx_v_value, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 25, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_setitem(__pyx_v_self, __pyx_v_key, __pyx_v_value, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -42865,7 +42955,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_8async_se
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":37
+/* "pcontainers/buffered_pdict_impl.pxi":43
  *         return py_future
  * 
  *     cpdef async_delitem(self, key):             # <<<<<<<<<<<<<<
@@ -42893,7 +42983,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_delitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 37, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_delitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 43, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_11async_delitem)) {
       __Pyx_XDECREF(__pyx_r);
@@ -42909,16 +42999,16 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
         }
       }
       if (!__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 37, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 43, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
       } else {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 37, __pyx_L1_error)
+        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 43, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_INCREF(__pyx_v_key);
         __Pyx_GIVEREF(__pyx_v_key);
         PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_key);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 37, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 43, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
@@ -42931,31 +43021,31 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":38
+  /* "pcontainers/buffered_pdict_impl.pxi":44
  * 
  *     cpdef async_delitem(self, key):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()             # <<<<<<<<<<<<<<
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 38, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_future = ((struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":39
+  /* "pcontainers/buffered_pdict_impl.pxi":45
  *     cpdef async_delitem(self, key):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_key = self.the_dict.key_chain.dumps(key)             # <<<<<<<<<<<<<<
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 39, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_key = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":40
+  /* "pcontainers/buffered_pdict_impl.pxi":46
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -42966,11 +43056,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
     __pyx_t_6 = utils::PyBufferWrap(__pyx_v_encoded_key);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 40, __pyx_L1_error)
+    __PYX_ERR(5, 46, __pyx_L1_error)
   }
   __pyx_v_k = __pyx_t_6.get_mdb_val();
 
-  /* "pcontainers/buffered_pdict_impl.pxi":42
+  /* "pcontainers/buffered_pdict_impl.pxi":48
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -42984,7 +43074,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pdict_impl.pxi":43
+        /* "pcontainers/buffered_pdict_impl.pxi":49
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:
  *             cpp_future = self.ptr.get().erase(k)             # <<<<<<<<<<<<<<
@@ -43001,12 +43091,12 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
           #ifdef WITH_THREAD
           PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(5, 43, __pyx_L4_error)
+          __PYX_ERR(5, 49, __pyx_L4_error)
         }
         __pyx_v_cpp_future = __pyx_t_7;
       }
 
-      /* "pcontainers/buffered_pdict_impl.pxi":42
+      /* "pcontainers/buffered_pdict_impl.pxi":48
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43030,18 +43120,18 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
       }
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":44
+  /* "pcontainers/buffered_pdict_impl.pxi":50
  *         with nogil:
  *             cpp_future = self.ptr.get().erase(k)
  *         py_future.set_boost_future(cpp_future)             # <<<<<<<<<<<<<<
  *         return py_future
  * 
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 44, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":45
+  /* "pcontainers/buffered_pdict_impl.pxi":51
  *             cpp_future = self.ptr.get().erase(k)
  *         py_future.set_boost_future(cpp_future)
  *         return py_future             # <<<<<<<<<<<<<<
@@ -43053,7 +43143,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_deli
   __pyx_r = ((PyObject *)__pyx_v_py_future);
   goto __pyx_L0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":37
+  /* "pcontainers/buffered_pdict_impl.pxi":43
  *         return py_future
  * 
  *     cpdef async_delitem(self, key):             # <<<<<<<<<<<<<<
@@ -43097,7 +43187,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_10async_d
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("async_delitem", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_delitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 37, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_delitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -43114,7 +43204,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_10async_d
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pdict_impl.pxi":47
+/* "pcontainers/buffered_pdict_impl.pxi":53
  *         return py_future
  * 
  *     cpdef async_getitem(self, key):             # <<<<<<<<<<<<<<
@@ -43142,7 +43232,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_getitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 47, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_async_getitem); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_11pcontainers_6_pdict_20BufferedPDictWrapper_13async_getitem)) {
       __Pyx_XDECREF(__pyx_r);
@@ -43158,16 +43248,16 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
         }
       }
       if (!__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 47, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_key); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 53, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
       } else {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 47, __pyx_L1_error)
+        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(5, 53, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_INCREF(__pyx_v_key);
         __Pyx_GIVEREF(__pyx_v_key);
         PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_key);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 47, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 53, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
@@ -43180,39 +43270,39 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":48
+  /* "pcontainers/buffered_pdict_impl.pxi":54
  * 
  *     cpdef async_getitem(self, key):
  *         cdef CBStringFutureWrapper py_future = CBStringFutureWrapper(self.the_dict.value_chain.pyloads)             # <<<<<<<<<<<<<<
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->the_dict->value_chain), __pyx_n_s_pyloads); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 48, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->the_dict->value_chain), __pyx_n_s_pyloads); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 48, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(5, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_CBStringFutureWrapper), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 48, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_CBStringFutureWrapper), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_py_future = ((struct __pyx_obj_11pcontainers_6_pdict_CBStringFutureWrapper *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":49
+  /* "pcontainers/buffered_pdict_impl.pxi":55
  *     cpdef async_getitem(self, key):
  *         cdef CBStringFutureWrapper py_future = CBStringFutureWrapper(self.the_dict.value_chain.pyloads)
  *         encoded_key = self.the_dict.key_chain.dumps(key)             # <<<<<<<<<<<<<<
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[CBString] cpp_future
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 49, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_dict->key_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_dict->key_chain), __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_key = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":50
+  /* "pcontainers/buffered_pdict_impl.pxi":56
  *         cdef CBStringFutureWrapper py_future = CBStringFutureWrapper(self.the_dict.value_chain.pyloads)
  *         encoded_key = self.the_dict.key_chain.dumps(key)
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -43223,11 +43313,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
     __pyx_t_6 = utils::PyBufferWrap(__pyx_v_encoded_key);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(5, 50, __pyx_L1_error)
+    __PYX_ERR(5, 56, __pyx_L1_error)
   }
   __pyx_v_k = __pyx_t_6.get_mdb_val();
 
-  /* "pcontainers/buffered_pdict_impl.pxi":52
+  /* "pcontainers/buffered_pdict_impl.pxi":58
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[CBString] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43241,7 +43331,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pdict_impl.pxi":53
+        /* "pcontainers/buffered_pdict_impl.pxi":59
  *         cdef shared_future[CBString] cpp_future
  *         with nogil:
  *             cpp_future = self.ptr.get().async_at(k)             # <<<<<<<<<<<<<<
@@ -43258,12 +43348,12 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
           #ifdef WITH_THREAD
           PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(5, 53, __pyx_L4_error)
+          __PYX_ERR(5, 59, __pyx_L4_error)
         }
         __pyx_v_cpp_future = __pyx_t_7;
       }
 
-      /* "pcontainers/buffered_pdict_impl.pxi":52
+      /* "pcontainers/buffered_pdict_impl.pxi":58
  *         cdef MDB_val k = PyBufferWrap(encoded_key).get_mdb_val()
  *         cdef shared_future[CBString] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43287,18 +43377,18 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
       }
   }
 
-  /* "pcontainers/buffered_pdict_impl.pxi":54
+  /* "pcontainers/buffered_pdict_impl.pxi":60
  *         with nogil:
  *             cpp_future = self.ptr.get().async_at(k)
  *         py_future.set_boost_future(cpp_future)             # <<<<<<<<<<<<<<
  *         return py_future
  * 
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_CBStringFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 54, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_CBStringFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":55
+  /* "pcontainers/buffered_pdict_impl.pxi":61
  *             cpp_future = self.ptr.get().async_at(k)
  *         py_future.set_boost_future(cpp_future)
  *         return py_future             # <<<<<<<<<<<<<<
@@ -43309,7 +43399,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_geti
   __pyx_r = ((PyObject *)__pyx_v_py_future);
   goto __pyx_L0;
 
-  /* "pcontainers/buffered_pdict_impl.pxi":47
+  /* "pcontainers/buffered_pdict_impl.pxi":53
  *         return py_future
  * 
  *     cpdef async_getitem(self, key):             # <<<<<<<<<<<<<<
@@ -43353,7 +43443,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_12async_g
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("async_getitem", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_getitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 47, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_20BufferedPDictWrapper_async_getitem(__pyx_v_self, __pyx_v_key, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -43373,7 +43463,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_12async_g
 /* "pcontainers/buffered_pqueue_impl.pxi":5
  * # noinspection PyPep8Naming
  * cdef class BufferedPQueueWrapper(object):
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __cinit__(self, PRawQueue q, interval):             # <<<<<<<<<<<<<<
  *         if q is None:
  *             raise ValueError()
  */
@@ -43382,12 +43472,12 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_20BufferedPDictWrapper_12async_g
 static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q = 0;
-  uint64_t __pyx_v_ms_interval;
+  PyObject *__pyx_v_interval = 0;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_ms_interval,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_interval,0};
     PyObject* values[2] = {0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -43404,7 +43494,7 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyO
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_ms_interval)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_interval)) != 0)) kw_args--;
         else {
           __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, 1); __PYX_ERR(6, 5, __pyx_L3_error)
         }
@@ -43419,7 +43509,7 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyO
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_q = ((struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *)values[0]);
-    __pyx_v_ms_interval = __Pyx_PyInt_As_uint64_t(values[1]); if (unlikely((__pyx_v_ms_interval == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(6, 5, __pyx_L3_error)
+    __pyx_v_interval = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -43430,7 +43520,7 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyO
   return -1;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_q), __pyx_ptype_11pcontainers_6_pdict_PRawQueue, 1, "q", 0))) __PYX_ERR(6, 5, __pyx_L1_error)
-  __pyx_r = __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *)__pyx_v_self), __pyx_v_q, __pyx_v_ms_interval);
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *)__pyx_v_self), __pyx_v_q, __pyx_v_interval);
 
   /* function exit code */
   goto __pyx_L0;
@@ -43441,32 +43531,35 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_1__cinit__(PyO
   return __pyx_r;
 }
 
-static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, uint64_t __pyx_v_ms_interval) {
+static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, PyObject *__pyx_v_interval) {
+  uint64_t __pyx_v_ms_interval;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
-  quiet::BufferedPersistentQueue *__pyx_t_4;
+  PyObject *__pyx_t_4 = NULL;
+  uint64_t __pyx_t_5;
+  quiet::BufferedPersistentQueue *__pyx_t_6;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "pcontainers/buffered_pqueue_impl.pxi":6
  * cdef class BufferedPQueueWrapper(object):
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):
+ *     def __cinit__(self, PRawQueue q, interval):
  *         if q is None:             # <<<<<<<<<<<<<<
  *             raise ValueError()
- *         self.the_queue = q
+ *         if not isinstance(interval, Number):
  */
   __pyx_t_1 = (((PyObject *)__pyx_v_q) == Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
     /* "pcontainers/buffered_pqueue_impl.pxi":7
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):
+ *     def __cinit__(self, PRawQueue q, interval):
  *         if q is None:
  *             raise ValueError()             # <<<<<<<<<<<<<<
- *         self.the_queue = q
- *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
  */
     __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_ValueError); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 7, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -43476,16 +43569,102 @@ static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(stru
 
     /* "pcontainers/buffered_pqueue_impl.pxi":6
  * cdef class BufferedPQueueWrapper(object):
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):
+ *     def __cinit__(self, PRawQueue q, interval):
  *         if q is None:             # <<<<<<<<<<<<<<
  *             raise ValueError()
- *         self.the_queue = q
+ *         if not isinstance(interval, Number):
  */
   }
 
   /* "pcontainers/buffered_pqueue_impl.pxi":8
  *         if q is None:
  *             raise ValueError()
+ *         if not isinstance(interval, Number):             # <<<<<<<<<<<<<<
+ *             raise TypeError()
+ *         if interval <= 0:
+ */
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_Number); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_interval, __pyx_t_3); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(6, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = ((!(__pyx_t_2 != 0)) != 0);
+  if (__pyx_t_1) {
+
+    /* "pcontainers/buffered_pqueue_impl.pxi":9
+ *             raise ValueError()
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()             # <<<<<<<<<<<<<<
+ *         if interval <= 0:
+ *             raise ValueError()
+ */
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_TypeError); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 9, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __PYX_ERR(6, 9, __pyx_L1_error)
+
+    /* "pcontainers/buffered_pqueue_impl.pxi":8
+ *         if q is None:
+ *             raise ValueError()
+ *         if not isinstance(interval, Number):             # <<<<<<<<<<<<<<
+ *             raise TypeError()
+ *         if interval <= 0:
+ */
+  }
+
+  /* "pcontainers/buffered_pqueue_impl.pxi":10
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
+ *         if interval <= 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ */
+  __pyx_t_3 = PyObject_RichCompare(__pyx_v_interval, __pyx_int_0, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(6, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (__pyx_t_1) {
+
+    /* "pcontainers/buffered_pqueue_impl.pxi":11
+ *             raise TypeError()
+ *         if interval <= 0:
+ *             raise ValueError()             # <<<<<<<<<<<<<<
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ *         self.the_queue = q
+ */
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_ValueError); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __PYX_ERR(6, 11, __pyx_L1_error)
+
+    /* "pcontainers/buffered_pqueue_impl.pxi":10
+ *         if not isinstance(interval, Number):
+ *             raise TypeError()
+ *         if interval <= 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)
+ */
+  }
+
+  /* "pcontainers/buffered_pqueue_impl.pxi":12
+ *         if interval <= 0:
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)             # <<<<<<<<<<<<<<
+ *         self.the_queue = q
+ *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
+ */
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_interval, __pyx_int_1000); if (unlikely(!__pyx_t_3)) __PYX_ERR(6, 12, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(6, 12, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_5 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_5 == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(6, 12, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_ms_interval = __pyx_t_5;
+
+  /* "pcontainers/buffered_pqueue_impl.pxi":13
+ *             raise ValueError()
+ *         cdef uint64_t ms_interval = int(interval * 1000)
  *         self.the_queue = q             # <<<<<<<<<<<<<<
  *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
  * 
@@ -43496,25 +43675,25 @@ static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(stru
   __Pyx_DECREF(((PyObject *)__pyx_v_self->the_queue));
   __pyx_v_self->the_queue = __pyx_v_q;
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":9
- *             raise ValueError()
+  /* "pcontainers/buffered_pqueue_impl.pxi":14
+ *         cdef uint64_t ms_interval = int(interval * 1000)
  *         self.the_queue = q
  *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
  */
   try {
-    __pyx_t_4 = new quiet::BufferedPersistentQueue(__pyx_v_q->ptr, __pyx_v_ms_interval);
+    __pyx_t_6 = new quiet::BufferedPersistentQueue(__pyx_v_q->ptr, __pyx_v_ms_interval);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(6, 9, __pyx_L1_error)
+    __PYX_ERR(6, 14, __pyx_L1_error)
   }
-  __pyx_v_self->ptr = boost::shared_ptr<quiet::BufferedPersistentQueue> (__pyx_t_4);
+  __pyx_v_self->ptr = boost::shared_ptr<quiet::BufferedPersistentQueue> (__pyx_t_6);
 
   /* "pcontainers/buffered_pqueue_impl.pxi":5
  * # noinspection PyPep8Naming
  * cdef class BufferedPQueueWrapper(object):
- *     def __cinit__(self, PRawQueue q, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __cinit__(self, PRawQueue q, interval):             # <<<<<<<<<<<<<<
  *         if q is None:
  *             raise ValueError()
  */
@@ -43524,6 +43703,7 @@ static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(stru
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("pcontainers._pdict.BufferedPQueueWrapper.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -43531,7 +43711,7 @@ static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper___cinit__(stru
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pqueue_impl.pxi":11
+/* "pcontainers/buffered_pqueue_impl.pxi":16
  *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -43554,7 +43734,7 @@ static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":12
+  /* "pcontainers/buffered_pqueue_impl.pxi":17
  * 
  *     def __dealloc__(self):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43568,17 +43748,17 @@ static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pqueue_impl.pxi":13
+        /* "pcontainers/buffered_pqueue_impl.pxi":18
  *     def __dealloc__(self):
  *         with nogil:
  *             self.ptr.reset()             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, PRawQueue q, uint64_t ms_interval):
+ *     def __init__(self, PRawQueue q, interval):
  */
         __pyx_v_self->ptr.reset();
       }
 
-      /* "pcontainers/buffered_pqueue_impl.pxi":12
+      /* "pcontainers/buffered_pqueue_impl.pxi":17
  * 
  *     def __dealloc__(self):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43596,7 +43776,7 @@ static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(
       }
   }
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":11
+  /* "pcontainers/buffered_pqueue_impl.pxi":16
  *         self.ptr = shared_ptr[cppBufferedPersistentQueue](new cppBufferedPersistentQueue(q.ptr, ms_interval))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -43608,10 +43788,10 @@ static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(
   __Pyx_RefNannyFinishContext();
 }
 
-/* "pcontainers/buffered_pqueue_impl.pxi":15
+/* "pcontainers/buffered_pqueue_impl.pxi":20
  *             self.ptr.reset()
  * 
- *     def __init__(self, PRawQueue q, uint64_t ms_interval):             # <<<<<<<<<<<<<<
+ *     def __init__(self, PRawQueue q, interval):             # <<<<<<<<<<<<<<
  *         pass
  * 
  */
@@ -43620,12 +43800,12 @@ static void __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_2__dealloc__(
 static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_5__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_5__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q = 0;
-  CYTHON_UNUSED uint64_t __pyx_v_ms_interval;
+  CYTHON_UNUSED PyObject *__pyx_v_interval = 0;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_ms_interval,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_interval,0};
     PyObject* values[2] = {0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -43642,13 +43822,13 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_5__init__(PyOb
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_ms_interval)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_interval)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(6, 15, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(6, 20, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(6, 15, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(6, 20, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -43657,18 +43837,18 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_5__init__(PyOb
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_q = ((struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *)values[0]);
-    __pyx_v_ms_interval = __Pyx_PyInt_As_uint64_t(values[1]); if (unlikely((__pyx_v_ms_interval == (uint64_t)-1) && PyErr_Occurred())) __PYX_ERR(6, 15, __pyx_L3_error)
+    __pyx_v_interval = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(6, 15, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(6, 20, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pcontainers._pdict.BufferedPQueueWrapper.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_q), __pyx_ptype_11pcontainers_6_pdict_PRawQueue, 1, "q", 0))) __PYX_ERR(6, 15, __pyx_L1_error)
-  __pyx_r = __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *)__pyx_v_self), __pyx_v_q, __pyx_v_ms_interval);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_q), __pyx_ptype_11pcontainers_6_pdict_PRawQueue, 1, "q", 0))) __PYX_ERR(6, 20, __pyx_L1_error)
+  __pyx_r = __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(((struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *)__pyx_v_self), __pyx_v_q, __pyx_v_interval);
 
   /* function exit code */
   goto __pyx_L0;
@@ -43679,7 +43859,7 @@ static int __pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_5__init__(PyOb
   return __pyx_r;
 }
 
-static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, CYTHON_UNUSED uint64_t __pyx_v_ms_interval) {
+static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_BufferedPQueueWrapper *__pyx_v_self, CYTHON_UNUSED struct __pyx_obj_11pcontainers_6_pdict_PRawQueue *__pyx_v_q, CYTHON_UNUSED PyObject *__pyx_v_interval) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
@@ -43690,7 +43870,7 @@ static int __pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_4__init__(CYTH
   return __pyx_r;
 }
 
-/* "pcontainers/buffered_pqueue_impl.pxi":18
+/* "pcontainers/buffered_pqueue_impl.pxi":23
  *         pass
  * 
  *     cpdef push_back(self, value):             # <<<<<<<<<<<<<<
@@ -43718,7 +43898,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_push_back); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 18, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_push_back); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 23, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_11pcontainers_6_pdict_21BufferedPQueueWrapper_7push_back)) {
       __Pyx_XDECREF(__pyx_r);
@@ -43734,16 +43914,16 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
         }
       }
       if (!__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(6, 18, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(6, 23, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
       } else {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(6, 18, __pyx_L1_error)
+        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(6, 23, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_INCREF(__pyx_v_value);
         __Pyx_GIVEREF(__pyx_v_value);
         PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_value);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(6, 18, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(6, 23, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
@@ -43756,31 +43936,31 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":19
+  /* "pcontainers/buffered_pqueue_impl.pxi":24
  * 
  *     cpdef push_back(self, value):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()             # <<<<<<<<<<<<<<
  *         encoded_value = self.the_queue.value_chain.dumps(value)
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_11pcontainers_6_pdict_BoolFutureWrapper), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_py_future = ((struct __pyx_obj_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":20
+  /* "pcontainers/buffered_pqueue_impl.pxi":25
  *     cpdef push_back(self, value):
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_value = self.the_queue.value_chain.dumps(value)             # <<<<<<<<<<<<<<
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_queue->value_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_queue->value_chain), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 20, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_Chain *)__pyx_v_self->the_queue->value_chain->__pyx_base.__pyx_vtab)->__pyx_base.dumps(((struct __pyx_obj_11pcontainers_6_pdict_Filter *)__pyx_v_self->the_queue->value_chain), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_value = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":21
+  /* "pcontainers/buffered_pqueue_impl.pxi":26
  *         cdef BoolFutureWrapper py_future = BoolFutureWrapper()
  *         encoded_value = self.the_queue.value_chain.dumps(value)
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()             # <<<<<<<<<<<<<<
@@ -43791,11 +43971,11 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
     __pyx_t_6 = utils::PyBufferWrap(__pyx_v_encoded_value);
   } catch(...) {
     __pyx_f_11pcontainers_14_py_exceptions_custom_handler(); if (!PyErr_Occurred()) PyErr_SetString(PyExc_RuntimeError , "Error converting c++ exception.");
-    __PYX_ERR(6, 21, __pyx_L1_error)
+    __PYX_ERR(6, 26, __pyx_L1_error)
   }
   __pyx_v_v = __pyx_t_6.get_mdb_val();
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":23
+  /* "pcontainers/buffered_pqueue_impl.pxi":28
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43809,7 +43989,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
       #endif
       /*try:*/ {
 
-        /* "pcontainers/buffered_pqueue_impl.pxi":24
+        /* "pcontainers/buffered_pqueue_impl.pxi":29
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:
  *             cpp_future = self.ptr.get().push_back(v)             # <<<<<<<<<<<<<<
@@ -43826,12 +44006,12 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
           #ifdef WITH_THREAD
           PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(6, 24, __pyx_L4_error)
+          __PYX_ERR(6, 29, __pyx_L4_error)
         }
         __pyx_v_cpp_future = __pyx_t_7;
       }
 
-      /* "pcontainers/buffered_pqueue_impl.pxi":23
+      /* "pcontainers/buffered_pqueue_impl.pxi":28
  *         cdef MDB_val v = PyBufferWrap(encoded_value).get_mdb_val()
  *         cdef shared_future[cpp_bool] cpp_future
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -43855,17 +44035,17 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
       }
   }
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":25
+  /* "pcontainers/buffered_pqueue_impl.pxi":30
  *         with nogil:
  *             cpp_future = self.ptr.get().push_back(v)
  *         py_future.set_boost_future(cpp_future)             # <<<<<<<<<<<<<<
  *         return py_future
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 25, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_11pcontainers_6_pdict_BoolFutureWrapper *)__pyx_v_py_future->__pyx_base.__pyx_vtab)->set_boost_future(__pyx_v_py_future, __pyx_v_cpp_future); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":26
+  /* "pcontainers/buffered_pqueue_impl.pxi":31
  *             cpp_future = self.ptr.get().push_back(v)
  *         py_future.set_boost_future(cpp_future)
  *         return py_future             # <<<<<<<<<<<<<<
@@ -43875,7 +44055,7 @@ static PyObject *__pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back
   __pyx_r = ((PyObject *)__pyx_v_py_future);
   goto __pyx_L0;
 
-  /* "pcontainers/buffered_pqueue_impl.pxi":18
+  /* "pcontainers/buffered_pqueue_impl.pxi":23
  *         pass
  * 
  *     cpdef push_back(self, value):             # <<<<<<<<<<<<<<
@@ -43919,7 +44099,7 @@ static PyObject *__pyx_pf_11pcontainers_6_pdict_21BufferedPQueueWrapper_6push_ba
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("push_back", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back(__pyx_v_self, __pyx_v_value, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 18, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_11pcontainers_6_pdict_21BufferedPQueueWrapper_push_back(__pyx_v_self, __pyx_v_value, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -73017,6 +73197,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_indent, __pyx_k_indent, sizeof(__pyx_k_indent), 0, 0, 1, 1},
   {&__pyx_n_s_index, __pyx_k_index, sizeof(__pyx_k_index), 0, 0, 1, 1},
   {&__pyx_n_s_init, __pyx_k_init, sizeof(__pyx_k_init), 0, 0, 1, 1},
+  {&__pyx_n_s_interval, __pyx_k_interval, sizeof(__pyx_k_interval), 0, 0, 1, 1},
   {&__pyx_n_s_invoke_callbacks, __pyx_k_invoke_callbacks, sizeof(__pyx_k_invoke_callbacks), 0, 0, 1, 1},
   {&__pyx_n_s_is_set, __pyx_k_is_set, sizeof(__pyx_k_is_set), 0, 0, 1, 1},
   {&__pyx_n_s_item, __pyx_k_item, sizeof(__pyx_k_item), 0, 0, 1, 1},
@@ -73051,7 +73232,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_mbufferio, __pyx_k_mbufferio, sizeof(__pyx_k_mbufferio), 0, 0, 1, 1},
   {&__pyx_n_s_metadata, __pyx_k_metadata, sizeof(__pyx_k_metadata), 0, 0, 1, 1},
   {&__pyx_n_s_move_to, __pyx_k_move_to, sizeof(__pyx_k_move_to), 0, 0, 1, 1},
-  {&__pyx_n_s_ms_interval, __pyx_k_ms_interval, sizeof(__pyx_k_ms_interval), 0, 0, 1, 1},
   {&__pyx_n_s_msgpack, __pyx_k_msgpack, sizeof(__pyx_k_msgpack), 0, 0, 1, 1},
   {&__pyx_n_s_n, __pyx_k_n, sizeof(__pyx_k_n), 0, 0, 1, 1},
   {&__pyx_n_s_new, __pyx_k_new, sizeof(__pyx_k_new), 0, 0, 1, 1},
@@ -78281,191 +78461,6 @@ raise_neg_overflow:
 }
 
 /* CIntFromPy */
-              static CYTHON_INLINE uint64_t __Pyx_PyInt_As_uint64_t(PyObject *x) {
-    const uint64_t neg_one = (uint64_t) -1, const_zero = (uint64_t) 0;
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(uint64_t) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(uint64_t, long, PyInt_AS_LONG(x))
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                goto raise_neg_overflow;
-            }
-            return (uint64_t) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (uint64_t) 0;
-                case  1: __PYX_VERIFY_RETURN_INT(uint64_t, digit, digits[0])
-                case 2:
-                    if (8 * sizeof(uint64_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) >= 2 * PyLong_SHIFT) {
-                            return (uint64_t) (((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(uint64_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) >= 3 * PyLong_SHIFT) {
-                            return (uint64_t) (((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(uint64_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) >= 4 * PyLong_SHIFT) {
-                            return (uint64_t) (((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
-                        }
-                    }
-                    break;
-            }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON
-            if (unlikely(Py_SIZE(x) < 0)) {
-                goto raise_neg_overflow;
-            }
-#else
-            {
-                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-                if (unlikely(result < 0))
-                    return (uint64_t) -1;
-                if (unlikely(result == 1))
-                    goto raise_neg_overflow;
-            }
-#endif
-            if (sizeof(uint64_t) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, unsigned long, PyLong_AsUnsignedLong(x))
-            } else if (sizeof(uint64_t) <= sizeof(unsigned PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-            }
-        } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (uint64_t) 0;
-                case -1: __PYX_VERIFY_RETURN_INT(uint64_t, sdigit, (sdigit) (-(sdigit)digits[0]))
-                case  1: __PYX_VERIFY_RETURN_INT(uint64_t,  digit, +digits[0])
-                case -2:
-                    if (8 * sizeof(uint64_t) - 1 > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (uint64_t) (((uint64_t)-1)*(((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if (8 * sizeof(uint64_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (uint64_t) ((((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (uint64_t) (((uint64_t)-1)*(((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(uint64_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (uint64_t) ((((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (uint64_t) (((uint64_t)-1)*(((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(uint64_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint64_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (uint64_t) ((((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
-                        }
-                    }
-                    break;
-            }
-#endif
-            if (sizeof(uint64_t) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, long, PyLong_AsLong(x))
-            } else if (sizeof(uint64_t) <= sizeof(PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, PY_LONG_LONG, PyLong_AsLongLong(x))
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            uint64_t val;
-            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (uint64_t) -1;
-        }
-    } else {
-        uint64_t val;
-        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
-        if (!tmp) return (uint64_t) -1;
-        val = __Pyx_PyInt_As_uint64_t(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to uint64_t");
-    return (uint64_t) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to uint64_t");
-    return (uint64_t) -1;
-}
-
-/* CIntFromPy */
               static CYTHON_INLINE time_t __Pyx_PyInt_As_time_t(PyObject *x) {
     const time_t neg_one = (time_t) -1, const_zero = (time_t) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -79203,6 +79198,191 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to long");
     return (long) -1;
+}
+
+/* CIntFromPy */
+              static CYTHON_INLINE uint64_t __Pyx_PyInt_As_uint64_t(PyObject *x) {
+    const uint64_t neg_one = (uint64_t) -1, const_zero = (uint64_t) 0;
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(uint64_t) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(uint64_t, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (uint64_t) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (uint64_t) 0;
+                case  1: __PYX_VERIFY_RETURN_INT(uint64_t, digit, digits[0])
+                case 2:
+                    if (8 * sizeof(uint64_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) >= 2 * PyLong_SHIFT) {
+                            return (uint64_t) (((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(uint64_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) >= 3 * PyLong_SHIFT) {
+                            return (uint64_t) (((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(uint64_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) >= 4 * PyLong_SHIFT) {
+                            return (uint64_t) (((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0]));
+                        }
+                    }
+                    break;
+            }
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+#else
+            {
+                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
+                if (unlikely(result < 0))
+                    return (uint64_t) -1;
+                if (unlikely(result == 1))
+                    goto raise_neg_overflow;
+            }
+#endif
+            if (sizeof(uint64_t) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, unsigned long, PyLong_AsUnsignedLong(x))
+            } else if (sizeof(uint64_t) <= sizeof(unsigned PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
+            }
+        } else {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (uint64_t) 0;
+                case -1: __PYX_VERIFY_RETURN_INT(uint64_t, sdigit, (sdigit) (-(sdigit)digits[0]))
+                case  1: __PYX_VERIFY_RETURN_INT(uint64_t,  digit, +digits[0])
+                case -2:
+                    if (8 * sizeof(uint64_t) - 1 > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (uint64_t) (((uint64_t)-1)*(((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 2:
+                    if (8 * sizeof(uint64_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (uint64_t) ((((((uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -3:
+                    if (8 * sizeof(uint64_t) - 1 > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (uint64_t) (((uint64_t)-1)*(((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(uint64_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (uint64_t) ((((((((uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -4:
+                    if (8 * sizeof(uint64_t) - 1 > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (uint64_t) (((uint64_t)-1)*(((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(uint64_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint64_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint64_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (uint64_t) ((((((((((uint64_t)digits[3]) << PyLong_SHIFT) | (uint64_t)digits[2]) << PyLong_SHIFT) | (uint64_t)digits[1]) << PyLong_SHIFT) | (uint64_t)digits[0])));
+                        }
+                    }
+                    break;
+            }
+#endif
+            if (sizeof(uint64_t) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, long, PyLong_AsLong(x))
+            } else if (sizeof(uint64_t) <= sizeof(PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint64_t, PY_LONG_LONG, PyLong_AsLongLong(x))
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            uint64_t val;
+            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (uint64_t) -1;
+        }
+    } else {
+        uint64_t val;
+        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
+        if (!tmp) return (uint64_t) -1;
+        val = __Pyx_PyInt_As_uint64_t(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to uint64_t");
+    return (uint64_t) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to uint64_t");
+    return (uint64_t) -1;
 }
 
 /* CIntFromPy */

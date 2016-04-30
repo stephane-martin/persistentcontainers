@@ -14,6 +14,7 @@
 #include <boost/exception_ptr.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -244,9 +245,18 @@ private:
         return push_back(val);
     }
 
+    bool cbstring_push_front(const CBString& val) {
+        return push_front(val);
+    }
+
     bool vector_push_back(const boost::container::vector<CBString>& v) {
         return push_back(v.cbegin(), v.cend());
     }
+
+    bool vector_push_front(const boost::container::vector<CBString>& v) {
+        return push_front(v.cbegin(), v.cend());
+    }
+
 
 protected:
     shared_ptr<PersistentDict> the_dict;        // PersistentDict is a member: implemented in terms of
@@ -676,11 +686,9 @@ public:
     template <class InputIterator>
     shared_future<bool> async_push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
         boost::container::vector<CBString> v;
-        // _LOG_DEBUG << "let's build the temporary vector: size " << v.size();
         for (; first != last; ++first) {
             v.push_back(*first);
         }
-        // _LOG_DEBUG << "built the temporary vector: size " << v.size();
         // v is *copied* in task, so we avoid a dangling reference
         packaged_task<bool()> task(boost::bind(&PersistentQueue::vector_push_back, this, v));
         return push_queue->push_task(boost::move(task));
@@ -703,7 +711,16 @@ public:
     }
 
     template <class InputIterator>
-    bool push_front(InputIterator& first, InputIterator& last) {
+    bool push_front(InputIterator first, InputIterator last) {
+        front_insert_iterator it(shared_from_this());
+        for (; first != last; ++first) {
+            it = *first;
+        }
+        return true;
+    }
+
+    template <class InputIterator>
+    bool push_front(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
         front_insert_iterator it(shared_from_this());
         for (; first != last; ++first) {
             it = *first;
@@ -718,12 +735,12 @@ public:
     CBString pop_front() { return CBString(*iiterator(shared_from_this())); }
 
     SharedFuture async_wait_and_pop_front() {
-        _LOG_DEBUG << "wait_and_pop_front_in_thread";
+        //_LOG_DEBUG << "wait_and_pop_front_in_thread";
         return waiters->create();
     }
 
     SharedFuture async_wait_and_pop_front(milliseconds ms) {
-        _LOG_DEBUG << "wait_and_pop_front_in_thread: " << ms.count() << "ms";
+        //_LOG_DEBUG << "wait_and_pop_front_in_thread: " << ms.count() << "ms";
         return waiters->create(ms);
     }
 
@@ -751,8 +768,6 @@ public:
         }
         return CBString(*iiterator(shared_from_this(), 0, queue_lock));
     }
-
-
 
     template <class OutputIterator>
     void pop_all(OutputIterator oit) {

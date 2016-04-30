@@ -8,6 +8,9 @@
 #include <boost/thread/thread.hpp>
 #include <boost/core/explicit_operator_bool.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/move/move.hpp>
 #include <boost/throw_exception.hpp>
@@ -26,6 +29,7 @@ using boost::shared_ptr;
 using boost::atomic_bool;
 using boost::chrono::milliseconds;
 using boost::mutex;
+using boost::lock_guard;
 using boost::condition_variable;
 using boost::promise;
 using std::pair;
@@ -46,6 +50,7 @@ private:
     const milliseconds flushing_interval;
     mutable scoped_ptr<boost::thread> pusher_thread_ptr;
     mutable mutex stopping_mutex;
+    mutable mutex flush_mutex;
     mutable condition_variable stopping_condition;
     mutable PushQueue push_queue;
 
@@ -55,6 +60,7 @@ private:
     }
 
     void stop() const {
+        // just until here push_back can still be called
         stopping_flag.store(true);
         stopping_condition.notify_one();
 
@@ -62,7 +68,6 @@ private:
             pusher_thread_ptr->join();
             pusher_thread_ptr.reset();
         }
-
         pusher_thread_is_running.store(false);
     }
 
@@ -73,10 +78,13 @@ private:
             stopping_condition.wait_for(stopping_lock, flushing_interval);
             flush();
         }
+        // if we get here, it means that stopping_flag was set, so no more push_back can happen
+        // we make a last flush to empty the push_queue
         flush();
     }
 
     void flush() const {
+        lock_guard<mutex> flush_lock(flush_mutex);  // to ensure that at most one "flush" is being executed
         // typedef boost::container::deque < shared_ptr < pair < CBString, PromisePtr > > > TempPushQueue;
         TempPushQueue temp_push_queue(push_queue.pop_all());
         if (!temp_push_queue.empty()) {
@@ -120,12 +128,18 @@ public:
     bool operator!() const { return !the_queue || !*the_queue; }
 
     shared_future<bool> push_back(const CBString& value) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         PromisePtr promise_ptr(new MyPromise());
         push_queue.push(make_pair(value, promise_ptr));
         return (promise_ptr->get_future()).share();
     }
 
     shared_future<bool> push_back(MDB_val value) {
+        if (stopping_flag.load()) {
+            BOOST_THROW_EXCEPTION( stopping_ops() );
+        }
         return push_back(utils::make_string(value));
     }
 
