@@ -166,7 +166,7 @@ cdef class BoolFutureWrapper(BaseFutureWrapper):
         super(BoolFutureWrapper, self).__init__()
 
     cdef set_boost_future(self, shared_future[cpp_bool] f):
-        # self._boost_future = f
+        self._boost_future = f
         self._state.store(_running)
         callback = self._future_is_ready_callback
         with nogil:

@@ -15,25 +15,6 @@ cdef class BufferedPDictWrapper(object):
     def __init__(self, PRawDict d, uint64_t ms_interval):
         pass
 
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop()
-
-    cpdef start(self):
-        with nogil:
-            self.ptr.get().start()
-
-    cpdef stop(self):
-        with nogil:
-            self.ptr.get().stop()
-
-    cpdef flush(self):
-        with nogil:
-            self.ptr.get().flush()
-
     cpdef getitem(self, key):
         encoded_key = self.the_dict.key_chain.dumps(key)
         cdef CBString result = self.ptr.get().at(

@@ -19,6 +19,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/lockable_adapter.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <bstrlib/bstrwrap.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -55,15 +56,13 @@ using namespace lmdb;
 using namespace utils;
 
 
-class PersistentDict: public enable_shared_from_this<PersistentDict> {
+class PersistentDict: public enable_shared_from_this<PersistentDict>, private boost::noncopyable {
 friend class PersistentQueue;
 friend class BufferedPersistentDict;
 
 private:
-    PersistentDict& operator=(const PersistentDict&);
     PersistentDict(const CBString& directory_name, const CBString& database_name, const lmdb_options& options):
             dirname(directory_name), dbname(database_name), env(), dbi(), opts(options) { init(); }
-    PersistentDict(const PersistentDict& other);
 
     void init();
     void close() { env.reset(); }

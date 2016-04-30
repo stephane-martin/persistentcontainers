@@ -30,7 +30,6 @@ namespace utils {
 
 using boost::shared_future;
 using boost::promise;
-using boost::noncopyable;
 using boost::basic_lockable_adapter;
 using boost::mutex;
 using boost::condition_variable;
@@ -49,10 +48,12 @@ using std::pair;
 using std::make_pair;
 
 template<typename T>
-class threadsafe_queue: private noncopyable, public basic_lockable_adapter<mutex> {
+class threadsafe_queue: public basic_lockable_adapter<mutex> {
 
 private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE(threadsafe_queue<T>)
+
+protected:
     boost::container::deque < shared_ptr < T > > data_queue;
     condition_variable data_cond;
 
@@ -86,38 +87,37 @@ public:
     }
 
     virtual shared_ptr<T> wait_and_pop() {
-        try {
-            unique_lock<mutex> lk(lockable());
-            while (__empty()) {
-                data_cond.wait(lk);
-            }
-            shared_ptr<T> res=data_queue.front();
-            data_queue.pop_front();
-            return res;
-        } catch (boost::thread_interrupted& ex) {
-            return shared_ptr<T>();
+        unique_lock<mutex> lk(lockable());
+        while (__empty()) {
+            data_cond.wait_for(lk, milliseconds(2000));
         }
+        shared_ptr<T> res=data_queue.front();
+        data_queue.pop_front();
+        return res;
     }
 
     virtual shared_ptr<T> wait_and_pop(milliseconds ms) {
-        try {
-            unique_lock<mutex> lk(lockable());
-            nanoseconds remaining = ms;
-            high_resolution_clock::time_point start_point;
-            while (__empty()) {
-                start_point = high_resolution_clock::now();
-                boost::cv_status st = data_cond.wait_until(lk, start_point + remaining);
-                remaining -= high_resolution_clock::now() - start_point;
-                if (st == boost::cv_status::timeout || remaining.count() <= 0) {
-                    return shared_ptr<T>();
-                }
+        unique_lock<mutex> lk(lockable());
+        nanoseconds remaining = ms;
+        high_resolution_clock::time_point start_point;
+        while (__empty()) {
+            start_point = high_resolution_clock::now();
+            boost::cv_status st = data_cond.wait_until(lk, start_point + remaining);
+            remaining -= high_resolution_clock::now() - start_point;
+            if (st == boost::cv_status::timeout || remaining.count() <= 0) {
+                return shared_ptr<T>();
             }
-            shared_ptr<T> res=data_queue.front();
-            data_queue.pop_front();
-            return res;
-        } catch (boost::thread_interrupted& ex) {
-            return shared_ptr<T>();
         }
+        shared_ptr<T> res=data_queue.front();
+        data_queue.pop_front();
+        return res;
+    }
+
+    virtual boost::container::deque < shared_ptr < T > > pop_all() {
+        unique_lock<mutex> lk(lockable());
+        boost::container::deque < shared_ptr < T > > res;
+        res.swap(data_queue);
+        return res;
     }
 
     virtual shared_ptr<T> try_pop() {
@@ -130,7 +130,14 @@ public:
         return res;
     }
 
-    virtual void push(BOOST_RV_REF(T) new_value) {
+    virtual void push(T new_value) {
+        shared_ptr<T> data(new T(boost::move(new_value)));
+        boost::lock_guard<mutex> lk(lockable());
+        data_queue.push_back(boost::move(data));
+        data_cond.notify_one();
+    }
+
+    virtual void push(BOOST_RV_REF(T) new_value) {              // move semantics T&&
         shared_ptr<T> data(new T(boost::move(new_value)));
         boost::lock_guard<mutex> lk(lockable());
         data_queue.push_back(boost::move(data));

@@ -31,5 +31,5 @@ cdef class PRawQueue(object):
     cdef Chain value_chain
 
 cdef class PQueue(PRawQueue):
-    cdef bytes secret_key
+    pass
 

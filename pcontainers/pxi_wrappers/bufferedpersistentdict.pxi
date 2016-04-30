@@ -1,9 +1,6 @@
 cdef extern from "cpp_persistent_dict_queue/bufferedpersistentdict.h" namespace "quiet" nogil:
     cppclass cppBufferedPersistentDict "quiet::BufferedPersistentDict":
         cppBufferedPersistentDict(shared_ptr[cppPersistentDict] d, uint64_t flush_interval) except +custom_handler
-        void flush() except +custom_handler
-        void start() except +custom_handler
-        void stop() except +custom_handler
         CBString at(const CBString& key) except +custom_handler
         CBString at(MDB_val key) except +custom_handler
         shared_future[CBString] async_at(const CBString& key) except +custom_handler

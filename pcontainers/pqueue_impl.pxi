@@ -149,14 +149,25 @@ cdef class PRawQueue(object):
         cdef PyStringInputIterator _begin = move(PyStringInputIterator(vals))
         cdef PyStringInputIterator _end
         with nogil:
-            self.ptr.get().push_front(_begin, _end)
+            self.ptr.get().push_front(move(_begin), move(_end))
 
     def push_back_many(self, vals):
         vals = iter(vals)
         cdef PyStringInputIterator _begin = move(PyStringInputIterator(vals))
         cdef PyStringInputIterator _end
         with nogil:
-            self.ptr.get().push_back(_begin, _end)
+            self.ptr.get().push_back(move(_begin), move(_end))
+
+    def async_push_back_many(self, vals):
+        vals = iter(vals)
+        cdef PyStringInputIterator _begin = move(PyStringInputIterator(vals))
+        cdef PyStringInputIterator _end
+        cdef BoolFutureWrapper py_future = BoolFutureWrapper()
+        cdef shared_future[cpp_bool] cpp_fut
+        with nogil:
+            cpp_fut = self.ptr.get().async_push_back_many(move(_begin), move(_end))
+        py_future.set_boost_future(cpp_fut)
+        return py_future
 
     def push_many(self, vals):
         self.push_back_many(vals)
@@ -209,14 +220,18 @@ cdef class PQueue(PRawQueue):
         values_iter = (self.value_chain.dumps(val).tobytes() for val in vals)
         super(PQueue, self).push_back_many(values_iter)
 
+    def async_push_back_many(self, vals):
+        values_iter = (self.value_chain.dumps(val).tobytes() for val in vals)
+        return super(PQueue, self).async_push_back_many(values_iter)
+
     cpdef transform_values(self, unary_funct):
-        unary_funct = _adapt_unary_functor(unary_funct, self.secret_key)
+        unary_funct = _adapt_unary_functor(unary_funct, self.value_chain)
         #cdef PyObject* obj = <PyObject*> unary_funct
         with nogil:
             self.ptr.get().transform_values(make_unary_functor(unary_funct))
 
     cpdef remove_if(self, unary_pred):
-        unary_pred = _adapt_unary_predicate(unary_pred, self.secret_key)
+        unary_pred = _adapt_unary_predicate(unary_pred, self.value_chain)
         #cdef PyObject* obj = <PyObject*> unary_pred
         with nogil:
             self.ptr.get().remove_if(make_unary_predicate(unary_pred))

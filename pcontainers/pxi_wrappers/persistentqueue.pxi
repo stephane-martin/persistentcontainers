@@ -15,8 +15,9 @@ cdef extern from "cpp_persistent_dict_queue/persistentqueue.h" namespace "quiet"
         cpp_bool push_back(size_t n, const CBString& val) except +custom_handler
         cpp_bool push_back[InputIterator](InputIterator first, InputIterator last) except +custom_handler
 
-        shared_future[cpp_bool] async_push_back(const CBString& val)
-        shared_future[cpp_bool] async_push_back(MDB_val val)
+        shared_future[cpp_bool] async_push_back(const CBString& val) except +custom_handler
+        shared_future[cpp_bool] async_push_back(MDB_val val) except +custom_handler
+        shared_future[cpp_bool] async_push_back_many "quiet::PersistentQueue::async_push_back<quiet::PyStringInputIterator>" (PyStringInputIterator first, PyStringInputIterator last) except +custom_handler
 
         CBString pop_back() except +custom_handler
         CBString pop_front() except +custom_handler

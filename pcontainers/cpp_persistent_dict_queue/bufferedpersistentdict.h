@@ -9,7 +9,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/exception_ptr.hpp>
 #include <boost/atomic.hpp>
+#include <boost/move/move.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/locks.hpp>
@@ -20,7 +22,12 @@
 #include <boost/thread/future.hpp>
 #include <boost/container/deque.hpp>
 #include <bstrlib/bstrwrap.h>
+#include <boost/core/explicit_operator_bool.hpp>
+#include <boost/core/noncopyable.hpp>
+#include <bstrlib/bstrwrap.h>
 
+#include "../logging/logging.h"
+#include "../lmdb_exceptions/lmdb_exceptions.h"
 #include "persistentdict.h"
 
 namespace quiet {
@@ -60,9 +67,8 @@ using Bstrlib::CBString;
 typedef shared_future<CBString> s_future;
 typedef future<CBString> _future;
 
-class BufferedPersistentDict {
-
-private:
+class BufferedPersistentDict: private boost::noncopyable {
+public:
     typedef packaged_task < CBString() > MyPackagedTask;
     typedef shared_future < CBString > MySharedFuture;
     typedef shared_future < bool > MySharedBoolFuture;
@@ -72,43 +78,45 @@ private:
     typedef promise < bool > MyPromise;
     typedef shared_ptr < MyPromise > PromisePtr;
 
-    BufferedPersistentDict(const BufferedPersistentDict& other);
-    BufferedPersistentDict& operator=(const BufferedPersistentDict&);
+private:
 
     mutable deque < TaskPtr > reads_queue;
-
     mutable shared_mutex buffers_mutex;
     mutable shared_mutex current_buffers_mutex;
     mutable mutex flush_mutex;
-    mutable mutex stopping_mutex;
+    mutable mutex flush_stopping_mutex;
     mutable mutex queue_mutex;
 
     shared_ptr<PersistentDict> the_dict;
 
     mutable map < CBString, pair < CBString, PromisePtr > > buffered_inserts;
-    mutable map < CBString, PromisePtr > buffered_deletes;
     mutable map < CBString, pair < CBString, PromisePtr > > current_inserts;
     mutable map < CBString, PromisePtr > current_deletes;
+    mutable map < CBString, PromisePtr > buffered_deletes;
 
-    mutable condition_variable stopping_condition;
     mutable condition_variable queue_not_empty_condition;
-    mutable atomic_bool starting_flag;
+    mutable condition_variable flush_stopping_condition;
+
     mutable atomic_bool stopping_flag;
     mutable atomic_bool flush_thread_is_running;
     mutable atomic_bool reader_thread_is_running;
+
     const milliseconds flushing_interval;
     mutable scoped_ptr<boost::thread> flush_thread_ptr;
     mutable scoped_ptr<boost::thread> reader_thread_ptr;
 
     void flush_thread_fun() const {
-        unique_lock<mutex> stopping_lock(stopping_mutex);
+        flush_thread_is_running.store(true);
+        unique_lock<mutex> stopping_lock(flush_stopping_mutex);
         while (!stopping_flag.load()) {
-            stopping_condition.wait_for(stopping_lock, flushing_interval);
+            flush_stopping_condition.wait_for(stopping_lock, flushing_interval);
             flush();
         }
+        flush();
     }
 
     void reader_thread_fun() const {
+        reader_thread_is_running.store(true);
         TaskPtr task_ptr;
         {
             while (!stopping_flag.load()) {
@@ -144,62 +152,55 @@ private:
                 }
             }
         }
-
-
     }
 
-    CBString read_value(shared_ptr<DictIterator> it_ptr) const {
-        return it_ptr->get_value();
+    void start_flush_thread() const {
+        flush_thread_ptr.reset(new boost::thread(boost::bind(&BufferedPersistentDict::flush_thread_fun, this)));
+        while (!flush_thread_is_running.load()) { }
     }
 
-public:
-    BufferedPersistentDict(shared_ptr<PersistentDict> d, uint64_t flush_interval, bool start_thread=true):
-        the_dict(d),
-        starting_flag(false),
-        stopping_flag(false),
-        flush_thread_is_running(false),
-        reader_thread_is_running(false),
-        flushing_interval(flush_interval)
+    void start_reader_thread() const {
+        reader_thread_ptr.reset(new boost::thread(boost::bind(&BufferedPersistentDict::reader_thread_fun, this)));
+        while (!reader_thread_is_running.load()) { }
+    }
 
-    {
-        if (!the_dict || !*the_dict) {
-            BOOST_THROW_EXCEPTION(not_initialized());
+    void stop_flush_thread() const {
+        flush_stopping_condition.notify_all();
+
+        if (flush_thread_ptr && flush_thread_ptr->joinable()) {
+            flush_thread_ptr->join();
+            flush_thread_ptr.reset();
         }
-        if (start_thread) {
-            start();
+
+        flush_thread_is_running.store(false);
+
+    }
+
+    void stop_reader_thread() const {
+        {
+            unique_lock<mutex> queue_lock(queue_mutex);
+            reads_queue.push_back(shared_ptr < packaged_task < CBString() > >());
+            queue_not_empty_condition.notify_all();
         }
+
+        if (reader_thread_ptr && reader_thread_ptr->joinable()) {
+            reader_thread_ptr->join();
+            reader_thread_is_running.store(false);
+            reader_thread_ptr.reset();
+        }
+
+        reader_thread_is_running.store(false);
     }
 
-    BOOST_EXPLICIT_OPERATOR_BOOL()
-    bool operator!() const { return !the_dict || !*the_dict; }
-
-    ~BufferedPersistentDict() {
-        stop();
-        flush();
+    void start() const {
+        start_flush_thread();
+        start_reader_thread();
     }
 
-    bool operator==(const BufferedPersistentDict& other) const {
-        return *the_dict == *(other.the_dict);
-    }
-
-    bool operator!=(const BufferedPersistentDict& other) const {
-        return *the_dict != *(other.the_dict);
-    }
-
-    CBString get_dirname() const {
-        return the_dict->get_dirname();
-    }
-
-    CBString get_dbname() const {
-        return the_dict->get_dbname();
-    }
-
-    size_t size() const {
-        return the_dict->size();
-    }
-
-    bool empty() const {
-        return the_dict->empty();
+    void stop() const {
+        stopping_flag.store(true);
+        stop_reader_thread();
+        stop_flush_thread();
     }
 
     void flush() const {
@@ -210,10 +211,8 @@ public:
             // here 'at', 'insert' and 'erase' are blocked
             unique_lock<shared_mutex> buffers_lock(buffers_mutex);
             unique_lock<shared_mutex> current_buffers_lock(current_buffers_mutex);
-            current_deletes = buffered_deletes;
-            current_inserts = buffered_inserts;
-            buffered_deletes.clear();
-            buffered_inserts.clear();
+            current_deletes.swap(buffered_deletes);
+            current_inserts.swap(buffered_inserts);
         }
         // every operation possible here
         {
@@ -223,7 +222,7 @@ public:
             {
                 DictIterator dict_it(the_dict->begin(false));
                 // we now have a LMDB write transaction
-                // if 'at' tries to read, it will not see the changes in LMDB yet (but it can see them in
+                // if a client tries to read with 'at', it will not see the changes in LMDB yet (but it can see them in
                 // current buffers)
                 for(map < CBString, pair < CBString, PromisePtr > >::iterator it(current_inserts.begin()); it != current_inserts.end(); ++it) {
                     dict_it.set_key_value(it->first, (it->second).first);
@@ -251,48 +250,31 @@ public:
 
     }
 
-    void start() const {
-        if (!stopping_flag.load() && !starting_flag.load()) {
-            starting_flag.store(true);
-            if (!flush_thread_is_running.load()) {
-                flush_thread_is_running.store(true);
-                flush_thread_ptr.reset(new boost::thread(boost::bind(&BufferedPersistentDict::flush_thread_fun, this)));
-            }
-            if (!reader_thread_is_running.load()) {
-                reader_thread_is_running.store(true);
-                reader_thread_ptr.reset(new boost::thread(boost::bind(&BufferedPersistentDict::reader_thread_fun, this)));
-            }
-            starting_flag.store(false);
-        }
-
+    CBString read_value(shared_ptr<DictIterator> it_ptr) const {
+        return it_ptr->get_value();
     }
 
-    void stop() const {
-        if (!stopping_flag.load() && !starting_flag.load()) {
-            if (flush_thread_is_running.load() || reader_thread_is_running.load()) {
-                // lock_guard<mutex> slock(stopping_mutex);
-                stopping_flag.store(true);
-                stopping_condition.notify_all();
-                {
-                    unique_lock<mutex> queue_lock(queue_mutex);
-                    reads_queue.push_back(shared_ptr < packaged_task < CBString() > >());
-                    queue_not_empty_condition.notify_all();
-                }
-
-                if (flush_thread_ptr && flush_thread_ptr->joinable()) {
-                    flush_thread_ptr->join();
-                    flush_thread_is_running.store(false);
-                    flush_thread_ptr.reset();
-                }
-                if (reader_thread_ptr && reader_thread_ptr->joinable()) {
-                    reader_thread_ptr->join();
-                    reader_thread_is_running.store(false);
-                    reader_thread_ptr.reset();
-                }
-                stopping_flag.store(false);
-            }
+public:
+    BufferedPersistentDict(shared_ptr<PersistentDict> d, uint64_t flush_interval):
+        the_dict(d),
+        stopping_flag(false),
+        flush_thread_is_running(false),
+        reader_thread_is_running(false),
+        flushing_interval(flush_interval)
+    {
+        if (!the_dict || !*the_dict) {
+            BOOST_THROW_EXCEPTION(not_initialized());
         }
+
+        start();
     }
+
+    ~BufferedPersistentDict() {
+        stop();
+    }
+
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return !the_dict || !*the_dict; }
 
     CBString at(MDB_val key) const {
         return at(CBString(key.mv_data, key.mv_size));

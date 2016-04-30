@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
+#include <boost/core/ref.hpp>
+#include <boost/container/vector.hpp>
 #include <boost/numeric/conversion/converter.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/bind.hpp>
+#include <boost/move/move.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -22,11 +25,12 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/chrono/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <bstrlib/bstrwrap.h>
 
 #include "persistentdict.h"
 #include "../utils/promise_queue.h"
-#include "../utils/threadsafe_queue.h"
+#include "../utils/packaged_task_queue.h"
 #include "../logging/logging.h"
 #include "lmdb.h"
 
@@ -72,7 +76,7 @@ using Bstrlib::CBString;
 
 typedef boost::numeric::converter<long, long long> LongLong2Long ;
 
-class PersistentQueue: public enable_shared_from_this<PersistentQueue> {
+class PersistentQueue: public enable_shared_from_this<PersistentQueue>, private boost::noncopyable {
 public:
     typedef CBString value_type;
     typedef CBString& reference;
@@ -86,18 +90,13 @@ private:
     mutable boost::atomic_bool stopping_flag;
     mutable boost::atomic_bool running_flag;
 
-
-    mutable boost::atomic_bool starting_dispatcher_flag;
-    mutable boost::atomic_bool stopping_dispatcher_flag;
     mutable boost::atomic_bool dispatcher_is_running_flag;
     mutable scoped_ptr<boost::thread> dispatcher_thread_ptr;
     mutable scoped_ptr < utils::promise_queue<CBString> > waiters;
 
-    mutable boost::atomic_bool starting_pusher_flag;
-    mutable boost::atomic_bool stopping_pusher_flag;
     mutable boost::atomic_bool pusher_is_running_flag;
     mutable scoped_ptr<boost::thread> pusher_thread_ptr;
-    mutable utils::threadsafe_queue < packaged_task < bool() > > push_queue;
+    mutable scoped_ptr<utils::packaged_task_queue> push_queue;
 
     scoped_ptr<named_mutex> mutex;
     scoped_ptr<named_condition> queue_is_empty;
@@ -106,23 +105,12 @@ private:
     PersistentQueue& operator=(const PersistentQueue&);
 
     PersistentQueue(const CBString& directory_name, const CBString& database_name, const lmdb_options& options):
-            starting_flag(false),
             stopping_flag(false),
-            running_flag(false),
-
-            starting_dispatcher_flag(false),
-            stopping_dispatcher_flag(false),
             dispatcher_is_running_flag(false),
-
-            starting_pusher_flag(false),
-            stopping_pusher_flag(false),
             pusher_is_running_flag(false),
-
             the_dict(PersistentDict::factory(directory_name, database_name, options))
 
         {
-            waiters.reset(new utils::promise_queue<CBString>());
-            create_interprocess_sync_objects();
             start();
         }
 
@@ -144,123 +132,94 @@ private:
     }
 
     void start() {
-        if (!running_flag.load() && !stopping_flag.load()) {
-            if (!starting_flag.exchange(true)) {
-                running_flag.store(true);
-                start_dispatcher_thread();
-                start_pusher_thread();
-                starting_flag.store(false);
-            }
-        }
+        create_interprocess_sync_objects();
+        start_dispatcher_thread();
+        start_pusher_thread();
     }
 
     void stop() {
-        if (running_flag.load() && !starting_flag.load()) {
-            if (!stopping_flag.exchange(true)) {
-                // todo: check order
-                running_flag.store(false);
-                stop_pusher_thread();
-                //push_queue.stop();
-                waiters.reset();
-                stop_dispatcher_thread();
-                stopping_flag.store(false);
-            }
-        }
+        stopping_flag.store(true);
+        stop_pusher_thread();
+        stop_dispatcher_thread();
     }
 
     void start_pusher_thread() {
-        if (!stopping_pusher_flag.load() && !pusher_is_running_flag.load()) {
-            if (!starting_pusher_flag.exchange(true)) {
-                _LOG_DEBUG << "Starting pusher thread";
-                pusher_thread_ptr.reset(new boost::thread(boost::bind(&PersistentQueue::pusher_thread_fun, this)));
-                pusher_is_running_flag.store(true);
-                starting_pusher_flag.store(false);
-            }
-        }
+        _LOG_DEBUG << "Starting pusher thread";
+        push_queue.reset(new utils::packaged_task_queue());
+        pusher_thread_ptr.reset(new boost::thread(boost::bind(&PersistentQueue::pusher_thread_fun, this)));
+        while (!pusher_is_running_flag.load()) { }
     }
 
     void stop_pusher_thread() {
-        if (!starting_pusher_flag.load() && pusher_is_running_flag.load()) {
-            if (!stopping_pusher_flag.exchange(true)) {
-                _LOG_DEBUG << "Stopping pusher thread";
-                if (pusher_thread_ptr && pusher_thread_ptr->joinable()) {
-                    pusher_thread_ptr->join();
-                    pusher_is_running_flag.store(false);
-                    pusher_thread_ptr.reset();
-                    _LOG_DEBUG << "Stopped pusher thread";
-                }
-                stopping_pusher_flag.store(false);
-            }
+        _LOG_DEBUG << "Stopping pusher thread";
+        if (pusher_thread_ptr && pusher_thread_ptr->joinable()) {
+            _LOG_DEBUG << "Asking to interrupt pusher thread";
+            pusher_thread_ptr->interrupt();
+            pusher_thread_ptr->join();
+            pusher_thread_ptr.reset();
+            push_queue.reset();
+            _LOG_DEBUG << "Stopped pusher thread";
+        } else {
+            _LOG_WARNING << "pusher_thread_ptr was not valid";
         }
+        pusher_is_running_flag.store(false);
     }
 
     void pusher_thread_fun() {
-        milliseconds two_seconds(2000);
+        pusher_is_running_flag.store(true);
         shared_ptr < packaged_task < bool() > > task_ptr;
 
         try {
-            while (running_flag.load()) {
-                task_ptr = push_queue.wait_and_pop(two_seconds);
+            while (true) {
+                task_ptr = push_queue->wait_and_pop(milliseconds(2000));
                 if (task_ptr) {
                     task_ptr->operator()();
                 }
             }
-        } catch (boost::thread_interrupted& ex) { }
+        } catch (boost::thread_interrupted& ex) {
+            _LOG_DEBUG << "pusher thread has been interrupted";
+        }
 
-        while ((task_ptr = push_queue.try_pop())) {
+        // push the remaining objects
+        while ((task_ptr = push_queue->try_pop())) {
             task_ptr->operator()();
         }
     }
 
-
-
     void start_dispatcher_thread() {
-        if (!stopping_dispatcher_flag.load() && !dispatcher_is_running_flag.load()) {
-            if (!starting_dispatcher_flag.exchange(true)) {
-                _LOG_DEBUG << "Starting dispatcher thread";
-                dispatcher_thread_ptr.reset(new boost::thread(boost::bind(&PersistentQueue::dispatcher_thread_fun, this)));
-                dispatcher_is_running_flag.store(true);
-                starting_dispatcher_flag.store(false);
-            }
-        }
+        _LOG_DEBUG << "Starting dispatcher thread";
+        waiters.reset(new utils::promise_queue<CBString>());
+        dispatcher_thread_ptr.reset(new boost::thread(boost::bind(&PersistentQueue::dispatcher_thread_fun, this)));
+        while (!dispatcher_is_running_flag.load()) { }
     }
 
     void stop_dispatcher_thread() {
-        if (!starting_dispatcher_flag.load() && dispatcher_is_running_flag.load()) {
-            if (!stopping_dispatcher_flag.exchange(true)) {
-                _LOG_DEBUG << "Stopping dispatcher thread";
-                queue_is_empty->notify_all();
-                if (dispatcher_thread_ptr && dispatcher_thread_ptr->joinable()) {
-                    dispatcher_thread_ptr->join();
-                    dispatcher_is_running_flag.store(false);
-                    dispatcher_thread_ptr.reset();
-                    _LOG_DEBUG << "Stopped dispatcher thread";
-                }
-                stopping_dispatcher_flag.store(false);
-            }
+        _LOG_DEBUG << "Stopping dispatcher thread";
+        waiters.reset();    // the promise_queue destructor unblocks waiters->wait_and_pop() in the dispatcher
+        queue_is_empty->notify_all();
+        if (dispatcher_thread_ptr && dispatcher_thread_ptr->joinable()) {
+            dispatcher_thread_ptr->join();
+            dispatcher_thread_ptr.reset();
+            _LOG_DEBUG << "Stopped dispatcher thread";
         }
+        dispatcher_is_running_flag.store(false);
     }
 
     void dispatcher_thread_fun() {
-        while (running_flag.load()) {
+        dispatcher_is_running_flag.store(true);
+        while (!stopping_flag.load()) {
             _LOG_DEBUG << "dispatcher_thread: asking for a waiter";
             PromisePtr waiter = waiters->wait_and_pop();
-            if (waiter) {
+            if (waiter) {   // waiter can be NULL if the promise_queue was stopped cause of end of operations
                 _LOG_DEBUG << "dispatcher_thread: got a waiter";
                 boost::interprocess::scoped_lock<named_mutex> queue_lock(*mutex);
-                while (empty() && running_flag.load() && !waiter.expired()) {
-                    if (waiter.get_expiry_posix().is_not_a_date_time()) {
-                        // todo: wait 2 secs maximum
-                        queue_is_empty->wait(queue_lock);
-                    } else {
-                        queue_is_empty->timed_wait(queue_lock, waiter.get_expiry_posix());
-                    }
+                while (empty() && !stopping_flag.load() && !waiter.expired()) {
+                    queue_is_empty->timed_wait(queue_lock, waiter.get_next_waiting_point());
                 }
-                if (!running_flag.load()) {
-                    queue_lock.unlock();
+                if (stopping_flag.load()) {
                     _LOG_DEBUG << "dispatcher_thread: cancelling the waiter: stopping";
+                    queue_lock.unlock();
                     waiter->set_exception(boost::copy_exception(lmdb::stopping_ops()));
-                    _LOG_DEBUG << "dispatcher_thread: have set default value for hanging promise";
                 } else if (waiter.expired()) {
                     _LOG_DEBUG << "dispatcher_thread: waiter is expired";
                     queue_lock.unlock();
@@ -279,6 +238,14 @@ private:
             }
         }
         _LOG_DEBUG << "dispatcher_thread: finished";
+    }
+
+    bool cbstring_push_back(const CBString& val) {
+        return push_back(val);
+    }
+
+    bool vector_push_back(const boost::container::vector<CBString>& v) {
+        return push_back(v.cbegin(), v.cend());
     }
 
 protected:
@@ -671,10 +638,6 @@ public:
         return back_insert_iterator(shared_from_this());
     }
 
-    bool cbstring_push_back(const CBString& val) {
-        return push_back(val);
-    }
-
     bool push_back(const CBString& val) {
         back_insert_iterator it(shared_from_this());
         it = val;
@@ -688,12 +651,43 @@ public:
     }
 
     template <class InputIterator>
-    bool push_back(InputIterator& first, InputIterator& last) {
+    bool push_back(InputIterator first, InputIterator last) {
         back_insert_iterator it(shared_from_this());
         for (; first != last; ++first) {
             it = *first;
         }
         return true;
+    }
+
+    template <class InputIterator>
+    bool push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
+        back_insert_iterator it(shared_from_this());
+        for (; first != last; ++first) {
+            it = *first;
+        }
+        return true;
+    }
+
+    shared_future<bool> async_push_back(const CBString& value) {
+        packaged_task<bool()> task(boost::bind(&PersistentQueue::cbstring_push_back, this, value));
+        return push_queue->push_task(boost::move(task));
+    }
+
+    template <class InputIterator>
+    shared_future<bool> async_push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
+        boost::container::vector<CBString> v;
+        // _LOG_DEBUG << "let's build the temporary vector: size " << v.size();
+        for (; first != last; ++first) {
+            v.push_back(*first);
+        }
+        // _LOG_DEBUG << "built the temporary vector: size " << v.size();
+        // v is *copied* in task, so we avoid a dangling reference
+        packaged_task<bool()> task(boost::bind(&PersistentQueue::vector_push_back, this, v));
+        return push_queue->push_task(boost::move(task));
+    }
+
+    shared_future<bool> async_push_back(MDB_val value) {
+        return async_push_back(make_string(value));
     }
 
     bool push_front(const CBString& val) {
@@ -731,17 +725,6 @@ public:
     SharedFuture async_wait_and_pop_front(milliseconds ms) {
         _LOG_DEBUG << "wait_and_pop_front_in_thread: " << ms.count() << "ms";
         return waiters->create(ms);
-    }
-
-    shared_future<bool> async_push_back(const CBString& value) {
-        packaged_task<bool()> task(boost::bind(&PersistentQueue::cbstring_push_back, this, value));
-        shared_future<bool> f(task.get_future().share());
-        push_queue.push(boost::move(task));
-        return f;
-    }
-
-    shared_future<bool> async_push_back(MDB_val value) {
-        return async_push_back(make_string(value));
     }
 
     CBString wait_and_pop_front(milliseconds ms) {
@@ -785,6 +768,8 @@ public:
 
 
 }; // END CLASS PersistentQueue
+
+
 
 }   // end NS quiet
 
