@@ -1,9 +1,12 @@
 #include <errno.h>
 #include <boost/bind.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/exception_ptr.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #include "lmdb_environment.h"
 #include "../lmdb_exceptions/lmdb_exceptions.h"
 #include "../utils/utils.h"
+#include "../logging/logging.h"
 
 namespace lmdb {
 
@@ -71,6 +74,13 @@ environment::environment(const CBString& directory_name, const lmdb_options& opt
     }
 }
 
+environment::~environment() {
+    if (ptr) {
+        _LOG_DEBUG << "Deleting (mdb_env_close) environment";
+        mdb_env_close(ptr);
+    }
+}
+
 
 environment::shared_ptr environment::factory(const CBString& directory_name, const lmdb_options& opts) {
     CBString dirname(directory_name);
@@ -94,11 +104,14 @@ environment::shared_ptr environment::factory(const CBString& directory_name, con
     }
 }
 
-void environment::unfactory(environment* env) {
+void environment::unfactory(environment* env) BOOST_NOEXCEPT_OR_NOTHROW {
     if (env) {
-        {
+        try {
             lock_guard<mutex> guard(environment::lock_envs);
             opened_environments.erase(env->get_dirname());
+        } catch (...) {
+            _LOG_ERROR << boost::current_exception_diagnostic_information();
+            opened_environments.erase(env->get_dirname());  // if we cant lock the opened_environments object, we choose to erase anyway
         }
         delete env;
     }
@@ -129,6 +142,20 @@ MDB_dbi environment::get_dbi(const CBString& dbname) {
     }
 }
 
+void environment::drop(MDB_dbi dbi) {
+    boost::shared_ptr<transaction> txn = start_transaction(false);
+    int res = mdb_drop(txn->txn, dbi, 0);
+    if (res != 0) {
+        txn->set_rollback();
+        BOOST_THROW_EXCEPTION(lmdb_error::factory(res));
+    }
+}
+
+
+environment::transaction_ptr environment::start_transaction() const {
+    return transaction_ptr(new transaction(*this));
+}
+
 environment::transaction_ptr environment::start_transaction(bool readonly) {
     if (readonly) {
         return transaction_ptr(new transaction(*this, true));
@@ -145,16 +172,6 @@ environment::transaction_ptr environment::start_transaction(bool readonly) {
         return t;
     }
 }
-
-void environment::drop(MDB_dbi dbi) {
-    boost::shared_ptr<transaction> txn = start_transaction(false);
-    int res = mdb_drop(txn->txn, dbi, 0);
-    if (res != 0) {
-        txn->set_rollback();
-        BOOST_THROW_EXCEPTION(lmdb_error::factory(res));
-    }
-}
-
 
 environment::transaction::transaction(const environment& e): env(e), txn(NULL), rollback(false), readonly(true) {
     int res;

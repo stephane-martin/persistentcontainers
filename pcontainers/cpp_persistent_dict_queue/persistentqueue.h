@@ -265,8 +265,8 @@ protected:
 
 
 public:
-    BOOST_EXPLICIT_OPERATOR_BOOL()
-    bool operator!() const { return !*the_dict; }
+    BOOST_EXPLICIT_OPERATOR_BOOL_NOEXCEPT()
+    bool operator!() const BOOST_NOEXCEPT_OR_NOTHROW { return !*the_dict; }
 
     ~PersistentQueue() {
         stop();
@@ -276,19 +276,19 @@ public:
         return shared_ptr<PersistentQueue>(new PersistentQueue(directory_name, database_name, options));
     }
 
-    bool operator==(const PersistentQueue& other) {
+    bool operator==(const PersistentQueue& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return *the_dict == *(other.the_dict);
     }
 
-    bool operator!=(const PersistentQueue& other) {
+    bool operator!=(const PersistentQueue& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return *the_dict != *(other.the_dict);
     }
 
-    CBString get_dirname() const {
+    CBString get_dirname() const BOOST_NOEXCEPT_OR_NOTHROW {
         return the_dict->get_dirname();
     }
 
-    CBString get_dbname() const {
+    CBString get_dbname() const BOOST_NOEXCEPT_OR_NOTHROW {
         return the_dict->get_dbname();
     }
 
@@ -670,7 +670,7 @@ public:
     }
 
     template <class InputIterator>
-    bool push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
+    bool push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {   // for non-copyable iterators
         back_insert_iterator it(shared_from_this());
         for (; first != last; ++first) {
             it = *first;
@@ -684,7 +684,7 @@ public:
     }
 
     template <class InputIterator>
-    shared_future<bool> async_push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {
+    shared_future<bool> async_push_back(BOOST_RV_REF(InputIterator) first, BOOST_RV_REF(InputIterator) last) {  // for non coyable iterators
         boost::container::vector<CBString> v;
         for (; first != last; ++first) {
             v.push_back(*first);

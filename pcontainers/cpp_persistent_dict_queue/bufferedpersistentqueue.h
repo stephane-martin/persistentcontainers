@@ -132,7 +132,8 @@ public:
             BOOST_THROW_EXCEPTION( stopping_ops() );
         }
         PromisePtr promise_ptr(new MyPromise());
-        push_queue.push(make_pair(value, promise_ptr));
+        pair<CBString, PromisePtr> p(make_pair(value, promise_ptr));
+        push_queue.push(boost::move(p));
         return (promise_ptr->get_future()).share();
     }
 

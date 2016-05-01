@@ -17,7 +17,7 @@ private:
 
 public:
 
-    packaged_task_queue(): threadsafe_queue < packaged_task < bool() > >() { }
+    packaged_task_queue() BOOST_NOEXCEPT_OR_NOTHROW: threadsafe_queue < packaged_task < bool() > >() { }
 
     packaged_task_queue(BOOST_RV_REF(packaged_task_queue) other):
             threadsafe_queue < packaged_task < bool() > >(BOOST_MOVE_BASE(threadsafe_queue < packaged_task < bool() > >, other)) { }

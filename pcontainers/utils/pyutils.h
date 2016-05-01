@@ -26,7 +26,7 @@ class GilWrapper: private boost::noncopyable {
 protected:
     PyGILState_STATE save;
 public:
-    GilWrapper(): save(PyGILState_Ensure()) { }
+    GilWrapper() BOOST_NOEXCEPT_OR_NOTHROW: save(PyGILState_Ensure()) { }
     ~GilWrapper() { PyGILState_Release(save); }
 };
 
@@ -34,7 +34,7 @@ class NoGilWrapper: private boost::noncopyable {
 protected:
     PyThreadState* save_ptr;
 public:
-    NoGilWrapper(): save_ptr(PyEval_SaveThread()) { }
+    NoGilWrapper() BOOST_NOEXCEPT_OR_NOTHROW: save_ptr(PyEval_SaveThread()) { }
     ~NoGilWrapper() { PyEval_RestoreThread(save_ptr); }
 };
 
@@ -46,20 +46,20 @@ private:
 protected:
     PyObject* obj;
 public:
-    BOOST_EXPLICIT_OPERATOR_BOOL()
-    bool operator!() const { return !obj; }
+    BOOST_EXPLICIT_OPERATOR_BOOL_NOEXCEPT()
+    bool operator!() const BOOST_NOEXCEPT_OR_NOTHROW { return !obj; }
 
-    PyNewRef(): obj(NULL) { }
-    explicit PyNewRef(PyObject* o): obj(o) { }
+    PyNewRef() BOOST_NOEXCEPT_OR_NOTHROW: obj(NULL) { }
+    explicit PyNewRef(PyObject* o) BOOST_NOEXCEPT_OR_NOTHROW: obj(o) { }
     ~PyNewRef() { reset(); }
 
-    PyObject* get() const { return obj; }
+    PyObject* get() const BOOST_NOEXCEPT_OR_NOTHROW { return obj; }
 
-    PyNewRef(const PyNewRef& other): obj(other.obj) {                   // Copy constructor
+    PyNewRef(const PyNewRef& other) BOOST_NOEXCEPT_OR_NOTHROW: obj(other.obj) {                   // Copy constructor
         this->operator++();
     }
 
-    PyNewRef& operator=(BOOST_COPY_ASSIGN_REF(PyNewRef) other) {        // Copy assignment
+    PyNewRef& operator=(BOOST_COPY_ASSIGN_REF(PyNewRef) other) BOOST_NOEXCEPT_OR_NOTHROW {        // Copy assignment
         if (*this != other) {
             reset();
             obj = other.obj;
@@ -68,39 +68,43 @@ public:
         return *this;
     }
 
-    PyNewRef(BOOST_RV_REF(PyNewRef) other): obj(NULL) {                 // Move constructor
+    PyNewRef(BOOST_RV_REF(PyNewRef) other) BOOST_NOEXCEPT_OR_NOTHROW: obj(NULL) {                 // Move constructor
         std::swap(obj, other.obj);
     }
 
-    PyNewRef& operator=(BOOST_RV_REF(PyNewRef) other) {                 // Move assignment
+    PyNewRef& operator=(BOOST_RV_REF(PyNewRef) other) BOOST_NOEXCEPT_OR_NOTHROW {                 // Move assignment
         reset();
         std::swap(obj, other.obj);
         return *this;
     }
 
-    friend bool operator==(const PyNewRef& one, const PyNewRef& other) {
+    void swap(PyNewRef& other) BOOST_NOEXCEPT_OR_NOTHROW {
+        std::swap(obj, other.obj);
+    }
+
+    friend bool operator==(const PyNewRef& one, const PyNewRef& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return one.obj == other.obj;
     }
 
-    friend bool operator!=(const PyNewRef& one, const PyNewRef& other) {
+    friend bool operator!=(const PyNewRef& one, const PyNewRef& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return one.obj != other.obj;
     }
 
-    PyNewRef& operator++() {
+    PyNewRef& operator++() BOOST_NOEXCEPT_OR_NOTHROW {
         if (obj) {
             Py_INCREF(obj);
         }
         return *this;
     }
 
-    PyNewRef& operator++(int) {
+    PyNewRef& operator++(int) BOOST_NOEXCEPT_OR_NOTHROW {
         if (obj) {
             Py_INCREF(obj);
         }
         return *this;
     }
 
-    void reset() {
+    void reset() BOOST_NOEXCEPT_OR_NOTHROW {
         if (obj) {
             Py_DECREF(obj);
         }
@@ -109,12 +113,11 @@ public:
 
 };
 
-class PyBufferWrap {
+class PyBufferWrap {        // probably not thread safe
 private:
-    //BOOST_COPYABLE_AND_MOVABLE(PyBufferWrap)
     BOOST_MOVABLE_BUT_NOT_COPYABLE(PyBufferWrap)
 
-    void _set_view() {
+    void _set_view() {      // can throw
         if (obj) {
             if (PyUnicode_Check(obj.get())) {
                 obj = PyNewRef(PyUnicode_AsUTF8String(obj.get()));
@@ -139,11 +142,20 @@ protected:
     PyNewRef obj;
     Py_buffer* obj_view;
 
-public:
-    BOOST_EXPLICIT_OPERATOR_BOOL()
-    bool operator!() const { return !obj_view; }
+    void close() BOOST_NOEXCEPT_OR_NOTHROW {
+        if (obj_view) {
+            PyBuffer_Release(obj_view);
+            PyMem_Free(obj_view);
+            obj_view = NULL;
+        }
+        obj.reset();
+    }
 
-    PyBufferWrap(): obj(), obj_view(NULL) {
+public:
+    BOOST_EXPLICIT_OPERATOR_BOOL_NOEXCEPT()
+    bool operator!() const BOOST_NOEXCEPT_OR_NOTHROW { return !obj_view; }
+
+    PyBufferWrap() BOOST_NOEXCEPT_OR_NOTHROW: obj(), obj_view(NULL) {
         // _LOG_DEBUG << "New trivial PyBufferWrap object";
     }
 
@@ -160,33 +172,33 @@ public:
     }
 
 
-    PyBufferWrap(BOOST_RV_REF(PyBufferWrap) other): obj(boost::move(other.obj)), obj_view(other.obj_view) {   // Move constructor
+    PyBufferWrap(BOOST_RV_REF(PyBufferWrap) other) BOOST_NOEXCEPT_OR_NOTHROW: obj(boost::move(other.obj)), obj_view(other.obj_view) {   // Move constructor
         // _LOG_DEBUG << "PyBufferWrap move constructor";
         other.obj_view = NULL;
     }
 
-    PyBufferWrap& operator=(BOOST_RV_REF(PyBufferWrap) other) {                     // Move assignment
+    PyBufferWrap& operator=(BOOST_RV_REF(PyBufferWrap) other) BOOST_NOEXCEPT_OR_NOTHROW {  // Move assignment
         // _LOG_DEBUG << "PyBufferWrap move assignment";
         close();    // sets obj and obj_view to NULL
-        obj = boost::move(other.obj);   // sets other.obj to NULL
+        obj.swap(other.obj);
         std::swap(obj_view, other.obj_view);    // sets other.obj_view to NULL
 
         return *this;
     }
 
-    friend bool operator==(const PyBufferWrap& one, const PyBufferWrap& other) {
+    friend bool operator==(const PyBufferWrap& one, const PyBufferWrap& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return one.obj == other.obj;
     }
 
-    friend bool operator!=(const PyBufferWrap& one, const PyBufferWrap& other) {
+    friend bool operator!=(const PyBufferWrap& one, const PyBufferWrap& other) BOOST_NOEXCEPT_OR_NOTHROW {
         return one.obj != other.obj;
     }
 
     ~PyBufferWrap() { close(); }
 
-    Py_buffer* get() const { return obj_view; }
+    Py_buffer* get() const BOOST_NOEXCEPT_OR_NOTHROW { return obj_view; }
 
-    MDB_val get_mdb_val() const {
+    MDB_val get_mdb_val() const BOOST_NOEXCEPT_OR_NOTHROW {
         MDB_val v;
         if (obj_view) {
             v.mv_data = obj_view->buf;
@@ -198,27 +210,18 @@ public:
         return v;
     }
 
-    Py_ssize_t length() const {
+    Py_ssize_t length() const BOOST_NOEXCEPT_OR_NOTHROW {
         if (obj_view) {
             return obj_view->len;
         }
         return 0;
     }
 
-    void* buf() const {
+    void* buf() const BOOST_NOEXCEPT_OR_NOTHROW {
         if (obj_view) {
             return obj_view->buf;
         }
         return NULL;
-    }
-
-    void close() {
-        if (obj_view) {
-            PyBuffer_Release(obj_view);
-            PyMem_Free(obj_view);
-            obj_view = NULL;
-        }
-        obj.reset();
     }
 
 };  // END CLASS PyBufferWrap
@@ -229,7 +232,7 @@ private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE(py_threadsafe_queue)
 
 public:
-    py_threadsafe_queue() { }
+    py_threadsafe_queue() BOOST_NOEXCEPT_OR_NOTHROW { }
 
     // default destructor is enough
     // on destruction, threadsafe_queue<PyNewRef>'s destructor will be called

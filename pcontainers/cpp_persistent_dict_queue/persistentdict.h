@@ -64,8 +64,8 @@ private:
     PersistentDict(const CBString& directory_name, const CBString& database_name, const lmdb_options& options):
             dirname(directory_name), dbname(database_name), env(), dbi(), opts(options) { init(); }
 
-    void init();
-    void close() { env.reset(); }
+    void init();                    // can throw
+    void close() BOOST_NOEXCEPT_OR_NOTHROW { env.reset(); }
 
 protected:
     CBString dirname;
@@ -80,8 +80,8 @@ public:
     typedef CBString mapped_type;
     typedef pair<CBString, CBString> value_type;
 
-    BOOST_EXPLICIT_OPERATOR_BOOL()
-    bool operator!() const {
+    BOOST_EXPLICIT_OPERATOR_BOOL_NOEXCEPT()
+    bool operator!() const BOOST_NOEXCEPT_OR_NOTHROW {
         return !env;
     }
 
@@ -92,18 +92,18 @@ public:
 
     ~PersistentDict() { close(); }
 
-    bool is_initialized() const {
+    bool is_initialized() const BOOST_NOEXCEPT_OR_NOTHROW {
         return bool(*this);
     }
 
-    int get_maxkeysize() const {
+    int get_maxkeysize() const BOOST_NOEXCEPT_OR_NOTHROW {
         if (*this) {
             return env->get_maxkeysize();
         }
         return 0;
     }
 
-    lmdb_options get_options() const { return opts; }
+    lmdb_options get_options() const BOOST_NOEXCEPT_OR_NOTHROW { return opts; }
 
     void copy_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1) const;
     void move_to(shared_ptr<PersistentDict> other, const CBString& first_key=CBString(), const CBString& last_key=CBString(), ssize_t chunk_size=-1);
@@ -172,8 +172,8 @@ public:
 
     void remove_if(binary_predicate binary_pred, const CBString& first_key="", const CBString& last_key="", ssize_t chunk_size=-1);
     void remove_duplicates(const CBString& first_key="", const CBString& last_key="");
-    CBString get_dirname() const { return dirname; }
-    CBString get_dbname() const { return dbname; }
+    CBString get_dirname() const BOOST_NOEXCEPT_OR_NOTHROW { return dirname; }
+    CBString get_dbname() const BOOST_NOEXCEPT_OR_NOTHROW { return dbname; }
 
     bool empty() const {
         if (!*this) {
@@ -256,7 +256,7 @@ public:
             txn.reset();
         }
 
-        void set_rollback(bool val=true) {
+        void set_rollback(bool val=true) BOOST_NOEXCEPT_OR_NOTHROW {
             if (*this) {
                 txn->set_rollback(val);
             }
@@ -270,7 +270,7 @@ public:
             }
         }
 
-        insert_iterator(BOOST_RV_REF(insert_iterator) other): initialized(false), dict(), txn(), cursor() {
+        insert_iterator(BOOST_RV_REF(insert_iterator) other): initialized(false), dict(), txn(), cursor() { // move constructor
             if (other) {
                 other.initialized.store(false);
                 dict.swap(other.dict);
@@ -280,7 +280,7 @@ public:
             }
         }
 
-        insert_iterator& operator=(BOOST_RV_REF(insert_iterator) other) {
+        insert_iterator& operator=(BOOST_RV_REF(insert_iterator) other) {   // move assign
             initialized.store(false);
             dict.reset();
             cursor.reset();
@@ -477,7 +477,7 @@ public:
         tmpl_iterator(BOOST_RV_REF(tmpl_iterator) other):
             abstract_iterator(), initialized(false), ro(true) {
             if (other) {
-                unique_lock<shared_mutex> lock(other.lockable());
+                unique_lock<shared_mutex> lock(other.lockable());   // can throw
                 other.initialized.store(false);
                 swap(other);
                 initialized.store(true);
@@ -486,7 +486,7 @@ public:
 
         // move assignment
         tmpl_iterator& operator=(BOOST_RV_REF(tmpl_iterator) other) {
-            boost::lock(lockable(), other.lockable());
+            boost::lock(lockable(), other.lockable());              // can throw
             unique_lock<shared_mutex> lock_self(lockable(), boost::adopt_lock);
             unique_lock<shared_mutex> lock_other(other.lockable(), boost::adopt_lock);
             initialized.store(false);
@@ -971,7 +971,7 @@ public:
 
 template<bool B> PersistentDict::tmpl_iterator<B>::~tmpl_iterator() { }
 
-inline bool operator==(const PersistentDict& one, const PersistentDict& other) {
+inline bool operator==(const PersistentDict& one, const PersistentDict& other) BOOST_NOEXCEPT_OR_NOTHROW {
     if (!bool(one) && !bool(other)) {
         return true;
     }
@@ -981,7 +981,7 @@ inline bool operator==(const PersistentDict& one, const PersistentDict& other) {
     return one.get_dirname() == other.get_dirname() && one.get_dbname() == other.get_dbname();
 }
 
-inline bool operator!=(const PersistentDict& one, const PersistentDict& other)  { return !(one==other); }
+inline bool operator!=(const PersistentDict& one, const PersistentDict& other) BOOST_NOEXCEPT_OR_NOTHROW { return !(one==other); }
 
 
 }   // end NS quiet

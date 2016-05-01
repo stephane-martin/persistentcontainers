@@ -21,7 +21,7 @@ public:
     unsigned int max_readers;
     unsigned int max_dbs;
 
-    lmdb_options() {
+    lmdb_options() BOOST_NOEXCEPT_OR_NOTHROW {
         fixed_map = false;
         no_subdir = false;
         read_only = false;
@@ -38,7 +38,7 @@ public:
         max_dbs = 16;
     }
 
-    unsigned int get_flags() const {
+    unsigned int get_flags() const BOOST_NOEXCEPT_OR_NOTHROW {
         unsigned int flags = 0;
         if (fixed_map) {
             flags |= MDB_FIXEDMAP;

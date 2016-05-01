@@ -58,19 +58,22 @@ protected:
     condition_variable data_cond;
 
 public:
-    threadsafe_queue() { }
+    threadsafe_queue() BOOST_NOEXCEPT_OR_NOTHROW { }
 
     virtual ~threadsafe_queue() { }
 
+    BOOST_EXPLICIT_OPERATOR_BOOL()
+    bool operator!() const { return empty(); }
+
     threadsafe_queue(BOOST_RV_REF(threadsafe_queue) other) {
-        boost::lock(lockable(), other.lockable());
+        boost::lock(lockable(), other.lockable());                      // can throw...
         unique_lock<mutex> lock_self(lockable(), adopt_lock);
         unique_lock<mutex> lock_other(other.lockable(), adopt_lock);
         data_queue.swap(other.data_queue);
     }
 
     threadsafe_queue& operator=(BOOST_RV_REF(threadsafe_queue) other) {
-        boost::lock(lockable(), other.lockable());
+        boost::lock(lockable(), other.lockable());                      // can throw...
         unique_lock<mutex> lock_self(lockable(), adopt_lock);
         unique_lock<mutex> lock_other(other.lockable(), adopt_lock);
         data_queue.clear();
@@ -78,15 +81,15 @@ public:
         return *this;
     }
 
-    bool __notempty() {
+    bool __notempty() const BOOST_NOEXCEPT_OR_NOTHROW {
         return !data_queue.empty();
     }
 
-    bool __empty() {
+    bool __empty() const BOOST_NOEXCEPT_OR_NOTHROW{
         return data_queue.empty();
     }
 
-    virtual shared_ptr<T> wait_and_pop() {
+    virtual shared_ptr<T> wait_and_pop() {              // can throw
         unique_lock<mutex> lk(lockable());
         while (__empty()) {
             data_cond.wait_for(lk, milliseconds(2000));
@@ -96,7 +99,7 @@ public:
         return res;
     }
 
-    virtual shared_ptr<T> wait_and_pop(milliseconds ms) {
+    virtual shared_ptr<T> wait_and_pop(milliseconds ms) {   // can throw
         unique_lock<mutex> lk(lockable());
         nanoseconds remaining = ms;
         high_resolution_clock::time_point start_point;
@@ -113,7 +116,7 @@ public:
         return res;
     }
 
-    virtual boost::container::deque < shared_ptr < T > > pop_all() {
+    virtual boost::container::deque < shared_ptr < T > > pop_all() {    // can throw
         unique_lock<mutex> lk(lockable());
         boost::container::deque < shared_ptr < T > > res;
         res.swap(data_queue);
@@ -121,7 +124,7 @@ public:
     }
 
     virtual shared_ptr<T> try_pop() {
-        lock_guard<mutex> lk(lockable());
+        lock_guard<mutex> lk(lockable());                               // can throw
         if (__empty()) {
             return boost::shared_ptr<T>();
         }
@@ -130,7 +133,7 @@ public:
         return res;
     }
 
-    virtual void push(T new_value) {
+    virtual void push(T& new_value) {
         shared_ptr<T> data(new T(boost::move(new_value)));
         boost::lock_guard<mutex> lk(lockable());
         data_queue.push_back(boost::move(data));
@@ -139,12 +142,12 @@ public:
 
     virtual void push(BOOST_RV_REF(T) new_value) {              // move semantics T&&
         shared_ptr<T> data(new T(boost::move(new_value)));
-        boost::lock_guard<mutex> lk(lockable());
+        boost::lock_guard<mutex> lk(lockable());                // can throw
         data_queue.push_back(boost::move(data));
         data_cond.notify_one();
     }
 
-    virtual bool empty() const {
+    virtual bool empty() const {                                // can throw
         lock_guard<mutex> lk(lockable());
         return data_queue.empty();
     }

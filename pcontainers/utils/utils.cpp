@@ -45,7 +45,7 @@ CBString cpp_realpath(const CBString& path) {
     }
 }
 
-size_t my_copy(char *dst, const char *src, size_t siz) {
+size_t my_copy(char *dst, const char *src, size_t siz) BOOST_NOEXCEPT_OR_NOTHROW {
 	register char *d = dst;
 	register const char *s = src;
 	register size_t n = siz;
@@ -161,7 +161,7 @@ int rmrf(CBString path) {
     return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
 
-void TempDirectory::do_destroy() {
+void TempDirectory::do_destroy() {  // todo: harden against exceptions and errors
     if (bool(path.length()) && _destroy) {
         rmrf(path);
         _LOG_DEBUG << "Deleted temp directory: " << (const char*) path;

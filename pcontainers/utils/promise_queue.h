@@ -64,15 +64,15 @@ protected:
     high_resolution_clock::time_point expiry_point;
 
 public:
-    ExpiryPromisePtr(): shared_ptr < promise < T > >() { }
-    ExpiryPromisePtr(promise<T>* ptr): shared_ptr < promise < T > >(ptr) { }
+    ExpiryPromisePtr() BOOST_NOEXCEPT_OR_NOTHROW: shared_ptr < promise < T > >() { }
+    ExpiryPromisePtr(promise<T>* ptr) BOOST_NOEXCEPT_OR_NOTHROW: shared_ptr < promise < T > >(ptr) { }
 
-    ExpiryPromisePtr(promise<T>* ptr, milliseconds timeout): shared_ptr < promise < T > >(ptr) {
+    ExpiryPromisePtr(promise<T>* ptr, milliseconds timeout) BOOST_NOEXCEPT_OR_NOTHROW: shared_ptr < promise < T > >(ptr) {
         expiry_point = high_resolution_clock::now() + timeout;
         expiry_posix_point = boost::date_time::microsec_clock<boost::posix_time::ptime>::universal_time() + millisec(timeout.count());
     }
 
-    bool expired() {
+    bool expired() BOOST_NOEXCEPT_OR_NOTHROW {
         if (expiry_posix_point.is_not_a_date_time()) {
             return false;
         }
@@ -81,7 +81,7 @@ public:
         return ( (expiry_point <= rightnow) || ((rightnow - expiry_point) <= five_milliseconds) );
     }
 
-    ptime get_next_waiting_point() {
+    ptime get_next_waiting_point() BOOST_NOEXCEPT_OR_NOTHROW {
         if (expiry_posix_point.is_not_a_date_time()) {
             // wait 2 secs maximum
             return boost::date_time::microsec_clock<boost::posix_time::ptime>::universal_time() + millisec(2000);
@@ -141,7 +141,7 @@ private:
         }
     }
 
-    void prune_expired_promises() {
+    void prune_expired_promises() BOOST_NOEXCEPT_OR_NOTHROW {
         _LOG_DEBUG << "promise_queue: pruning expired promises";
         int p = 0;
         for(typename MyMultimap::iterator it=expiry_promise_map.begin(); it != expiry_promise_map.end(); ++it) {
@@ -202,11 +202,11 @@ public:
         return *this;
     }
 
-    bool __notempty() {
+    bool __notempty() BOOST_NOEXCEPT_OR_NOTHROW {
         return !simple_promise_queue.empty() || !expiry_promise_map.empty();
     }
 
-    bool __empty() {
+    bool __empty() BOOST_NOEXCEPT_OR_NOTHROW {
         return simple_promise_queue.empty() && expiry_promise_map.empty();
     }
 
